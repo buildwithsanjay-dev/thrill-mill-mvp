@@ -148,3 +148,31 @@ export type LeaderboardRow = {
   team?: { name: string } | null;
   user?: { full_name: string | null; avatar_url: string | null } | null;
 };
+
+// Row shape returned by fn_leaderboard_live(scope, period) — computed live
+// for the current (possibly partial) Week/Month, not the precomputed
+// leaderboard_weekly snapshot (that table is only ever populated by an
+// Admin/cron-driven RPC and stays empty otherwise).
+export type LiveLeaderboardRow = {
+  rank_no: number;
+  subject_id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  metric_value: number;
+  period_start: string;
+  period_end: string;
+};
+
+// Row shape returned by fn_my_credit_usage_log(period) for the Profile
+// screen's Credit Usage section — analytics only, the caller's own
+// member_usage_attribution rows.
+export type CreditUsageLogRow = {
+  booking_id: string;
+  team_id: string;
+  team_name: string | null;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  credits_attributed: number;
+  participant_count_at_completion: number;
+};

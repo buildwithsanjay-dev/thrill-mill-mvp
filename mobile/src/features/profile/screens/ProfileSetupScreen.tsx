@@ -46,10 +46,13 @@ function ProfileForm({ profile }: { profile: Profile }) {
       Alert.alert('Permission needed', 'Allow photo access to set a profile picture.');
       return;
     }
+    // See ProfileScreen.tsx's pickImage for why `allowsEditing`/`aspect`
+    // (the native "Crop" screen) was removed: it's not reliably functional
+    // across Android versions and its label isn't controllable from JS, so
+    // we skip straight to using the picked image — our avatar preview
+    // already frames it consistently via `contentFit: 'cover'`.
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
