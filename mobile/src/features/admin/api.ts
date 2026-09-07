@@ -146,6 +146,9 @@ export type AdminBookingRow = {
   booking_date: string;
   start_time: string;
   end_time: string;
+  team_id: string;
+  turf_id: string;
+  total_credits: number;
   turf: { name: string } | null;
   team: { name: string } | null;
   participant_count: number;
@@ -154,7 +157,9 @@ export type AdminBookingRow = {
 export async function getAllBookings(): Promise<AdminBookingRow[]> {
   const { data, error } = await supabase
     .from('bookings')
-    .select('id, status, booking_date, start_time, end_time, turf:turf_resources(name), team:teams(name)')
+    .select(
+      'id, status, booking_date, start_time, end_time, team_id, turf_id, total_credits, turf:turf_resources(name), team:teams(name)'
+    )
     .order('booking_date', { ascending: false })
     .order('start_time', { ascending: false });
   if (error) throw error;
@@ -205,4 +210,57 @@ export async function adminBlockSlot(slotId: string, reason: string): Promise<vo
 export async function adminUnblockSlot(slotId: string): Promise<void> {
   const { error } = await supabase.rpc('fn_admin_unblock_slot', { p_slot_id: slotId });
   if (error) throw error;
+}
+
+// -- Cancel a booking (Admin) -------------------------------------------------
+
+// Same fn_cancel_booking RPC the Host/Co-host cancel flow uses
+// (mobile/src/features/booking/api.ts) — it already authorizes
+// `fn_is_team_host_or_cohost(team_id) or fn_is_admin()`, so an Admin can
+// cancel ANY team's booking through it with the exact same server-time
+// refund-eligibility logic. Returns the actual outcome
+// ('CANCELLED_REFUNDED' | 'CANCELLED_NO_REFUND') — never assume a refund
+// happened.
+export async function adminCancelBooking(bookingId: string, reason?: string): Promise<string> {
+  const { data, error } = await supabase.rpc('fn_cancel_booking', {
+    p_booking_id: bookingId,
+    p_reason: reason ?? null,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+// -- Revenue analytics ---------------------------------------------------------
+
+export type RevenueAnalyticsDay = {
+  day: string;
+  revenue_inr: number;
+  credits_consumed: number;
+  bookings_count: number;
+};
+
+export type RevenueAnalyticsSummary = {
+  total_revenue_inr: number;
+  total_credits_consumed: number;
+  active_memberships: number;
+  total_bookings: number;
+  bookings_this_week: number;
+  bookings_last_week: number;
+  period_revenue_inr: number;
+  period_credits_consumed: number;
+  period_bookings_count: number;
+};
+
+export type RevenueAnalytics = {
+  period_days: number;
+  range_start: string;
+  range_end: string;
+  summary: RevenueAnalyticsSummary;
+  daily: RevenueAnalyticsDay[];
+};
+
+export async function getAdminRevenueAnalytics(days = 30): Promise<RevenueAnalytics> {
+  const { data, error } = await supabase.rpc('fn_admin_revenue_analytics', { p_days: days });
+  if (error) throw error;
+  return data as RevenueAnalytics;
 }

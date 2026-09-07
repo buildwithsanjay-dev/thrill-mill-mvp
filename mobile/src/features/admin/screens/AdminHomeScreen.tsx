@@ -8,7 +8,24 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
-import { useAllBookings, useDashboardStats, usePendingActivationTeams, useRecentAuditLog } from '../useAdmin';
+import type { RevenueAnalytics } from '../api';
+import {
+  useAdminRevenueAnalytics,
+  useAllBookings,
+  useDashboardStats,
+  usePendingActivationTeams,
+  useRecentAuditLog,
+} from '../useAdmin';
+
+const ANALYTICS_WINDOW_DAYS = 30;
+
+function formatInr(value: number) {
+  return `₹${Math.round(value).toLocaleString('en-IN')}`;
+}
+
+function formatCredits(value: number) {
+  return Math.round(value).toLocaleString('en-IN');
+}
 
 export function AdminHomeScreen() {
   const router = useRouter();
@@ -16,6 +33,7 @@ export function AdminHomeScreen() {
   const { data: pendingTeams } = usePendingActivationTeams();
   const { data: bookings } = useAllBookings();
   const { data: auditLog } = useRecentAuditLog();
+  const { data: analytics, isPending: analyticsPending } = useAdminRevenueAnalytics(ANALYTICS_WINDOW_DAYS);
 
   const firstPending = pendingTeams?.[0];
   const upcomingBookings = (bookings ?? []).filter((b) => b.status === 'CONFIRMED').slice(0, 1);
@@ -61,6 +79,15 @@ export function AdminHomeScreen() {
               <Text style={styles.wideStatCaption}>Today&apos;s Bookings</Text>
             </View>
           </>
+        )}
+
+        <Text style={styles.sectionTitle2}>Revenue Analytics</Text>
+        {analyticsPending ? (
+          <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
+        ) : analytics ? (
+          <RevenueAnalyticsSection analytics={analytics} />
+        ) : (
+          <Text style={styles.emptyText}>Analytics unavailable right now.</Text>
         )}
 
         {firstPending && (
@@ -188,6 +215,88 @@ function StatCard({
   );
 }
 
+function RevenueAnalyticsSection({ analytics }: { analytics: RevenueAnalytics }) {
+  const { summary, daily } = analytics;
+  const weekDelta = summary.bookings_this_week - summary.bookings_last_week;
+  const maxRevenue = Math.max(1, ...daily.map((d) => d.revenue_inr));
+
+  return (
+    <>
+      <View style={styles.statsRow}>
+        <View style={styles.revenueCard}>
+          <View style={styles.revenueTopRow}>
+            <View style={[styles.statIcon, { backgroundColor: '#ECFDF5' }]}>
+              <Ionicons name="cash" size={16} color="#15803D" />
+            </View>
+            <Text style={styles.statLabel}>REVENUE</Text>
+          </View>
+          <Text style={styles.revenueValue}>{formatInr(summary.total_revenue_inr)}</Text>
+          <Text style={styles.statCaption}>Collected all-time (₹, verified payments)</Text>
+        </View>
+        <View style={styles.revenueCard}>
+          <View style={styles.revenueTopRow}>
+            <View style={[styles.statIcon, { backgroundColor: '#EFF6FF' }]}>
+              <Ionicons name="flash" size={16} color="#1D4ED8" />
+            </View>
+            <Text style={styles.statLabel}>CREDITS USED</Text>
+          </View>
+          <Text style={styles.revenueValue}>{formatCredits(summary.total_credits_consumed)}</Text>
+          <Text style={styles.statCaption}>Consumed all-time via bookings</Text>
+        </View>
+      </View>
+      <Text style={styles.analyticsNote}>
+        Revenue is real money collected (₹). Credits consumed is a usage/volume figure — the two are not the
+        same and should not be compared directly.
+      </Text>
+
+      <View style={styles.analyticsMetaRow}>
+        <View style={styles.analyticsMetaCard}>
+          <Text style={styles.analyticsMetaLabel}>ACTIVE MEMBERSHIPS</Text>
+          <Text style={styles.analyticsMetaValue}>{summary.active_memberships}</Text>
+        </View>
+        <View style={styles.analyticsMetaCard}>
+          <Text style={styles.analyticsMetaLabel}>BOOKINGS THIS WEEK</Text>
+          <View style={styles.analyticsMetaValueRow}>
+            <Text style={styles.analyticsMetaValue}>{summary.bookings_this_week}</Text>
+            {weekDelta !== 0 && (
+              <View style={styles.deltaChip}>
+                <Ionicons
+                  name={weekDelta > 0 ? 'arrow-up' : 'arrow-down'}
+                  size={10}
+                  color={weekDelta > 0 ? '#15803D' : colors.danger}
+                />
+                <Text style={[styles.deltaText, { color: weekDelta > 0 ? '#15803D' : colors.danger }]}>
+                  {Math.abs(weekDelta)} vs last week
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.trendCard}>
+        <View style={styles.trendHeaderRow}>
+          <Text style={styles.trendTitle}>Daily Revenue — Last {analytics.period_days} Days</Text>
+          <Text style={styles.trendCaption}>{formatInr(summary.period_revenue_inr)} total</Text>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trendBarsRow}>
+          {daily.map((d) => {
+            const barHeight = Math.max(3, Math.round((d.revenue_inr / maxRevenue) * 64));
+            return (
+              <View key={d.day} style={styles.trendBarCol}>
+                <View style={styles.trendBarTrack}>
+                  <View style={[styles.trendBar, { height: barHeight }]} />
+                </View>
+                <Text style={styles.trendBarLabel}>{d.day.slice(8, 10)}</Text>
+              </View>
+            );
+          })}
+        </ScrollView>
+      </View>
+    </>
+  );
+}
+
 function QuickAction({
   icon,
   label,
@@ -231,6 +340,51 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   statValue: { fontSize: 26, fontWeight: '800', color: colors.text },
   statCaption: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+
+  revenueCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  revenueTopRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
+  revenueValue: { fontSize: 18, fontWeight: '800', color: colors.text },
+
+  analyticsNote: { fontSize: 11, color: colors.textMuted, lineHeight: 16, marginTop: spacing.sm },
+
+  analyticsMetaRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
+  analyticsMetaCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  analyticsMetaLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
+  analyticsMetaValue: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: 2 },
+  analyticsMetaValueRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  deltaChip: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  deltaText: { fontSize: 11, fontWeight: '700' },
+
+  trendCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  trendHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
+  trendTitle: { fontSize: 12, fontWeight: '700', color: colors.text },
+  trendCaption: { fontSize: 12, fontWeight: '700', color: colors.primary },
+  trendBarsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, paddingBottom: 4 },
+  trendBarCol: { alignItems: 'center', width: 18 },
+  trendBarTrack: { height: 64, justifyContent: 'flex-end' },
+  trendBar: { width: 10, borderRadius: 4, backgroundColor: colors.primary },
+  trendBarLabel: { fontSize: 8, color: colors.textMuted, marginTop: 4 },
 
   wideStatCard: {
     backgroundColor: '#FFFFFF',
