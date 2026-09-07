@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,8 +9,10 @@ import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
+import { teamDetailsQueryKey } from '@/features/team/useTeams';
 import { formatBookingDate, formatSlotTime, todayIso } from '@/utils/datetime';
-import { useAllBookings } from '../useAdmin';
+import { adminCancelBooking, type AdminBookingRow } from '../api';
+import { useAllBookings, useInvalidateAdminQueries } from '../useAdmin';
 
 type Filter = 'ALL' | 'TODAY' | 'UPCOMING' | 'COMPLETED';
 
@@ -28,6 +31,47 @@ export function AdminBookingsScreen() {
   const { data: bookings, isPending } = useAllBookings();
   const [filter, setFilter] = useState<Filter>('ALL');
   const [query, setQuery] = useState('');
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const invalidateAdmin = useInvalidateAdminQueries();
+
+  const handleCancel = (booking: AdminBookingRow) => {
+    Alert.alert(
+      'Cancel this booking?',
+      `${booking.team?.name ?? 'This Network'}'s booking on ${formatBookingDate(booking.booking_date)} at ${formatSlotTime(
+        booking.start_time
+      )} will be cancelled. Full refund if cancelled 24 hours or more before the slot; no refund inside 24 hours — decided by server time, not this device.`,
+      [
+        { text: 'Keep booking', style: 'cancel' },
+        {
+          text: 'Cancel booking',
+          style: 'destructive',
+          onPress: async () => {
+            setCancellingId(booking.id);
+            try {
+              const outcome = await adminCancelBooking(booking.id, 'Cancelled by Admin');
+              invalidateAdmin();
+              queryClient.invalidateQueries({ queryKey: ['team-bookings', booking.team_id] });
+              queryClient.invalidateQueries({ queryKey: ['team-wallet', booking.team_id] });
+              queryClient.invalidateQueries({ queryKey: teamDetailsQueryKey(booking.team_id) });
+              queryClient.invalidateQueries({ queryKey: ['turf-slots', booking.turf_id] });
+              queryClient.invalidateQueries({ queryKey: ['booking', booking.id] });
+              Alert.alert(
+                'Booking cancelled',
+                outcome === 'CANCELLED_REFUNDED'
+                  ? 'Full credits were refunded to the Network wallet.'
+                  : 'No refund — cancelled within 24 hours of the slot.'
+              );
+            } catch (error) {
+              Alert.alert('Could not cancel', error instanceof Error ? error.message : 'Please try again.');
+            } finally {
+              setCancellingId(null);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const today = todayIso();
   const counts = useMemo(() => {
@@ -117,6 +161,22 @@ export function AdminBookingsScreen() {
                 {formatBookingDate(b.booking_date)} • {formatSlotTime(b.start_time)}–{formatSlotTime(b.end_time)}
               </Text>
               <Text style={styles.cardMeta}>{b.participant_count} Players</Text>
+              {b.status === 'CONFIRMED' && (
+                <Pressable
+                  style={styles.cancelButton}
+                  onPress={() => handleCancel(b)}
+                  disabled={cancellingId === b.id}
+                >
+                  {cancellingId === b.id ? (
+                    <ActivityIndicator size="small" color={colors.danger} />
+                  ) : (
+                    <>
+                      <Ionicons name="close-circle-outline" size={14} color={colors.danger} />
+                      <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+                    </>
+                  )}
+                </Pressable>
+              )}
             </View>
           ))
         )}
@@ -172,6 +232,20 @@ const styles = StyleSheet.create({
   cardRef: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   cardDivider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.sm },
   cardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    backgroundColor: '#FEF2F2',
+  },
+  cancelButtonText: { fontSize: 12, fontWeight: '700', color: colors.danger },
 
   fab: {
     position: 'absolute',

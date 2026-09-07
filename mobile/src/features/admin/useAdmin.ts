@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
+  getAdminRevenueAnalytics,
   getAllBookings,
   getAllTeams,
   getDashboardStats,
@@ -26,6 +27,13 @@ export function useRecentAuditLog() {
 
 export function useAllBookings() {
   return useQuery({ queryKey: ['admin', 'bookings'], queryFn: getAllBookings });
+}
+
+export function useAdminRevenueAnalytics(days = 30) {
+  return useQuery({
+    queryKey: ['admin', 'revenue-analytics', days],
+    queryFn: () => getAdminRevenueAnalytics(days),
+  });
 }
 
 export function useInvalidateAdminQueries() {
