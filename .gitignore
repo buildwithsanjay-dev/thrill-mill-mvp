@@ -1,0 +1,10 @@
+# Supabase CLI local link/session cache — machine-specific, never committed
+supabase/.temp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
