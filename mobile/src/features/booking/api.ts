@@ -50,6 +50,34 @@ export async function confirmBooking(holdId: string, participantUserIds: string[
   return data as string;
 }
 
+// Voluntary early release of an ACTIVE hold — e.g. the user deselects a
+// slot they'd tapped before confirming. Idempotent server-side: releasing
+// an already-converted/expired/released hold is a safe no-op, never an
+// error, so a deselect racing the 1-minute countdown can't surface a
+// spurious failure.
+export async function releaseSlotHold(holdId: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_release_slot_hold', { p_hold_id: holdId });
+  if (error) throw error;
+}
+
+// Atomic multi-slot confirm: several ACTIVE holds at once, same Team, same
+// calendar day. Server prices every selected hour together in chronological
+// order (the rolling-24h discount allowance is consumed across the whole
+// batch, not restarted per slot) and either confirms all of them or none.
+// Still one bookings row per slot under the hood (schema's 1:1 booking:slot
+// relationship), so this returns every booking id created.
+export async function confirmMultiSlotBooking(
+  holdIds: string[],
+  participantUserIds: string[]
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc('fn_confirm_multi_slot_booking', {
+    p_hold_ids: holdIds,
+    p_participant_user_ids: participantUserIds,
+  });
+  if (error) throw error;
+  return (data ?? []) as string[];
+}
+
 export type UpcomingTeamBooking = {
   id: string;
   team_id: string;
