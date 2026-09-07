@@ -11,7 +11,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { assignCoHost, removeTeamMember, respondToJoinRequest } from '../api';
-import { useInvalidateTeamQueries, useTeamDetails } from '../useTeams';
+import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '../useTeams';
 import type { TeamMember, TeamRole } from '@/types/db';
 
 const ROLE_TONE: Record<TeamRole, 'host' | 'coHost' | 'member'> = {
@@ -26,6 +26,7 @@ export function TeamDetailsScreen() {
   const { session } = useAuth();
   const { data, isPending, refetch } = useTeamDetails(id);
   const { data: bookings } = useTeamBookings(id);
+  const { data: bookingCounts } = useTeamBookingCounts(id);
   const invalidate = useInvalidateTeamQueries();
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -181,13 +182,8 @@ export function TeamDetailsScreen() {
 
         <View style={styles.statsRow}>
           <StatBox icon="people" value={activeMembers.length} label="MEMBERS" />
-          <StatBox icon="football" value={bookings?.filter((b) => b.status === 'COMPLETED').length ?? 0} label="GAMES PLAYED" />
-          <StatBox
-            icon="calendar"
-            value={bookings?.filter((b) => b.status === 'CONFIRMED').length ?? 0}
-            label="UPCOMING"
-            highlight
-          />
+          <StatBox icon="football" value={bookingCounts?.played ?? 0} label="GAMES PLAYED" />
+          <StatBox icon="calendar" value={bookingCounts?.upcoming ?? 0} label="UPCOMING" highlight />
         </View>
 
         {upcoming && (

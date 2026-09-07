@@ -1,12 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
-import { getMyInvites, getMyTeams, getTeamDetails, getTeamMembers } from './api';
+import { getMyInvites, getMyTeams, getTeamBookingCounts, getTeamDetails, getTeamMembers } from './api';
 
 export const myTeamsQueryKey = (userId: string | undefined) => ['my-teams', userId] as const;
 export const myInvitesQueryKey = (userId: string | undefined) => ['my-invites', userId] as const;
 export const teamDetailsQueryKey = (teamId: string) => ['team-details', teamId] as const;
 export const teamMembersQueryKey = (teamId: string) => ['team-members', teamId] as const;
+export const teamBookingCountsQueryKey = (teamId: string) => ['team-booking-counts', teamId] as const;
 
 export function useMyInvites() {
   const { session } = useAuth();
@@ -46,6 +47,17 @@ export function useTeamMembers(teamId: string | undefined) {
   });
 }
 
+// Server-computed Upcoming/Games-Played counts (see getTeamBookingCounts) —
+// shared by the member Team Details screen and the Admin Network Details
+// screen so neither ever shows a number the other disagrees with.
+export function useTeamBookingCounts(teamId: string | undefined) {
+  return useQuery({
+    queryKey: teamBookingCountsQueryKey(teamId ?? ''),
+    queryFn: () => getTeamBookingCounts(teamId as string),
+    enabled: !!teamId,
+  });
+}
+
 // Invalidate every query that a team-mutating RPC (invite, join, remove,
 // membership activation, booking...) can affect. Cheap and safe to
 // over-invalidate here — correctness beats a few extra refetches.
@@ -60,6 +72,7 @@ export function useInvalidateTeamQueries() {
     if (teamId) {
       queryClient.invalidateQueries({ queryKey: teamDetailsQueryKey(teamId) });
       queryClient.invalidateQueries({ queryKey: teamMembersQueryKey(teamId) });
+      queryClient.invalidateQueries({ queryKey: teamBookingCountsQueryKey(teamId) });
     }
   };
 }

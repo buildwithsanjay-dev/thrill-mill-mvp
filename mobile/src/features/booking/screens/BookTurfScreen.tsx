@@ -15,6 +15,7 @@ import { useMyTeams, useTeamDetails, useTeamMembers } from '@/features/team/useT
 import { useActiveTeamStore } from '@/stores/activeTeam';
 import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
+import { mapBookingError } from '../errors';
 import { useDefaultTurf, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, TurfSlot } from '@/types/db';
 
@@ -88,21 +89,6 @@ function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | u
   }));
 
   return { totalCredits, totalHours, lines };
-}
-
-function mapBookingError(error: unknown): string {
-  const message = error instanceof Error ? error.message : '';
-  if (message.includes('INSUFFICIENT_CREDITS')) return 'Not enough Network credits for this booking.';
-  if (message.includes('HOLD_EXPIRED')) return 'One or more holds expired before confirming. Please reselect and try again.';
-  if (message.includes('SLOTS_MUST_BE_SAME_DAY')) return 'All selected slots must be on the same day.';
-  if (message.includes('SLOTS_MUST_BE_SAME_TEAM')) return 'Something went wrong — the selected slots did not all belong to this Network.';
-  if (message.includes('SLOT_UNAVAILABLE')) return 'One of the selected slots is no longer available.';
-  if (message.includes('PARTICIPANT_INVALID')) return 'One of the selected players is not an active Network member.';
-  if (message.includes('MEMBERSHIP_INACTIVE')) return "This Network's membership is not active.";
-  if (message.includes('NO_SLOTS_SELECTED')) return 'Select at least one slot first.';
-  if (message.includes('NO_PARTICIPANTS')) return 'Select at least one player.';
-  if (message.includes('FORBIDDEN')) return 'You are not authorized to book for this Network.';
-  return message || 'Please try again.';
 }
 
 export function BookTurfScreen() {

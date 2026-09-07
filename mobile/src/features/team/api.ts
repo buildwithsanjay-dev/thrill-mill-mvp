@@ -233,6 +233,23 @@ export type TeamDetails = {
   membership: TeamMembership | null;
 };
 
+export type TeamBookingCounts = { upcoming: number; played: number };
+
+// Server-computed, not client-derived: buckets by session start time vs.
+// public.now() (never device time), not by booking.status alone — nothing
+// automatically flips a booking from CONFIRMED to COMPLETED once its start
+// time passes (fn_complete_booking is a separate explicit action), so
+// counting "Upcoming" purely off status would keep a played game counted
+// as upcoming forever. One RPC, called by both the member Team Details
+// screen and the Admin Network Details screen, so their numbers can never
+// disagree.
+export async function getTeamBookingCounts(teamId: string): Promise<TeamBookingCounts> {
+  const { data, error } = await supabase.rpc('fn_get_team_booking_counts', { p_team_id: teamId });
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : data;
+  return { upcoming: row?.upcoming_count ?? 0, played: row?.played_count ?? 0 };
+}
+
 export async function getTeamDetails(teamId: string): Promise<TeamDetails> {
   const [{ data: team, error: teamError }, members, { data: wallet }, { data: membership }] =
     await Promise.all([

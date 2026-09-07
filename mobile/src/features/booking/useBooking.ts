@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/features/auth/AuthProvider';
+import { teamBookingCountsQueryKey } from '@/features/team/useTeams';
 import {
   getBooking,
   getBookingParticipants,
@@ -64,7 +65,10 @@ export function useBookingParticipants(bookingId: string | undefined) {
 export function useInvalidateBookingQueries() {
   const queryClient = useQueryClient();
   return (opts: { teamId?: string; bookingId?: string; turfId?: string }) => {
-    if (opts.teamId) queryClient.invalidateQueries({ queryKey: ['team-bookings', opts.teamId] });
+    if (opts.teamId) {
+      queryClient.invalidateQueries({ queryKey: ['team-bookings', opts.teamId] });
+      queryClient.invalidateQueries({ queryKey: teamBookingCountsQueryKey(opts.teamId) });
+    }
     if (opts.bookingId) {
       queryClient.invalidateQueries({ queryKey: ['booking', opts.bookingId] });
       queryClient.invalidateQueries({ queryKey: ['booking-participants', opts.bookingId] });
