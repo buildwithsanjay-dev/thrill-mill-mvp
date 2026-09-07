@@ -7,9 +7,11 @@ import { create } from 'zustand';
 type ActiveTeamState = {
   activeTeamId: string | null;
   setActiveTeamId: (teamId: string | null) => void;
+  reset: () => void;
 };
 
 export const useActiveTeamStore = create<ActiveTeamState>((set) => ({
   activeTeamId: null,
   setActiveTeamId: (teamId) => set({ activeTeamId: teamId }),
+  reset: () => set({ activeTeamId: null }),
 }));
