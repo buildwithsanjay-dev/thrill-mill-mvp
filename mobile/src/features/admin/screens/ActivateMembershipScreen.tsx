@@ -48,7 +48,15 @@ export function ActivateMembershipScreen() {
         'Membership activated',
         `${plan.credits_allocated.toLocaleString()} credits loaded to ${team.name}'s wallet.`
       );
-      router.back();
+      // Not router.back(): the create-network wizard stack underneath this
+      // screen (create-membership specifically) still has teamId cleared by
+      // NetworkCreatedScreen's reset() before it navigated here, so popping
+      // back into it would trip its `if (!teamId) router.replace(team/create)`
+      // guard and bounce the Admin all the way to Step 1. This wizard has
+      // already committed — there is nothing sane to go "back" to — so land
+      // forward on the Team's own detail page instead, same destination
+      // NetworkCreatedScreen's own goToDetails() uses.
+      router.replace(`/(admin)/team/${team.id}`);
     } catch (error) {
       Alert.alert('Could not activate', error instanceof Error ? error.message : 'Please try again.');
     } finally {
