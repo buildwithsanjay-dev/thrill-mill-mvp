@@ -17,6 +17,16 @@ const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const
 const ROLE_LABEL = { HOST: 'HOST', CO_HOST: 'CO-HOST', MEMBER: 'MEMBER' } as const;
 const HERO_COLORS = ['#0F1729', '#0C4A45', '#1E293B', '#4C1D24', '#1D3557'];
 
+// Membership request status -> at-a-glance label for the Teams list, shown
+// only while a Team's membership isn't ACTIVE yet (no badge once it is).
+const MEMBERSHIP_STATUS_LABEL: Record<string, string> = {
+  PLAN_SELECTED: 'PLAN SELECTED',
+  REQUEST_SUBMITTED: 'REQUEST SUBMITTED',
+  PAYMENT_PENDING: 'PAYMENT PENDING',
+  ADMIN_REVIEW: 'UNDER ADMIN REVIEW',
+  PAYMENT_VERIFIED: 'PAYMENT VERIFIED',
+};
+
 function heroColorFor(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
@@ -94,7 +104,8 @@ export function MyTeamsScreen() {
 }
 
 function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () => void }) {
-  const { team, myRole, wallet, memberCount, upcomingBooking } = summary;
+  const { team, myRole, wallet, memberCount, upcomingBooking, membershipStatus } = summary;
+  const isMembershipActive = membershipStatus === 'ACTIVE';
 
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -107,6 +118,15 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
       </View>
 
       <View style={styles.cardBody}>
+        {!isMembershipActive && (
+          <View style={styles.membershipNotice}>
+            <Ionicons name="alert-circle" size={14} color="#92400E" />
+            <Text style={styles.membershipNoticeText}>
+              {membershipStatus ? (MEMBERSHIP_STATUS_LABEL[membershipStatus] ?? membershipStatus) : 'No membership requested yet'}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.cardRow}>
           <View style={styles.cardCreditsRow}>
             <Ionicons name="card-outline" size={16} color={colors.primary} />
@@ -114,7 +134,7 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
               {Math.round(wallet?.available_credits ?? 0).toLocaleString()} NETWORK CREDITS
             </Text>
           </View>
-          <Text style={styles.cardMembers}>{memberCount} Members</Text>
+          <Text style={styles.cardMembers}>{memberCount} Active Member{memberCount === 1 ? '' : 's'}</Text>
         </View>
 
         <View style={styles.cardDivider} />
@@ -125,12 +145,14 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
             <Text style={styles.cardMetaValue}>
               {upcomingBooking
                 ? `${formatBookingDate(upcomingBooking.booking_date)} • ${formatSlotTime(upcomingBooking.start_time)}`
-                : 'No upcoming games'}
+                : 'No upcoming bookings'}
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={styles.cardMetaLabel}>Activity</Text>
-            <Text style={styles.cardMetaValue}>—</Text>
+            <Text style={styles.cardMetaLabel}>Membership</Text>
+            <Text style={[styles.cardMetaValue, isMembershipActive && styles.cardMetaValueActive]}>
+              {isMembershipActive ? 'Active' : 'Not active'}
+            </Text>
           </View>
         </View>
       </View>
@@ -175,6 +197,17 @@ const styles = StyleSheet.create({
   cardHeroBadge: { position: 'absolute', top: spacing.md, right: spacing.md },
 
   cardBody: { padding: spacing.md },
+  membershipNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#FEF3C7',
+    borderRadius: radii.sm,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  membershipNoticeText: { flex: 1, fontSize: 11, fontWeight: '700', color: '#92400E' },
   cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardCreditsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardCredits: { fontSize: 13, fontWeight: '700', color: colors.primary },
@@ -182,6 +215,7 @@ const styles = StyleSheet.create({
   cardDivider: { height: 1, backgroundColor: colors.border, marginVertical: spacing.sm },
   cardMetaLabel: { fontSize: 10, color: colors.textMuted, fontWeight: '700', letterSpacing: 0.3 },
   cardMetaValue: { fontSize: 12, color: colors.text, marginTop: 2, fontWeight: '600' },
+  cardMetaValueActive: { color: colors.primary },
 
   createButton: {
     flexDirection: 'row',

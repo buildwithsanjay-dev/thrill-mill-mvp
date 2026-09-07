@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
+import type { MembershipRequestStatus, Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
 
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -18,6 +18,10 @@ export type MyTeamSummary = {
     start_time: string;
     end_time: string;
   } | null;
+  // Latest membership request's status, so the Teams list can flag a Team
+  // whose membership isn't ACTIVE yet (still under Admin review, payment
+  // pending, etc.) — null means no membership has ever been requested.
+  membershipStatus: MembershipRequestStatus | null;
 };
 
 // "My Teams" (network page): every team I'm an ACTIVE member of, with the
@@ -43,24 +47,32 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
 
   return Promise.all(
     rows.map(async ({ team_role, team }) => {
-      const [{ data: wallet }, { count: memberCount }, { data: upcoming }] = await Promise.all([
-        supabase.from('team_wallets').select('*').eq('team_id', team.id).maybeSingle(),
-        supabase
-          .from('team_members')
-          .select('id', { count: 'exact', head: true })
-          .eq('team_id', team.id)
-          .eq('status', 'ACTIVE'),
-        supabase
-          .from('bookings')
-          .select('id, booking_date, start_time, end_time')
-          .eq('team_id', team.id)
-          .eq('status', 'CONFIRMED')
-          .gte('booking_date', new Date().toISOString().slice(0, 10))
-          .order('booking_date', { ascending: true })
-          .order('start_time', { ascending: true })
-          .limit(1)
-          .maybeSingle(),
-      ]);
+      const [{ data: wallet }, { count: memberCount }, { data: upcoming }, { data: membership }] =
+        await Promise.all([
+          supabase.from('team_wallets').select('*').eq('team_id', team.id).maybeSingle(),
+          supabase
+            .from('team_members')
+            .select('id', { count: 'exact', head: true })
+            .eq('team_id', team.id)
+            .eq('status', 'ACTIVE'),
+          supabase
+            .from('bookings')
+            .select('id, booking_date, start_time, end_time')
+            .eq('team_id', team.id)
+            .eq('status', 'CONFIRMED')
+            .gte('booking_date', new Date().toISOString().slice(0, 10))
+            .order('booking_date', { ascending: true })
+            .order('start_time', { ascending: true })
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from('team_memberships')
+            .select('status')
+            .eq('team_id', team.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]);
 
       return {
         team,
@@ -68,6 +80,7 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
         wallet: (wallet as TeamWallet | null) ?? null,
         memberCount: memberCount ?? 0,
         upcomingBooking: upcoming ?? null,
+        membershipStatus: (membership?.status as MembershipRequestStatus | undefined) ?? null,
       };
     })
   );

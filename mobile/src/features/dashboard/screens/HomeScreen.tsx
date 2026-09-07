@@ -7,7 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
+import type { UpcomingTeamBooking } from '@/features/booking/api';
+import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
 import type { MyTeamSummary } from '@/features/team/api';
 import { PendingInvites } from '@/features/team/components/PendingInvites';
 import { useProfile } from '@/features/profile/useProfile';
@@ -63,7 +66,6 @@ export function HomeScreen() {
         ) : (
           <DashboardContent
             summary={activeTeam}
-            otherTeams={(teams ?? []).filter((t) => t.team.id !== activeTeam.team.id)}
             hasMultipleTeams={(teams?.length ?? 0) > 1}
             onSwitchTeam={() => router.push('/(app)/(tabs)/team')}
           />
@@ -96,12 +98,10 @@ function NewMemberContent() {
 
 function DashboardContent({
   summary,
-  otherTeams,
   hasMultipleTeams,
   onSwitchTeam,
 }: {
   summary: MyTeamSummary;
-  otherTeams: MyTeamSummary[];
   hasMultipleTeams: boolean;
   onSwitchTeam: () => void;
 }) {
@@ -109,10 +109,11 @@ function DashboardContent({
   const { team, wallet, upcomingBooking } = summary;
   const { data: ledger } = useWalletLedger(team.id);
   const recentActivity = (ledger ?? []).slice(0, 3);
-  const otherUpcoming = otherTeams.filter((t) => t.upcomingBooking);
 
   return (
     <View>
+      <OtherNetworksUpcoming />
+
       <Pressable
         style={styles.teamSwitcher}
         onPress={hasMultipleTeams ? onSwitchTeam : undefined}
@@ -176,33 +177,6 @@ function DashboardContent({
         <QuickAction icon="stats-chart" label="Leaderboard" onPress={() => router.push('/(app)/(tabs)/leaderboard')} />
       </View>
 
-      {otherUpcoming.length > 0 && (
-        <>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Other Networks&apos; Upcoming</Text>
-          </View>
-          {otherUpcoming.map((t) => (
-            <Pressable
-              key={t.team.id}
-              style={styles.otherTeamRow}
-              onPress={() => router.push(`/(app)/booking/${t.upcomingBooking!.id}`)}
-            >
-              <View style={styles.otherTeamIcon}>
-                <Ionicons name="shield" size={16} color={colors.textMuted} />
-              </View>
-              <View style={{ flex: 1, marginLeft: spacing.sm }}>
-                <Text style={styles.otherTeamName}>{t.team.name}</Text>
-                <Text style={styles.otherTeamMeta}>
-                  {formatBookingDate(t.upcomingBooking!.booking_date)} •{' '}
-                  {formatSlotTime(t.upcomingBooking!.start_time)}
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
-            </Pressable>
-          ))}
-        </>
-      )}
-
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Recent Activity</Text>
         <Pressable onPress={() => router.push(`/(app)/wallet/${team.id}`)}>
@@ -243,9 +217,71 @@ function QuickAction({
   return (
     <Pressable style={styles.quickAction} onPress={onPress}>
       <View style={styles.quickIcon}>
-        <Ionicons name={icon} size={20} color={colors.text} />
+        <Ionicons name={icon} size={16} color={colors.text} />
       </View>
-      <Text style={styles.quickLabel}>{label}</Text>
+      <Text style={styles.quickLabel} numberOfLines={2}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// Dashboard "Other Networks' Upcoming Events" strip — a horizontally
+// scrollable row of every ACTIVE Team's upcoming CONFIRMED bookings (not
+// just the currently selected Team), so a member can see what's coming up
+// across every Network they're part of before picking one from the
+// dropdown below.
+function OtherNetworksUpcoming() {
+  const router = useRouter();
+  const { data: bookings, isPending } = useUpcomingBookingsAcrossTeams();
+
+  return (
+    <View>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Other Networks&apos; Upcoming Events</Text>
+      </View>
+
+      {isPending ? (
+        <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.md }} />
+      ) : !bookings || bookings.length === 0 ? (
+        <View style={styles.noBookingCard}>
+          <EmptyState
+            icon="calendar-outline"
+            title="No upcoming events"
+            message="Nothing booked across your Networks yet."
+          />
+        </View>
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.upcomingStrip}
+        >
+          {bookings.map((b) => (
+            <UpcomingEventCard key={b.id} booking={b} onPress={() => router.push(`/(app)/booking/${b.id}`)} />
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
+}
+
+function UpcomingEventCard({ booking, onPress }: { booking: UpcomingTeamBooking; onPress: () => void }) {
+  return (
+    <Pressable style={styles.upcomingCard} onPress={onPress}>
+      <View style={styles.upcomingCardTeamRow}>
+        <Ionicons name="shield" size={12} color="#A7F3D0" />
+        <Text style={styles.upcomingCardTeam} numberOfLines={1}>
+          {booking.team?.name ?? 'Network'}
+        </Text>
+      </View>
+      <Text style={styles.upcomingCardTurf} numberOfLines={1}>
+        {booking.turf?.name ?? 'Turf'}
+      </Text>
+      <Text style={styles.upcomingCardDate}>{formatBookingDate(booking.booking_date)}</Text>
+      <Text style={styles.upcomingCardTime}>
+        {formatSlotTime(booking.start_time)} – {formatSlotTime(booking.end_time)}
+      </Text>
     </Pressable>
   );
 }
@@ -319,50 +355,42 @@ const styles = StyleSheet.create({
 
   quickGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
+    gap: spacing.sm,
     marginTop: spacing.xl,
   },
   quickAction: {
-    width: '47%',
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: radii.lg,
-    paddingVertical: spacing.lg,
+    borderRadius: radii.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 4,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
   },
   quickIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  quickLabel: { fontSize: 13, fontWeight: '600', color: colors.text },
-
-  otherTeamRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: radii.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  otherTeamIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
     backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 6,
   },
-  otherTeamName: { fontSize: 13, fontWeight: '700', color: colors.text },
-  otherTeamMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  quickLabel: { fontSize: 10.5, fontWeight: '600', color: colors.text, textAlign: 'center' },
+
+  upcomingStrip: { gap: spacing.sm, paddingRight: spacing.sm },
+  upcomingCard: {
+    width: 168,
+    backgroundColor: '#0F1729',
+    borderRadius: radii.lg,
+    padding: spacing.md,
+  },
+  upcomingCardTeamRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  upcomingCardTeam: { flex: 1, fontSize: 11, fontWeight: '700', color: '#A7F3D0', letterSpacing: 0.3 },
+  upcomingCardTurf: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
+  upcomingCardDate: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
+  upcomingCardTime: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
 
   activityRow: {
     flexDirection: 'row',

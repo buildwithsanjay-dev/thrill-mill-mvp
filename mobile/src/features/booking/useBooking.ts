@@ -1,15 +1,31 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { useAuth } from '@/features/auth/AuthProvider';
 import {
   getBooking,
   getBookingParticipants,
   getDefaultTurf,
   getTeamBookings,
   getTurfSlotsForDate,
+  getUpcomingBookingsAcrossTeams,
 } from './api';
 
 export function useDefaultTurf() {
   return useQuery({ queryKey: ['default-turf'], queryFn: getDefaultTurf, staleTime: 60 * 60 * 1000 });
+}
+
+// Dashboard "Other Networks' Upcoming Events" strip — every ACTIVE Team the
+// member belongs to, not just the currently selected one. Keyed by userId so
+// it never leaks across an account switch on the same device.
+export function useUpcomingBookingsAcrossTeams() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+
+  return useQuery({
+    queryKey: ['upcoming-bookings-all-teams', userId],
+    queryFn: () => getUpcomingBookingsAcrossTeams(),
+    enabled: !!userId,
+  });
 }
 
 export function useTurfSlots(turfId: string | undefined, isoDate: string) {

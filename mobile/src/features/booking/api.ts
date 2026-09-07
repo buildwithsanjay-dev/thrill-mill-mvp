@@ -50,6 +50,46 @@ export async function confirmBooking(holdId: string, participantUserIds: string[
   return data as string;
 }
 
+export type UpcomingTeamBooking = {
+  id: string;
+  team_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  team: { name: string } | null;
+  turf: { name: string } | null;
+};
+
+// Upcoming CONFIRMED bookings across every Team the caller is an ACTIVE
+// member of (not scoped to a single selected Team). No team_id filtering is
+// done here — bookings_select RLS (fn_is_team_member(team_id) or
+// fn_is_admin()) already limits rows to the caller's own Teams, so this is a
+// plain RLS-scoped read, same pattern as getTeamBookings below.
+//
+// booking_date/start_time are separate columns (no combined timestamp on
+// the table), so "starts at or after now" is approximated the same way
+// team/api.ts's getMyTeams() does: filter server-side by date >= today, then
+// trim sessions that already ended earlier today off the client result.
+export async function getUpcomingBookingsAcrossTeams(limit = 15): Promise<UpcomingTeamBooking[]> {
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const nowTime = now.toTimeString().slice(0, 8); // "HH:MM:SS"
+
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('id, team_id, booking_date, start_time, end_time, team:teams(name), turf:turf_resources(name)')
+    .eq('status', 'CONFIRMED')
+    .gte('booking_date', todayIso)
+    .order('booking_date', { ascending: true })
+    .order('start_time', { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+
+  return ((data ?? []) as unknown as UpcomingTeamBooking[]).filter(
+    (b) => b.booking_date !== todayIso || b.end_time > nowTime
+  );
+}
+
 export async function getTeamBookings(teamId: string): Promise<Booking[]> {
   const { data, error } = await supabase
     .from('bookings')
