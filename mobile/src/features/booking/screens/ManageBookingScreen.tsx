@@ -104,7 +104,18 @@ export function ManageBookingScreen() {
           onPress: async () => {
             setIsCancelling(true);
             try {
-              const outcome = await cancelBooking(booking.id);
+              // Defense in depth: no root-cause hang was found in
+              // fn_cancel_booking during backend investigation (it completes
+              // fine, no lock contention, grants intact), but a client-side
+              // timeout means the UI can never spin forever regardless of
+              // cause (dropped connection, a future regression, etc.) — the
+              // request itself isn't cancelled, just our wait on it.
+              const outcome = await Promise.race([
+                cancelBooking(booking.id),
+                new Promise<never>((_, reject) =>
+                  setTimeout(() => reject(new Error('CANCEL_TIMEOUT')), 20_000)
+                ),
+              ]);
               invalidate({ teamId: booking.team_id, bookingId: booking.id, turfId: booking.turf_id });
               Alert.alert(
                 'Booking cancelled',
@@ -112,7 +123,13 @@ export function ManageBookingScreen() {
               );
               router.back();
             } catch (error) {
-              Alert.alert('Could not cancel', error instanceof Error ? error.message : 'Please try again.');
+              const message =
+                error instanceof Error && error.message === 'CANCEL_TIMEOUT'
+                  ? 'This is taking longer than expected — check your connection and try again.'
+                  : error instanceof Error
+                    ? error.message
+                    : 'Please try again.';
+              Alert.alert('Could not cancel', message);
             } finally {
               setIsCancelling(false);
             }

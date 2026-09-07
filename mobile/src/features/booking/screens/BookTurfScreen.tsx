@@ -6,18 +6,104 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/AppHeader';
 import { Avatar } from '@/components/Avatar';
+import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { useMyTeams, useTeamMembers } from '@/features/team/useTeams';
+import { useMyTeams, useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useActiveTeamStore } from '@/stores/activeTeam';
-import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
-import { confirmBooking, createSlotHold } from '../api';
+import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
+import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
 import { useDefaultTurf, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
-import type { TurfSlot } from '@/types/db';
+import type { MembershipPlan, TurfSlot } from '@/types/db';
 
 const DATE_WINDOW = 14;
+
+type HeldSlot = { slot: TurfSlot; holdId: string; expiresAt: number };
+
+// Whole-hour duration of a slot, tolerant of a slot whose end_time wraps to
+// "00:00:00" (midnight) — Turf hours run 5AM-midnight so this only ever
+// matters for the very last slot of the day.
+function slotDurationHours(slot: TurfSlot): number {
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(':').map((n) => parseInt(n, 10));
+    return h * 60 + (m || 0);
+  };
+  const start = toMinutes(slot.start_time);
+  let end = toMinutes(slot.end_time);
+  if (end <= start) end += 24 * 60;
+  return Math.round((end - start) / 60);
+}
+
+type PreviewLine = { label: string; hours: number; rate: number; subtotal: number };
+type BookingPreview = { totalCredits: number; totalHours: number; lines: PreviewLine[] };
+
+// Client-side preview only — a reasonable best-effort estimate using the
+// plan's day/night rates and its own rolling-24h discount cap, priced hour
+// by hour in chronological (start_time) order across the whole selection,
+// mirroring how fn_confirm_multi_slot_booking prices the batch server-side.
+// It does NOT query prior confirmed bookings in the rolling 24h window (that
+// would need an extra round trip for a value the server recomputes
+// authoritatively anyway) — so if the cap was already partly/fully consumed
+// by earlier bookings today, this preview can look slightly more optimistic
+// than the server's real number. That's fine per CLAUDE.md: previews are
+// UX-only, the server is always authoritative for the final total.
+function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | undefined): BookingPreview | null {
+  if (!plan || sortedSlots.length === 0) return null;
+
+  let discountRemaining = plan.discounted_hours_cap_per_24h ?? Infinity;
+  let totalCredits = 0;
+  let totalHours = 0;
+  const buckets = new Map<string, { hours: number; rate: number }>();
+
+  const addHour = (label: string, rate: number) => {
+    const existing = buckets.get(label);
+    if (existing) existing.hours += 1;
+    else buckets.set(label, { hours: 1, rate });
+    totalCredits += rate;
+    totalHours += 1;
+  };
+
+  for (const slot of sortedSlots) {
+    const startHour = parseInt(slot.start_time.split(':')[0], 10);
+    const duration = slotDurationHours(slot);
+    for (let offset = 0; offset < duration; offset++) {
+      const hour = (startHour + offset) % 24;
+      const isDay = hour >= 5 && hour < 17;
+      if (discountRemaining > 0) {
+        discountRemaining -= 1;
+        addHour(isDay ? 'Membership Day' : 'Membership Night', isDay ? plan.membership_day_rate_per_hour : plan.membership_night_rate_per_hour);
+      } else {
+        addHour(isDay ? 'Standard Day' : 'Standard Night', isDay ? plan.standard_day_rate_per_hour : plan.standard_night_rate_per_hour);
+      }
+    }
+  }
+
+  const lines: PreviewLine[] = Array.from(buckets.entries()).map(([label, v]) => ({
+    label,
+    hours: v.hours,
+    rate: v.rate,
+    subtotal: v.hours * v.rate,
+  }));
+
+  return { totalCredits, totalHours, lines };
+}
+
+function mapBookingError(error: unknown): string {
+  const message = error instanceof Error ? error.message : '';
+  if (message.includes('INSUFFICIENT_CREDITS')) return 'Not enough Network credits for this booking.';
+  if (message.includes('HOLD_EXPIRED')) return 'One or more holds expired before confirming. Please reselect and try again.';
+  if (message.includes('SLOTS_MUST_BE_SAME_DAY')) return 'All selected slots must be on the same day.';
+  if (message.includes('SLOTS_MUST_BE_SAME_TEAM')) return 'Something went wrong — the selected slots did not all belong to this Network.';
+  if (message.includes('SLOT_UNAVAILABLE')) return 'One of the selected slots is no longer available.';
+  if (message.includes('PARTICIPANT_INVALID')) return 'One of the selected players is not an active Network member.';
+  if (message.includes('MEMBERSHIP_INACTIVE')) return "This Network's membership is not active.";
+  if (message.includes('NO_SLOTS_SELECTED')) return 'Select at least one slot first.';
+  if (message.includes('NO_PARTICIPANTS')) return 'Select at least one player.';
+  if (message.includes('FORBIDDEN')) return 'You are not authorized to book for this Network.';
+  return message || 'Please try again.';
+}
 
 export function BookTurfScreen() {
   const router = useRouter();
@@ -28,11 +114,10 @@ export function BookTurfScreen() {
   const invalidateBooking = useInvalidateBookingQueries();
 
   const [selectedDate, setSelectedDate] = useState(todayIso());
-  const [selectedSlot, setSelectedSlot] = useState<TurfSlot | null>(null);
-  const [hold, setHold] = useState<{ holdId: string; expiresAt: number } | null>(null);
+  const [heldSlots, setHeldSlots] = useState<Map<string, HeldSlot>>(new Map());
+  const [mutatingSlotId, setMutatingSlotId] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
-  const [isHolding, setIsHolding] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
 
   const activeTeam = useMemo(
@@ -45,6 +130,8 @@ export function BookTurfScreen() {
 
   const { data: slots, isPending: slotsPending } = useTurfSlots(turf?.id, selectedDate);
   const { data: members } = useTeamMembers(activeTeam?.team.id);
+  const { data: teamDetails } = useTeamDetails(activeTeam?.team.id);
+  const plan = teamDetails?.membership?.plan;
   const activeMembers = (members ?? []).filter((m) => m.status === 'ACTIVE');
 
   // Derived, not stored: defaults to "just me" until the user explicitly
@@ -53,21 +140,54 @@ export function BookTurfScreen() {
   const effectiveParticipantIds =
     selectedParticipantIds.length > 0 ? selectedParticipantIds : session?.user.id ? [session.user.id] : [];
 
+  const sortedHeldSlots = useMemo(
+    () => Array.from(heldSlots.values()).sort((a, b) => a.slot.start_time.localeCompare(b.slot.start_time)),
+    [heldSlots]
+  );
+
+  const preview = useMemo(
+    () => computeBookingPreview(sortedHeldSlots.map((h) => h.slot), plan),
+    [sortedHeldSlots, plan]
+  );
+
+  // Shared "earliest expiring" countdown across every currently-held slot —
+  // simpler than a per-slot timer and equally useful, since all holds were
+  // taken close together and expire on the same 1-minute window. Any hold
+  // that actually expires is dropped from the map and surfaced, same spirit
+  // as the old single-hold countdown effect.
   useEffect(() => {
-    if (!hold) return;
     const tick = () => {
-      const remaining = Math.max(0, Math.round((hold.expiresAt - Date.now()) / 1000));
-      setSecondsLeft(remaining);
-      if (remaining === 0) {
-        setHold(null);
-        setSelectedSlot(null);
-        Alert.alert('Hold expired', 'Your slot hold expired. Please select a slot again.');
+      if (heldSlots.size === 0) {
+        setSecondsLeft(0);
+        return;
       }
+      const now = Date.now();
+      const expiredIds: string[] = [];
+      let earliest = Infinity;
+      heldSlots.forEach((h, id) => {
+        if (h.expiresAt <= now) expiredIds.push(id);
+        else earliest = Math.min(earliest, h.expiresAt);
+      });
+      if (expiredIds.length > 0) {
+        setHeldSlots((prev) => {
+          const next = new Map(prev);
+          expiredIds.forEach((id) => next.delete(id));
+          return next;
+        });
+        Alert.alert(
+          'Hold expired',
+          expiredIds.length === 1
+            ? 'Your slot hold expired. Please select it again.'
+            : 'Some of your slot holds expired. Please reselect them.'
+        );
+      }
+      setSecondsLeft(earliest === Infinity ? 0 : Math.max(0, Math.round((earliest - now) / 1000)));
     };
     tick();
+    if (heldSlots.size === 0) return;
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [hold]);
+  }, [heldSlots]);
 
   const dateOptions = useMemo(
     () => Array.from({ length: DATE_WINDOW }, (_, i) => addDaysIso(todayIso(), i)),
@@ -99,13 +219,50 @@ export function BookTurfScreen() {
     );
   }
 
-  const handleSelectSlot = async (slot: TurfSlot) => {
+  const handleDateChange = async (iso: string) => {
+    if (iso === selectedDate) return;
+    setSelectedDate(iso);
+    const toRelease = Array.from(heldSlots.values());
+    setHeldSlots(new Map());
+    // Best-effort: the date changed regardless of whether release succeeds
+    // (e.g. a hold that already expired server-side) — never block the date
+    // switch on this.
+    await Promise.all(toRelease.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
+  };
+
+  const handleToggleSlot = async (slot: TurfSlot) => {
+    const existing = heldSlots.get(slot.id);
+    if (existing) {
+      // Tapping an already-selected (held-by-me) slot again deselects it.
+      setMutatingSlotId(slot.id);
+      try {
+        await releaseSlotHold(existing.holdId);
+      } catch {
+        // Idempotent server-side for the common cases (already converted/
+        // expired/released); still drop it locally below regardless so the
+        // UI never gets stuck on a hold the user explicitly tried to let go.
+      } finally {
+        setHeldSlots((prev) => {
+          const next = new Map(prev);
+          next.delete(slot.id);
+          return next;
+        });
+        setMutatingSlotId(null);
+      }
+      return;
+    }
+
     if (slot.status !== 'AVAILABLE') return;
-    setIsHolding(true);
+    setMutatingSlotId(slot.id);
     try {
       const result = await createSlotHold(slot.id, activeTeam.team.id);
-      setSelectedSlot(slot);
-      setHold({ holdId: result.hold_id, expiresAt: new Date(result.expires_at).getTime() });
+      setHeldSlots((prev) =>
+        new Map(prev).set(slot.id, {
+          slot,
+          holdId: result.hold_id,
+          expiresAt: new Date(result.expires_at).getTime(),
+        })
+      );
     } catch (error) {
       const msg =
         error instanceof Error && error.message.includes('SLOT_UNAVAILABLE')
@@ -115,7 +272,7 @@ export function BookTurfScreen() {
             : 'Please try again.';
       Alert.alert('Could not hold slot', msg);
     } finally {
-      setIsHolding(false);
+      setMutatingSlotId(null);
     }
   };
 
@@ -128,26 +285,26 @@ export function BookTurfScreen() {
   };
 
   const handleConfirm = async () => {
-    if (!hold || effectiveParticipantIds.length === 0) return;
+    if (heldSlots.size === 0 || effectiveParticipantIds.length === 0) return;
     setIsConfirming(true);
     try {
-      const bookingId = await confirmBooking(hold.holdId, effectiveParticipantIds);
+      const holdIds = sortedHeldSlots.map((h) => h.holdId);
+      const bookingIds = await confirmMultiSlotBooking(holdIds, effectiveParticipantIds);
       invalidateBooking({ teamId: activeTeam.team.id, turfId: turf?.id });
-      setHold(null);
-      setSelectedSlot(null);
-      router.replace(`/(app)/booking/${bookingId}`);
+      setHeldSlots(new Map());
+      setSelectedParticipantIds([]);
+      if (bookingIds.length > 1) {
+        Alert.alert('Booking confirmed', `${bookingIds.length} slots were booked successfully.`);
+      }
+      if (bookingIds[0]) {
+        router.push(`/(app)/booking/${bookingIds[0]}`);
+      }
     } catch (error) {
-      const msg =
-        error instanceof Error && error.message.includes('INSUFFICIENT_CREDITS')
-          ? 'Not enough Network credits for this booking.'
-          : error instanceof Error && error.message.includes('HOLD_EXPIRED')
-            ? 'Your hold expired before confirming. Please try again.'
-            : error instanceof Error
-              ? error.message
-              : 'Please try again.';
-      Alert.alert('Booking failed', msg);
-      setHold(null);
-      setSelectedSlot(null);
+      // Atomic server-side: a failure here means NONE of the selected slots
+      // were booked, so the holds are likely still active — leave the
+      // selection exactly as it was rather than clearing it, so the user can
+      // retry without reselecting everything.
+      Alert.alert('Booking failed', mapBookingError(error));
     } finally {
       setIsConfirming(false);
     }
@@ -187,11 +344,7 @@ export function BookTurfScreen() {
               <Pressable
                 key={iso}
                 style={[styles.dateChip, isSelected && styles.dateChipSelected]}
-                onPress={() => {
-                  setSelectedDate(iso);
-                  setSelectedSlot(null);
-                  setHold(null);
-                }}
+                onPress={() => handleDateChange(iso)}
               >
                 <Text style={[styles.dateWeekday, isSelected && styles.dateTextSelected]}>{weekday}</Text>
                 <Text style={[styles.dateDay, isSelected && styles.dateTextSelected]}>{day}</Text>
@@ -206,7 +359,7 @@ export function BookTurfScreen() {
         ) : (
           <View style={styles.slotGrid}>
             {(slots ?? []).map((slot) => {
-              const isSelected = selectedSlot?.id === slot.id;
+              const isSelected = heldSlots.has(slot.id);
               const isDisabled = slot.status !== 'AVAILABLE' && !isSelected;
               return (
                 <Pressable
@@ -216,25 +369,29 @@ export function BookTurfScreen() {
                     isSelected && styles.slotChipSelected,
                     isDisabled && styles.slotChipDisabled,
                   ]}
-                  disabled={isDisabled || isHolding}
-                  onPress={() => handleSelectSlot(slot)}
+                  disabled={isDisabled || mutatingSlotId === slot.id}
+                  onPress={() => handleToggleSlot(slot)}
                 >
-                  <Text
-                    style={[
-                      styles.slotText,
-                      isSelected && styles.slotTextSelected,
-                      isDisabled && styles.slotTextDisabled,
-                    ]}
-                  >
-                    {formatSlotTime(slot.start_time)}
-                  </Text>
+                  {mutatingSlotId === slot.id ? (
+                    <ActivityIndicator size="small" color={isSelected ? '#FFFFFF' : colors.primary} />
+                  ) : (
+                    <Text
+                      style={[
+                        styles.slotText,
+                        isSelected && styles.slotTextSelected,
+                        isDisabled && styles.slotTextDisabled,
+                      ]}
+                    >
+                      {formatSlotTime(slot.start_time)}
+                    </Text>
+                  )}
                 </Pressable>
               );
             })}
           </View>
         )}
 
-        {selectedSlot && (
+        {heldSlots.size > 0 && (
           <>
             <Text style={styles.sectionLabel}>Players</Text>
             {activeMembers.map((m) => {
@@ -245,26 +402,94 @@ export function BookTurfScreen() {
                   <Text style={styles.playerName}>
                     {m.user_id === session?.user.id ? 'You' : (m.profile?.full_name ?? 'Member')}
                   </Text>
+                  {m.team_role === 'HOST' && <Badge label="HOST" tone="host" />}
+                  {m.team_role === 'CO_HOST' && <Badge label="CO-HOST" tone="coHost" />}
                   <Ionicons
                     name={checked ? 'checkmark-circle' : 'ellipse-outline'}
                     size={22}
                     color={checked ? colors.primary : colors.border}
+                    style={{ marginLeft: spacing.sm }}
                   />
                 </Pressable>
               );
             })}
           </>
         )}
+
+        {heldSlots.size > 0 && (
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>Booking Summary</Text>
+            <View style={styles.summaryRow}>
+              <Ionicons name="location-outline" size={14} color={colors.textMuted} />
+              <Text style={styles.summaryText}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
+              <Text style={styles.summaryText}>{formatBookingDate(selectedDate)}</Text>
+            </View>
+            {sortedHeldSlots.map((h) => (
+              <View style={styles.summaryRow} key={h.slot.id}>
+                <Ionicons name="time-outline" size={14} color={colors.textMuted} />
+                <Text style={styles.summaryText}>
+                  {formatSlotTime(h.slot.start_time)}–{formatSlotTime(h.slot.end_time)}
+                </Text>
+              </View>
+            ))}
+
+            <Text style={styles.hoursSelectedLabel}>
+              {preview?.totalHours ?? sortedHeldSlots.length} Hour
+              {(preview?.totalHours ?? sortedHeldSlots.length) === 1 ? '' : 's'} Selected
+            </Text>
+
+            {preview?.lines.map((line) => (
+              <View style={styles.rateLine} key={line.label}>
+                <Text style={styles.rateLineText}>
+                  {line.hours} {line.label} Hr{line.hours === 1 ? '' : 's'} @ ₹{line.rate}/hr
+                </Text>
+                <Text style={styles.rateLineValue}>₹{line.subtotal.toLocaleString()}</Text>
+              </View>
+            ))}
+
+            {preview && (
+              <View style={styles.totalBox}>
+                <Text style={styles.totalLabel}>Estimated Total (server-confirmed on submit)</Text>
+                <Text style={styles.totalValue}>{Math.round(preview.totalCredits).toLocaleString()} CR</Text>
+              </View>
+            )}
+
+            {preview && activeTeam.wallet && (
+              <View style={styles.walletPreviewBox}>
+                <View style={styles.walletPreviewRow}>
+                  <Text style={styles.walletPreviewLabel}>Wallet Before</Text>
+                  <Text style={styles.walletPreviewValue}>
+                    {Math.round(activeTeam.wallet.available_credits).toLocaleString()} CR
+                  </Text>
+                </View>
+                <View style={styles.walletPreviewRow}>
+                  <Text style={styles.walletPreviewLabel}>Deduct</Text>
+                  <Text style={[styles.walletPreviewValue, { color: colors.danger }]}>
+                    -{Math.round(preview.totalCredits).toLocaleString()} CR
+                  </Text>
+                </View>
+                <View style={styles.walletPreviewRow}>
+                  <Text style={styles.walletPreviewLabel}>Wallet After</Text>
+                  <Text style={styles.walletPreviewValue}>
+                    {Math.max(0, Math.round(activeTeam.wallet.available_credits - preview.totalCredits)).toLocaleString()} CR
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
 
-      {selectedSlot && hold && (
+      {heldSlots.size > 0 && (
         <View style={styles.confirmBar}>
           <View style={styles.confirmTopRow}>
             <View>
-              <Text style={styles.confirmLabel}>SLOT HELD</Text>
+              <Text style={styles.confirmLabel}>{sortedHeldSlots.length} SLOT{sortedHeldSlots.length === 1 ? '' : 'S'} HELD</Text>
               <Text style={styles.confirmMeta}>
-                {formatSlotTime(selectedSlot.start_time)}–{formatSlotTime(selectedSlot.end_time)} ·{' '}
-                {effectiveParticipantIds.length} Players
+                {preview?.totalHours ?? sortedHeldSlots.length} Hours · {effectiveParticipantIds.length} Players
               </Text>
             </View>
             <Text style={styles.confirmTimer}>
@@ -272,7 +497,7 @@ export function BookTurfScreen() {
             </Text>
           </View>
           <Button
-            title="Hold & Confirm"
+            title="Confirm Booking"
             onPress={handleConfirm}
             loading={isConfirming}
             disabled={effectiveParticipantIds.length === 0}
@@ -361,6 +586,29 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   playerName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
+
+  summaryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    marginTop: spacing.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  summaryTitle: { fontSize: 14, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
+  summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
+  summaryText: { fontSize: 12, color: colors.textMuted },
+  hoursSelectedLabel: { fontSize: 13, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
+  rateLine: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+  rateLineText: { fontSize: 12, color: colors.textMuted, flex: 1 },
+  rateLineValue: { fontSize: 12, fontWeight: '700', color: colors.text },
+  totalBox: { backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.sm },
+  totalLabel: { fontSize: 10, color: colors.textMuted },
+  totalValue: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 2 },
+  walletPreviewBox: { marginTop: spacing.sm, gap: 4 },
+  walletPreviewRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  walletPreviewLabel: { fontSize: 11, color: colors.textMuted },
+  walletPreviewValue: { fontSize: 12, fontWeight: '700', color: colors.text },
 
   confirmBar: {
     backgroundColor: '#0F1729',

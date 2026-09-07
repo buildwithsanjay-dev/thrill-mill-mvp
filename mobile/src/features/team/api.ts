@@ -47,41 +47,57 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
 
   return Promise.all(
     rows.map(async ({ team_role, team }) => {
-      const [{ data: wallet }, { count: memberCount }, { data: upcoming }, { data: membership }] =
-        await Promise.all([
-          supabase.from('team_wallets').select('*').eq('team_id', team.id).maybeSingle(),
-          supabase
-            .from('team_members')
-            .select('id', { count: 'exact', head: true })
-            .eq('team_id', team.id)
-            .eq('status', 'ACTIVE'),
-          supabase
-            .from('bookings')
-            .select('id, booking_date, start_time, end_time')
-            .eq('team_id', team.id)
-            .eq('status', 'CONFIRMED')
-            .gte('booking_date', new Date().toISOString().slice(0, 10))
-            .order('booking_date', { ascending: true })
-            .order('start_time', { ascending: true })
-            .limit(1)
-            .maybeSingle(),
-          supabase
-            .from('team_memberships')
-            .select('status')
-            .eq('team_id', team.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ]);
+      // One Team's queries failing (a flaky request, a since-deleted Team
+      // row, etc.) must never take the whole dashboard down with it — degrade
+      // that single Team to nulled-out fields instead of propagating the
+      // rejection through the outer Promise.all, per CLAUDE.md.
+      try {
+        const [{ data: wallet }, { count: memberCount }, { data: upcoming }, { data: membership }] =
+          await Promise.all([
+            supabase.from('team_wallets').select('*').eq('team_id', team.id).maybeSingle(),
+            supabase
+              .from('team_members')
+              .select('id', { count: 'exact', head: true })
+              .eq('team_id', team.id)
+              .eq('status', 'ACTIVE'),
+            supabase
+              .from('bookings')
+              .select('id, booking_date, start_time, end_time')
+              .eq('team_id', team.id)
+              .eq('status', 'CONFIRMED')
+              .gte('booking_date', new Date().toISOString().slice(0, 10))
+              .order('booking_date', { ascending: true })
+              .order('start_time', { ascending: true })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from('team_memberships')
+              .select('status')
+              .eq('team_id', team.id)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+          ]);
 
-      return {
-        team,
-        myRole: team_role,
-        wallet: (wallet as TeamWallet | null) ?? null,
-        memberCount: memberCount ?? 0,
-        upcomingBooking: upcoming ?? null,
-        membershipStatus: (membership?.status as MembershipRequestStatus | undefined) ?? null,
-      };
+        return {
+          team,
+          myRole: team_role,
+          wallet: (wallet as TeamWallet | null) ?? null,
+          memberCount: memberCount ?? 0,
+          upcomingBooking: upcoming ?? null,
+          membershipStatus: (membership?.status as MembershipRequestStatus | undefined) ?? null,
+        };
+      } catch (error) {
+        console.error(`getMyTeams: failed to load per-team data for team ${team.id}`, error);
+        return {
+          team,
+          myRole: team_role,
+          wallet: null,
+          memberCount: 0,
+          upcomingBooking: null,
+          membershipStatus: null,
+        };
+      }
     })
   );
 }
