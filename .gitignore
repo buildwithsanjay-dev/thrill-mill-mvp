@@ -1,6 +1,9 @@
 # Supabase CLI local link/session cache — machine-specific, never committed
 supabase/.temp/
 
+# Subagent git-worktree scratch space — ephemeral, never committed
+.claude/worktrees/
+
 # OS
 .DS_Store
 Thumbs.db
