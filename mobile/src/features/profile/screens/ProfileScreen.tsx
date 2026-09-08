@@ -173,9 +173,16 @@ function ProfileForm({ profile }: { profile: Profile }) {
           </View>
         )}
 
-        <View style={styles.divider} />
-
-        <CreditUsageSection />
+        {/* Credit usage is per-member analytics (credits ÷ participants on
+            games a member actually played) — an Admin is a platform
+            operator, not a Team participant, so this concept doesn't apply
+            to their own profile. */}
+        {profile.platform_role !== 'ADMIN' && (
+          <>
+            <View style={styles.divider} />
+            <CreditUsageSection />
+          </>
+        )}
 
         <View style={styles.divider} />
 

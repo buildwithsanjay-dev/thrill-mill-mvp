@@ -17,6 +17,17 @@ WebBrowser.maybeCompleteAuthSession();
 // Configuration -> Redirect URLs (wildcards like exp://** are fine for the
 // Expo Go dev case, since that address changes with the dev machine's IP).
 const redirectTo = makeRedirectUri();
+if (__DEV__) {
+  // If Google sign-in ever exits the app to a broken URL (classically
+  // Supabase's default Site URL, http://localhost:3000, which it falls
+  // back to whenever the actual redirectTo isn't in Authentication -> URL
+  // Configuration -> Redirect URLs), this is the exact string that needs
+  // to be added there (as a wildcard, e.g. `thrillmillclub://*`) — it
+  // changes shape between Expo Go (`exp://...`) and a dev-client/standalone
+  // build (`<scheme>://...`), so it's worth reprinting on every launch
+  // rather than assuming it's stable across builds.
+  console.log('[auth] Google OAuth redirectTo:', redirectTo);
+}
 
 async function createSessionFromUrl(url: string): Promise<Session | null> {
   const { params, errorCode } = QueryParams.getQueryParams(url);

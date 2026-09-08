@@ -111,7 +111,8 @@ function TeamSwitcherModal({
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>Switch Network</Text>
           <ScrollView style={styles.modalList} bounces={false}>
-            {teams.map(({ team }) => {
+            {teams.map((summary) => {
+              const { team } = summary;
               const isActive = team.id === activeTeamId;
               return (
                 <Pressable
@@ -121,10 +122,16 @@ function TeamSwitcherModal({
                 >
                   <View style={styles.modalRowIcon}>
                     <Ionicons name="albums" size={16} color={colors.text} />
+                    {summary.pendingRequestCount > 0 && <View style={styles.notificationDot} />}
                   </View>
                   <Text style={styles.modalRowLabel} numberOfLines={1}>
                     {team.name}
                   </Text>
+                  {summary.pendingRequestCount > 0 && (
+                    <Text style={styles.modalRowActionNeeded}>
+                      {summary.pendingRequestCount} pending
+                    </Text>
+                  )}
                   {isActive && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
                 </Pressable>
               );
@@ -175,15 +182,30 @@ function DashboardContent({
     <View>
       <OtherNetworksUpcoming />
 
+      <View style={{ height: spacing.lg }} />
+
       <Pressable
         style={styles.teamSwitcher}
         onPress={hasMultipleTeams ? onSwitchTeam : undefined}
         disabled={!hasMultipleTeams}
       >
-        <Ionicons name="albums" size={16} color={colors.text} />
+        <View>
+          <Ionicons name="albums" size={16} color={colors.text} />
+          {summary.pendingRequestCount > 0 && <View style={styles.notificationDot} />}
+        </View>
         <Text style={styles.teamSwitcherLabel}>{team.name}</Text>
         {hasMultipleTeams && <Ionicons name="chevron-down" size={16} color={colors.textMuted} />}
       </Pressable>
+
+      {summary.pendingRequestCount > 0 && (
+        <Pressable style={styles.actionNeededBanner} onPress={() => router.push(`/(app)/team/${team.id}`)}>
+          <Ionicons name="alert-circle" size={16} color="#B45309" />
+          <Text style={styles.actionNeededText}>
+            {summary.pendingRequestCount} join request{summary.pendingRequestCount === 1 ? '' : 's'} waiting on your review
+          </Text>
+          <Ionicons name="chevron-forward" size={14} color="#B45309" />
+        </Pressable>
+      )}
 
       <View style={styles.creditsCard}>
         <View style={styles.creditsCardTop}>
@@ -316,6 +338,7 @@ function OtherNetworksUpcoming() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          style={styles.upcomingStripScroll}
           contentContainerStyle={styles.upcomingStrip}
         >
           {bookings.map((b) => (
@@ -375,6 +398,31 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   teamSwitcherLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text, marginLeft: spacing.xs },
+
+  notificationDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#DC2626',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+  },
+
+  actionNeededBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+  },
+  actionNeededText: { flex: 1, fontSize: 12.5, fontWeight: '700', color: '#92400E' },
 
   creditsCard: {
     backgroundColor: colors.primaryDark,
@@ -440,6 +488,12 @@ const styles = StyleSheet.create({
   },
   quickLabel: { fontSize: 10.5, fontWeight: '600', color: colors.text, textAlign: 'center' },
 
+  // A horizontal ScrollView with no explicit height can collapse to 0 on
+  // Android when nested inside a vertical ScrollView (it doesn't reliably
+  // measure its own cross-axis size from content) — that's what was letting
+  // the team-switcher dropdown visually overlap this strip. Fixing the
+  // height explicitly, matching the tallest card's content.
+  upcomingStripScroll: { minHeight: 128 },
   upcomingStrip: { gap: spacing.sm, paddingRight: spacing.sm },
   upcomingCard: {
     width: 168,
@@ -504,4 +558,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalRowLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
+  modalRowActionNeeded: { fontSize: 11, fontWeight: '700', color: '#B45309', marginRight: spacing.xs },
 });

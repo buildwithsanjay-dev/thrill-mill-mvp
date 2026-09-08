@@ -6,14 +6,17 @@ import type { Booking, BookingParticipant, TurfResource, TurfSlot } from '@/type
 // with how booking_date/start_time are populated (local wall-clock values).
 // Never used for cancellation/refund eligibility — that's always decided by
 // server time per CLAUDE.md.
-function localDateIso(d: Date): string {
+// Exported so other feature modules computing "is this booking still
+// upcoming" (e.g. team/api.ts's getMyTeams()) use the same local-time
+// reference instead of re-introducing the UTC/local mismatch fixed below.
+export function localDateIso(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
 
-function localTimeHms(d: Date): string {
+export function localTimeHms(d: Date): string {
   const h = String(d.getHours()).padStart(2, '0');
   const m = String(d.getMinutes()).padStart(2, '0');
   const s = String(d.getSeconds()).padStart(2, '0');

@@ -207,11 +207,15 @@ export function ManageBookingScreen() {
                     <Pressable key={m.id} style={styles.participantRow} onPress={() => toggleMember(m.user_id)}>
                       <Avatar uri={m.profile?.avatar_url} name={m.profile?.full_name} size={32} />
                       <Text style={styles.participantName}>{m.profile?.full_name ?? 'Member'}</Text>
-                      <Ionicons
-                        name={checked ? 'checkmark-circle' : 'ellipse-outline'}
-                        size={20}
-                        color={checked ? colors.primary : colors.border}
-                      />
+                      {/* Explicitly labelled add/remove — a bare checkmark/circle
+                          pair reads as a single-select radio button rather than
+                          a multi-select toggle, which is exactly what made this
+                          screen's real intent (stage for add vs. stage for
+                          remove) unclear at a glance. */}
+                      <View style={[styles.memberToggle, checked ? styles.memberToggleRemove : styles.memberToggleAdd]}>
+                        <Ionicons name={checked ? 'remove' : 'add'} size={14} color="#FFFFFF" />
+                        <Text style={styles.memberToggleText}>{checked ? 'Remove' : 'Add'}</Text>
+                      </View>
                     </Pressable>
                   );
                 })
@@ -339,6 +343,18 @@ const styles = StyleSheet.create({
   participantsCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   participantRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   participantName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
+
+  memberToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 5,
+    borderRadius: radii.pill,
+  },
+  memberToggleAdd: { backgroundColor: colors.primary },
+  memberToggleRemove: { backgroundColor: '#DC2626' },
+  memberToggleText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
 
   addMemberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingTop: spacing.sm },
   addMemberText: { fontSize: 13, fontWeight: '700', color: colors.primary },

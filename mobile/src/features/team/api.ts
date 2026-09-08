@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { localDateIso, localTimeHms } from '@/features/booking/api';
 import type { MembershipRequestStatus, Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
 
 async function requireUserId(): Promise<string> {
@@ -22,6 +23,14 @@ export type MyTeamSummary = {
   // whose membership isn't ACTIVE yet (still under Admin review, payment
   // pending, etc.) — null means no membership has ever been requested.
   membershipStatus: MembershipRequestStatus | null;
+  // Count of PENDING (awaiting Host/Co-host approval) join requests. RLS on
+  // `team_members` only surfaces PENDING rows to that Team's Host/Co-host/
+  // Admin, so this is naturally 0 for a plain member — no extra role check
+  // needed client-side. Drives the "action needed" indicator on the
+  // dashboard's team switcher; it disappears the moment the request is
+  // actually accepted/rejected (the count drops to 0), rather than tracking
+  // a separate "seen" flag.
+  pendingRequestCount: number;
 };
 
 // "My Teams" (network page): every team I'm an ACTIVE member of, with the
@@ -45,6 +54,16 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
     team: Team;
   }[];
 
+  // Local wall-clock "today"/"now", not `Date#toISOString()` (UTC calendar
+  // date) — booking_date/start_time are the turf's local values, so mixing
+  // in a UTC-derived date can push "today" a day off depending on the
+  // device's UTC offset, silently hiding (or wrongly surfacing a stale)
+  // upcoming booking. Same bug, same fix, as booking/api.ts's
+  // getUpcomingBookingsAcrossTeams — see its comment for the full story.
+  const now = new Date();
+  const todayIso = localDateIso(now);
+  const nowTime = localTimeHms(now);
+
   return Promise.all(
     rows.map(async ({ team_role, team }) => {
       // One Team's queries failing (a flaky request, a since-deleted Team
@@ -52,7 +71,7 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
       // that single Team to nulled-out fields instead of propagating the
       // rejection through the outer Promise.all, per CLAUDE.md.
       try {
-        const [{ data: wallet }, { count: memberCount }, { data: upcoming }, { data: membership }] =
+        const [{ data: wallet }, { count: memberCount }, { count: pendingRequestCount }, { data: upcoming }, { data: membership }] =
           await Promise.all([
             supabase.from('team_wallets').select('*').eq('team_id', team.id).maybeSingle(),
             supabase
@@ -61,11 +80,19 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
               .eq('team_id', team.id)
               .eq('status', 'ACTIVE'),
             supabase
+              .from('team_members')
+              .select('id', { count: 'exact', head: true })
+              .eq('team_id', team.id)
+              .eq('status', 'PENDING'),
+            supabase
               .from('bookings')
               .select('id, booking_date, start_time, end_time')
               .eq('team_id', team.id)
               .eq('status', 'CONFIRMED')
-              .gte('booking_date', new Date().toISOString().slice(0, 10))
+              // Future date, OR today but not yet ended — a plain
+              // `.gte('booking_date', todayIso)` alone would keep showing a
+              // same-day session as "upcoming" all day even after it ended.
+              .or(`booking_date.gt.${todayIso},and(booking_date.eq.${todayIso},end_time.gt.${nowTime})`)
               .order('booking_date', { ascending: true })
               .order('start_time', { ascending: true })
               .limit(1)
@@ -84,6 +111,7 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
           myRole: team_role,
           wallet: (wallet as TeamWallet | null) ?? null,
           memberCount: memberCount ?? 0,
+          pendingRequestCount: pendingRequestCount ?? 0,
           upcomingBooking: upcoming ?? null,
           membershipStatus: (membership?.status as MembershipRequestStatus | undefined) ?? null,
         };
@@ -94,6 +122,7 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
           myRole: team_role,
           wallet: null,
           memberCount: 0,
+          pendingRequestCount: 0,
           upcomingBooking: null,
           membershipStatus: null,
         };
