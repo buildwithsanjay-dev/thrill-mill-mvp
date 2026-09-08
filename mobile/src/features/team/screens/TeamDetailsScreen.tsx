@@ -6,9 +6,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
+import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamBookings } from '@/features/booking/useBooking';
+import { useActiveTeamStore } from '@/stores/activeTeam';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { assignCoHost, removeTeamMember, respondToJoinRequest } from '../api';
 import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '../useTeams';
@@ -28,6 +30,7 @@ export function TeamDetailsScreen() {
   const { data: bookings } = useTeamBookings(id);
   const { data: bookingCounts } = useTeamBookingCounts(id);
   const invalidate = useInvalidateTeamQueries();
+  const setActiveTeamId = useActiveTeamStore((s) => s.setActiveTeamId);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   if (isPending || !data) {
@@ -108,6 +111,15 @@ export function TeamDetailsScreen() {
     Alert.alert(member.profile?.full_name ?? 'Member', undefined, options);
   };
 
+  // Book Turf reads whichever Team is "active" (client-only UI state, see
+  // stores/activeTeam.ts) — set it to the Team being viewed here first, so
+  // booking from inside a Team's own page books for THAT Team, not
+  // whatever was last selected on the dashboard.
+  const handleBookTurf = () => {
+    setActiveTeamId(team.id);
+    router.push('/(app)/(tabs)/book');
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -179,6 +191,10 @@ export function TeamDetailsScreen() {
             <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />
           </View>
         </Pressable>
+
+        <View style={styles.bookTurfWrap}>
+          <Button title="Book Turf" iconLeft="football" onPress={handleBookTurf} />
+        </View>
 
         <View style={styles.statsRow}>
           <StatBox icon="people" value={activeMembers.length} label="MEMBERS" />
@@ -349,6 +365,7 @@ const styles = StyleSheet.create({
   },
   walletCtaText: { fontSize: 12, fontWeight: '700', color: '#FFFFFF', letterSpacing: 0.3 },
 
+  bookTurfWrap: { marginTop: spacing.md },
   statsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   statBox: {
     flex: 1,

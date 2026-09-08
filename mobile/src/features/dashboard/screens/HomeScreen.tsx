@@ -180,7 +180,7 @@ function DashboardContent({
 
   return (
     <View>
-      <OtherNetworksUpcoming />
+      <OtherNetworksUpcoming excludeTeamId={team.id} />
 
       <View style={{ height: spacing.lg }} />
 
@@ -310,18 +310,23 @@ function QuickAction({
 }
 
 // Dashboard "Other Networks' Upcoming Events" strip — a horizontally
-// scrollable row of every ACTIVE Team's upcoming CONFIRMED bookings (not
-// just the currently selected Team), so a member can see what's coming up
-// across every Network they're part of before picking one from the
-// dropdown below.
+// scrollable row of every OTHER ACTIVE Team's upcoming CONFIRMED bookings —
+// excludes whichever Team is currently selected above, since that Team's
+// own next game is already shown in the "Upcoming" card below. Without this
+// exclusion the same booking appeared twice on the same screen whenever the
+// selected Team happened to have an upcoming game itself.
 // Card width + the strip's own gap (see styles.upcomingStrip/upcomingCard) —
 // used to scroll by roughly one card per arrow tap rather than an arbitrary
 // jump.
 const UPCOMING_CARD_STRIDE = 168 + spacing.sm;
 
-function OtherNetworksUpcoming() {
+function OtherNetworksUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
   const router = useRouter();
-  const { data: bookings, isPending } = useUpcomingBookingsAcrossTeams();
+  const { data: allBookings, isPending } = useUpcomingBookingsAcrossTeams();
+  const bookings = useMemo(
+    () => (allBookings ?? []).filter((b) => b.team_id !== excludeTeamId),
+    [allBookings, excludeTeamId]
+  );
   const scrollRef = useRef<ScrollView>(null);
   const [scrollX, setScrollX] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
