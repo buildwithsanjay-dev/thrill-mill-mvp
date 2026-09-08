@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,14 +11,20 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import type { RevenueAnalytics } from '../api';
 import {
+  useAdminAuditLogFeed,
   useAdminRevenueAnalytics,
   useAllBookings,
   useDashboardStats,
   usePendingActivationTeams,
-  useRecentAuditLog,
 } from '../useAdmin';
 
-const ANALYTICS_WINDOW_DAYS = 30;
+type RangePreset = 'week' | 'month' | 'year';
+
+const RANGE_PRESETS: { key: RangePreset; label: string; days: number }[] = [
+  { key: 'week', label: 'Weekly', days: 7 },
+  { key: 'month', label: 'Monthly', days: 30 },
+  { key: 'year', label: 'Yearly', days: 365 },
+];
 
 function formatInr(value: number) {
   return `₹${Math.round(value).toLocaleString('en-IN')}`;
@@ -29,11 +36,13 @@ function formatCredits(value: number) {
 
 export function AdminHomeScreen() {
   const router = useRouter();
+  const [rangePreset, setRangePreset] = useState<RangePreset>('month');
   const { data: stats, isPending: statsPending } = useDashboardStats();
   const { data: pendingTeams } = usePendingActivationTeams();
   const { data: bookings } = useAllBookings();
-  const { data: auditLog } = useRecentAuditLog();
-  const { data: analytics, isPending: analyticsPending } = useAdminRevenueAnalytics(ANALYTICS_WINDOW_DAYS);
+  const { data: auditLog } = useAdminAuditLogFeed(6);
+  const activeRangeDays = RANGE_PRESETS.find((p) => p.key === rangePreset)!.days;
+  const { data: analytics, isPending: analyticsPending } = useAdminRevenueAnalytics(activeRangeDays);
 
   const firstPending = pendingTeams?.[0];
   const upcomingBookings = (bookings ?? []).filter((b) => b.status === 'CONFIRMED').slice(0, 1);
@@ -81,11 +90,26 @@ export function AdminHomeScreen() {
           </>
         )}
 
-        <Text style={styles.sectionTitle2}>Revenue Analytics</Text>
+        <View style={styles.sectionHeaderRow2}>
+          <Text style={styles.sectionTitle2}>Revenue Analytics</Text>
+          <View style={styles.rangeChipRow}>
+            {RANGE_PRESETS.map((preset) => (
+              <Pressable
+                key={preset.key}
+                style={[styles.rangeChip, rangePreset === preset.key && styles.rangeChipActive]}
+                onPress={() => setRangePreset(preset.key)}
+              >
+                <Text style={[styles.rangeChipText, rangePreset === preset.key && styles.rangeChipTextActive]}>
+                  {preset.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
         {analyticsPending ? (
           <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
         ) : analytics ? (
-          <RevenueAnalyticsSection analytics={analytics} />
+          <RevenueAnalyticsSection analytics={analytics} rangeLabel={RANGE_PRESETS.find((p) => p.key === rangePreset)!.label} />
         ) : (
           <Text style={styles.emptyText}>Analytics unavailable right now.</Text>
         )}
@@ -162,7 +186,12 @@ export function AdminHomeScreen() {
           <QuickAction icon="ban" label="Block Turf Slot" onPress={() => router.push('/(admin)/block-slot')} />
         </View>
 
-        <Text style={styles.sectionTitle2}>Recent Activity</Text>
+        <View style={styles.sectionHeaderRow2}>
+          <Text style={styles.sectionTitle2}>Recent Activity</Text>
+          <Pressable onPress={() => router.push('/(admin)/(tabs)/leaderboard')}>
+            <Text style={styles.seeAll}>View All Logs</Text>
+          </Pressable>
+        </View>
         <View style={styles.activityCard}>
           {(auditLog ?? []).length === 0 ? (
             <Text style={styles.emptyText}>No admin activity yet.</Text>
@@ -172,6 +201,10 @@ export function AdminHomeScreen() {
                 <View style={[styles.activityDot, index === 0 && styles.activityDotActive]} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.activityAction}>{log.action.replaceAll('_', ' ')}</Text>
+                  <Text style={styles.activityActor}>
+                    {log.admin_name}
+                    {log.target_label ? ` → ${log.target_label}` : ''}
+                  </Text>
                   {!!log.reason && <Text style={styles.activityReason}>{log.reason}</Text>}
                 </View>
                 <Text style={styles.activityTime}>
@@ -215,10 +248,21 @@ function StatCard({
   );
 }
 
-function RevenueAnalyticsSection({ analytics }: { analytics: RevenueAnalytics }) {
+function RevenueAnalyticsSection({ analytics, rangeLabel }: { analytics: RevenueAnalytics; rangeLabel: string }) {
   const { summary, daily } = analytics;
   const weekDelta = summary.bookings_this_week - summary.bookings_last_week;
-  const maxRevenue = Math.max(1, ...daily.map((d) => d.revenue_inr));
+  // reduce, not `Math.max(1, ...daily.map(...))` — a yearly window is 365
+  // entries and spreading that many args into Math.max is needless risk for
+  // no benefit over a plain reduce.
+  const maxRevenue = daily.reduce((max, d) => Math.max(max, d.revenue_inr), 1);
+  // Root cause of "the chart doesn't work": with 30 (or 365) days of bars in
+  // a horizontal ScrollView, the view opens scrolled to the *start* — i.e.
+  // the oldest day, which for a freshly-seeded/quiet period is a flat wall
+  // of near-zero bars. The interesting, most recent data sits off-screen to
+  // the right, so the chart reads as broken/empty until someone manually
+  // scrolls all the way over. Auto-scroll to the latest day on load/refresh.
+  const scrollRef = useRef<ScrollView>(null);
+  const isDense = daily.length > 45; // yearly view — thinner bars, tighter gap
 
   return (
     <>
@@ -276,25 +320,42 @@ function RevenueAnalyticsSection({ analytics }: { analytics: RevenueAnalytics })
 
       <View style={styles.trendCard}>
         <View style={styles.trendHeaderRow}>
-          <Text style={styles.trendTitle}>Daily Revenue — Last {analytics.period_days} Days</Text>
+          <Text style={styles.trendTitle}>Daily Revenue — {rangeLabel}</Text>
           <Text style={styles.trendCaption}>{formatInr(summary.period_revenue_inr)} total</Text>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trendBarsRow}>
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.trendBarsRow}
+          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+        >
           {daily.map((d) => {
             const barHeight = Math.max(3, Math.round((d.revenue_inr / maxRevenue) * 64));
             return (
-              <View key={d.day} style={styles.trendBarCol}>
+              <View key={d.day} style={[styles.trendBarCol, isDense && styles.trendBarColDense]}>
                 <View style={styles.trendBarTrack}>
-                  <View style={[styles.trendBar, { height: barHeight }]} />
+                  <View style={[styles.trendBar, isDense && styles.trendBarDense, { height: barHeight }]} />
                 </View>
-                <Text style={styles.trendBarLabel}>{d.day.slice(8, 10)}</Text>
+                {!isDense && <Text style={styles.trendBarLabel}>{d.day.slice(8, 10)}</Text>}
               </View>
             );
           })}
         </ScrollView>
+        {daily.length > 0 && (
+          <Text style={styles.trendRangeCaption}>
+            {formatDayLabelShort(daily[0].day)} – {formatDayLabelShort(daily[daily.length - 1].day)} · scroll to see earlier days
+          </Text>
+        )}
       </View>
     </>
   );
+}
+
+function formatDayLabelShort(isoDay: string) {
+  const [, month, day] = isoDay.split('-');
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${day} ${monthNames[Number(month) - 1]}`;
 }
 
 function QuickAction({
@@ -382,9 +443,25 @@ const styles = StyleSheet.create({
   trendCaption: { fontSize: 12, fontWeight: '700', color: colors.primary },
   trendBarsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, paddingBottom: 4 },
   trendBarCol: { alignItems: 'center', width: 18 },
+  trendBarColDense: { width: 5, gap: 0 },
   trendBarTrack: { height: 64, justifyContent: 'flex-end' },
   trendBar: { width: 10, borderRadius: 4, backgroundColor: colors.primary },
+  trendBarDense: { width: 3, borderRadius: 2 },
   trendBarLabel: { fontSize: 8, color: colors.textMuted, marginTop: 4 },
+  trendRangeCaption: { fontSize: 10, color: colors.textMuted, marginTop: spacing.sm, textAlign: 'center' },
+
+  rangeChipRow: { flexDirection: 'row', gap: spacing.xs },
+  rangeChip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+  },
+  rangeChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  rangeChipText: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
+  rangeChipTextActive: { color: colors.white },
 
   wideStatCard: {
     backgroundColor: '#FFFFFF',
@@ -446,6 +523,7 @@ const styles = StyleSheet.create({
   activityDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border, marginTop: 5 },
   activityDotActive: { backgroundColor: colors.primary },
   activityAction: { fontSize: 13, fontWeight: '700', color: colors.text, textTransform: 'capitalize' },
+  activityActor: { fontSize: 11, color: colors.primary, fontWeight: '600', marginTop: 1 },
   activityReason: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   activityTime: { fontSize: 11, color: colors.textMuted },
 });

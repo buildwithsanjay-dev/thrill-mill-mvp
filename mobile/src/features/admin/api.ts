@@ -75,16 +75,6 @@ export async function getPendingActivationTeams(): Promise<AdminTeamRow[]> {
   return all.filter((row) => row.membership && row.membership.status !== 'ACTIVE');
 }
 
-export async function getRecentAuditLog(limit = 10) {
-  const { data, error } = await supabase
-    .from('admin_audit_logs')
-    .select('id, action, reason, created_at')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data ?? [];
-}
-
 export type AdminMemberSearchResult = { id: string; full_name: string | null; avatar_url: string | null; phone: string | null };
 
 // Unlike the member-side fn_lookup_user_by_phone (exact match only, one
@@ -263,4 +253,57 @@ export async function getAdminRevenueAnalytics(days = 30): Promise<RevenueAnalyt
   const { data, error } = await supabase.rpc('fn_admin_revenue_analytics', { p_days: days });
   if (error) throw error;
   return data as RevenueAnalytics;
+}
+
+// -- Audit log feed (actor + resolved target name, server-joined) --------------
+
+export type AuditLogFeedRow = {
+  id: string;
+  action: string;
+  reason: string | null;
+  created_at: string;
+  target_type: string | null;
+  target_id: string | null;
+  admin_id: string | null;
+  admin_name: string;
+  target_label: string | null;
+};
+
+export type AuditLogFilters = {
+  action?: string | null;
+  dateFrom?: string | null; // YYYY-MM-DD
+  dateTo?: string | null; // YYYY-MM-DD
+};
+
+export async function getAdminAuditLogFeed(limit = 20, filters: AuditLogFilters = {}): Promise<AuditLogFeedRow[]> {
+  const { data, error } = await supabase.rpc('fn_admin_audit_log_feed', {
+    p_limit: limit,
+    p_action: filters.action ?? null,
+    p_date_from: filters.dateFrom ?? null,
+    p_date_to: filters.dateTo ?? null,
+  });
+  if (error) throw error;
+  return (data as AuditLogFeedRow[]) ?? [];
+}
+
+// -- Team leaderboard (games played, server-ranked) -----------------------------
+
+export type TeamLeaderboardRow = {
+  team_id: string;
+  team_name: string;
+  games_played: number;
+  rank: number;
+};
+
+export type TeamLeaderboard = {
+  range: 'week' | 'month';
+  range_start: string;
+  range_end: string;
+  teams: TeamLeaderboardRow[];
+};
+
+export async function getAdminTeamLeaderboard(range: 'week' | 'month' = 'week'): Promise<TeamLeaderboard> {
+  const { data, error } = await supabase.rpc('fn_admin_team_leaderboard', { p_range: range });
+  if (error) throw error;
+  return data as TeamLeaderboard;
 }

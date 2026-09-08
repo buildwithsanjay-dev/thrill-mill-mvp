@@ -32,10 +32,10 @@ export default function AdminTabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="management"
+        name="leaderboard"
         options={{
-          title: 'Management',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid" size={size} color={color} />,
+          title: 'Leaderboard',
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
