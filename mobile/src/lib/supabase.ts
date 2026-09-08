@@ -32,10 +32,24 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // access token silently expires while backgrounded and the very next
 // request fails auth, which looks exactly like "the app signed me out on
 // its own" even though no sign-out ever happened.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') {
-    supabase.auth.startAutoRefresh();
-  } else {
-    supabase.auth.stopAutoRefresh();
-  }
-});
+//
+// This is a top-level side effect (module scope, not inside a component),
+// so it must guard against running more than once. Without the guard,
+// anything that causes this module to be re-evaluated while the JS engine
+// instance is kept alive (e.g. a Metro Fast Refresh full-module reload of a
+// non-component module) would register an additional listener on top of
+// the previous one, each one independently calling startAutoRefresh /
+// stopAutoRefresh on every foreground/background transition.
+const globalWithFlag = globalThis as typeof globalThis & {
+  __thrillmill_authAppStateListenerRegistered__?: boolean;
+};
+if (!globalWithFlag.__thrillmill_authAppStateListenerRegistered__) {
+  globalWithFlag.__thrillmill_authAppStateListenerRegistered__ = true;
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      supabase.auth.startAutoRefresh();
+    } else {
+      supabase.auth.stopAutoRefresh();
+    }
+  });
+}

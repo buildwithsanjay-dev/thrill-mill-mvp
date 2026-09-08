@@ -3,6 +3,10 @@ import type { Session } from '@supabase/supabase-js';
 
 import { queryClient } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
+import { useActiveTeamStore } from '@/stores/activeTeam';
+import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
+import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
+import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 
 // This context exists purely to gate navigation (logged in vs. not) and to
 // know *who* is calling. It is NOT a source of authorization truth — no
@@ -38,6 +42,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
       // are still in flight.
       if (newUserId !== lastUserId.current) {
         queryClient.clear();
+        // Zustand stores are client-only UI/draft state, but they can hold
+        // references (a selected Team id, a mid-flow wizard draft) that are
+        // only valid for the account that created them. Left in place across
+        // an account switch, activeTeamId can point at a Team the new
+        // session isn't even a member of, and a wizard draft can resume
+        // mid-flow with another user's picks. Reset every live store on the
+        // same trigger as the query cache clear above.
+        useActiveTeamStore.getState().reset();
+        useCreateTeamWizard.getState().reset();
+        useAdminTeamWizard.getState().reset();
+        useAdminBookingDraft.getState().reset();
         lastUserId.current = newUserId;
       }
       setSession(newSession);
