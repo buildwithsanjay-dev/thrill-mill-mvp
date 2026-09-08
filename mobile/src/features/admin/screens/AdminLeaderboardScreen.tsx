@@ -45,7 +45,14 @@ function isoDaysAgo(days: number): string {
 
 function toCsv(rows: AuditLogFeedRow[]): string {
   const header = ['Date', 'Admin', 'Action', 'Target', 'Reason'];
-  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  // Guard against CSV/formula injection: a value starting with =, +, -, @, or
+  // a tab/CR (Excel/Sheets formula triggers) gets a leading apostrophe so it
+  // opens as inert text, never as an executed formula. `reason` in
+  // particular is free-text admin input, so this isn't just theoretical.
+  const escape = (v: string) => {
+    const safe = /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
+    return `"${safe.replace(/"/g, '""')}"`;
+  };
   const lines = rows.map((r) =>
     [
       new Date(r.created_at).toLocaleString('en-IN'),
