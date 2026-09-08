@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -314,9 +314,27 @@ function QuickAction({
 // just the currently selected Team), so a member can see what's coming up
 // across every Network they're part of before picking one from the
 // dropdown below.
+// Card width + the strip's own gap (see styles.upcomingStrip/upcomingCard) —
+// used to scroll by roughly one card per arrow tap rather than an arbitrary
+// jump.
+const UPCOMING_CARD_STRIDE = 168 + spacing.sm;
+
 function OtherNetworksUpcoming() {
   const router = useRouter();
   const { data: bookings, isPending } = useUpcomingBookingsAcrossTeams();
+  const scrollRef = useRef<ScrollView>(null);
+  const [scrollX, setScrollX] = useState(0);
+  const [contentWidth, setContentWidth] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+
+  // Hide the arrow once there's nothing further right to reveal — both when
+  // everything already fits on screen and once the user has scrolled to the
+  // end.
+  const canScrollForward = contentWidth - viewportWidth - scrollX > 4;
+
+  const scrollForward = () => {
+    scrollRef.current?.scrollTo({ x: scrollX + UPCOMING_CARD_STRIDE, animated: true });
+  };
 
   return (
     <View>
@@ -335,16 +353,32 @@ function OtherNetworksUpcoming() {
           />
         </View>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.upcomingStripScroll}
-          contentContainerStyle={styles.upcomingStrip}
-        >
-          {bookings.map((b) => (
-            <UpcomingEventCard key={b.id} booking={b} onPress={() => router.push(`/(app)/booking/${b.id}`)} />
-          ))}
-        </ScrollView>
+        <View>
+          <ScrollView
+            ref={scrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.upcomingStripScroll}
+            contentContainerStyle={styles.upcomingStrip}
+            onLayout={(e) => setViewportWidth(e.nativeEvent.layout.width)}
+            onContentSizeChange={(w) => setContentWidth(w)}
+            onScroll={(e) => setScrollX(e.nativeEvent.contentOffset.x)}
+            scrollEventThrottle={32}
+          >
+            {bookings.map((b) => (
+              <UpcomingEventCard key={b.id} booking={b} onPress={() => router.push(`/(app)/booking/${b.id}`)} />
+            ))}
+          </ScrollView>
+
+          {/* Nudges people to scroll sideways — the strip has no other
+              visual hint that there's more content off-screen to the
+              right. */}
+          {canScrollForward && (
+            <Pressable style={styles.upcomingScrollHint} onPress={scrollForward} hitSlop={8}>
+              <Ionicons name="chevron-forward" size={18} color="#FFFFFF" />
+            </Pressable>
+          )}
+        </View>
       )}
     </View>
   );
@@ -495,6 +529,18 @@ const styles = StyleSheet.create({
   // height explicitly, matching the tallest card's content.
   upcomingStripScroll: { minHeight: 128 },
   upcomingStrip: { gap: spacing.sm, paddingRight: spacing.sm },
+  upcomingScrollHint: {
+    position: 'absolute',
+    top: '50%',
+    right: 2,
+    marginTop: -16,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(15, 23, 41, 0.65)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   upcomingCard: {
     width: 168,
     backgroundColor: '#0F1729',
