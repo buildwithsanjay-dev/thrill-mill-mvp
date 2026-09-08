@@ -8,7 +8,7 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useTeamBookings } from '@/features/booking/useBooking';
-import { useTeamDetails } from '@/features/team/useTeams';
+import { useTeamBookingCounts, useTeamDetails } from '@/features/team/useTeams';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
 
@@ -17,6 +17,7 @@ export function AdminTeamDetailsScreen() {
   const router = useRouter();
   const { data, isPending } = useTeamDetails(id);
   const { data: bookings } = useTeamBookings(id);
+  const { data: bookingCounts } = useTeamBookingCounts(id);
 
   if (isPending || !data) {
     return (
@@ -119,6 +120,12 @@ export function AdminTeamDetailsScreen() {
           </Text>
         </View>
 
+        <View style={styles.statsRow}>
+          <StatBox icon="people" value={activeMembers.length} label="MEMBERS" />
+          <StatBox icon="football" value={bookingCounts?.played ?? 0} label="GAMES PLAYED" />
+          <StatBox icon="calendar" value={bookingCounts?.upcoming ?? 0} label="UPCOMING" highlight />
+        </View>
+
         <View style={styles.card}>
           <Text style={styles.cardLabel}>NETWORK INFO</Text>
           <InfoRow label="Network ID" value={team.join_code} />
@@ -143,6 +150,28 @@ function InfoRow({ label, value }: { label: string; value: string }) {
     <View style={styles.infoRow}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
+}
+
+function StatBox({
+  icon,
+  value,
+  label,
+  highlight,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  value: number;
+  label: string;
+  highlight?: boolean;
+}) {
+  return (
+    <View style={styles.statBox}>
+      <View style={[styles.statIcon, highlight && styles.statIconHighlight]}>
+        <Ionicons name={icon} size={16} color={highlight ? colors.primary : colors.text} />
+      </View>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
@@ -207,6 +236,29 @@ const styles = StyleSheet.create({
   walletLabel: { fontSize: 11, fontWeight: '700', color: '#5EEAD4', letterSpacing: 0.4 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
   walletCaption: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
+
+  statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  statIconHighlight: { backgroundColor: '#ECFDF5' },
+  statValue: { fontSize: 16, fontWeight: '800', color: colors.text },
+  statLabel: { fontSize: 9, fontWeight: '700', color: colors.textMuted, marginTop: 2, letterSpacing: 0.3 },
 
   infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
   infoLabel: { fontSize: 12, color: colors.textMuted },

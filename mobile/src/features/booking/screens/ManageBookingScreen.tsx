@@ -8,9 +8,12 @@ import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { useProfile } from '@/features/profile/useProfile';
 import { useTeamMembers } from '@/features/team/useTeams';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { cancelBooking, modifyParticipants } from '../api';
+import { mapBookingError } from '../errors';
 import {
   useBooking,
   useBookingParticipants,
@@ -30,6 +33,8 @@ const STATUS_TONE = {
 export function ManageBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { session } = useAuth();
+  const { data: profile } = useProfile();
   const { data: booking, isPending } = useBooking(id);
   const { data: participants } = useBookingParticipants(id);
   const { data: teamMembers } = useTeamMembers(booking?.team_id);
@@ -80,13 +85,7 @@ export function ManageBookingScreen() {
       invalidate({ bookingId: booking.id });
       setIsEditing(false);
     } catch (error) {
-      const message =
-        error instanceof Error && error.message.includes('PARTICIPANTS_LOCKED')
-          ? 'This session has already started — participants can no longer be changed.'
-          : error instanceof Error
-            ? error.message
-            : 'Please try again.';
-      Alert.alert('Could not update participants', message);
+      Alert.alert('Could not update participants', mapBookingError(error));
     } finally {
       setIsSaving(false);
     }
@@ -126,9 +125,7 @@ export function ManageBookingScreen() {
               const message =
                 error instanceof Error && error.message === 'CANCEL_TIMEOUT'
                   ? 'This is taking longer than expected — check your connection and try again.'
-                  : error instanceof Error
-                    ? error.message
-                    : 'Please try again.';
+                  : mapBookingError(error);
               Alert.alert('Could not cancel', message);
             } finally {
               setIsCancelling(false);
@@ -141,6 +138,16 @@ export function ManageBookingScreen() {
 
   const canManage = booking.status === 'CONFIRMED';
 
+  // Cancel Booking / Update Participants are Host, Co-host, or Admin-only
+  // actions — a plain Team member must never see these affordances.
+  // fn_cancel_booking and fn_modify_participants independently re-check
+  // this server-side (fn_is_team_host_or_cohost(team_id) or fn_is_admin()),
+  // per CLAUDE.md's "hiding a UI element is not security" rule — this is
+  // purely about not offering a control that would just come back FORBIDDEN.
+  const myTeamRole = teamMembers?.find((m) => m.user_id === session?.user.id)?.team_role;
+  const isAdmin = profile?.platform_role === 'ADMIN';
+  const isTeamManager = myTeamRole === 'HOST' || myTeamRole === 'CO_HOST' || isAdmin;
+
   // fn_modify_participants separately refuses this server-side once the
   // slot's start time has passed (server-authoritative, per CLAUDE.md) —
   // this only hides the affordance client-side so it isn't offered for a
@@ -148,7 +155,7 @@ export function ManageBookingScreen() {
   // 24-hour rule and isn't affected by this. Device-time approximation
   // only — the backend check is what actually decides.
   const sessionStart = new Date(`${booking.booking_date}T${booking.start_time}`);
-  const canEditParticipants = canManage && screenOpenedAt < sessionStart.getTime();
+  const canEditParticipants = canManage && isTeamManager && screenOpenedAt < sessionStart.getTime();
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -241,7 +248,7 @@ export function ManageBookingScreen() {
               </Pressable>
             )
           )}
-          {!canEditParticipants && canManage && !isEditing && (
+          {!canEditParticipants && canManage && isTeamManager && !isEditing && (
             <Text style={styles.lockedNote}>Participants are locked once the session starts.</Text>
           )}
         </View>
@@ -272,7 +279,7 @@ export function ManageBookingScreen() {
         )}
       </ScrollView>
 
-      {canManage && !isEditing && (
+      {canManage && isTeamManager && !isEditing && (
         <View style={styles.footer}>
           <Pressable style={styles.cancelBookingButton} onPress={handleCancel} disabled={isCancelling}>
             {isCancelling ? (
