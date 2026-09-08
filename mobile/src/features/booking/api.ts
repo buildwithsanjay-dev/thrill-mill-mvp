@@ -1,6 +1,25 @@
 import { supabase } from '@/lib/supabase';
 import type { Booking, BookingParticipant, TurfResource, TurfSlot } from '@/types/db';
 
+// Local-time (not UTC) date/time-of-day formatting — display-only "is this
+// upcoming" previews must stay internally consistent with each other and
+// with how booking_date/start_time are populated (local wall-clock values).
+// Never used for cancellation/refund eligibility — that's always decided by
+// server time per CLAUDE.md.
+function localDateIso(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function localTimeHms(d: Date): string {
+  const h = String(d.getHours()).padStart(2, '0');
+  const m = String(d.getMinutes()).padStart(2, '0');
+  const s = String(d.getSeconds()).padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
 export async function getDefaultTurf(): Promise<TurfResource> {
   const { data, error } = await supabase
     .from('turf_resources')
@@ -98,10 +117,23 @@ export type UpcomingTeamBooking = {
 // the table), so "starts at or after now" is approximated the same way
 // team/api.ts's getMyTeams() does: filter server-side by date >= today, then
 // trim sessions that already ended earlier today off the client result.
+//
+// IMPORTANT: `booking_date`/`start_time` are the turf's local wall-clock
+// values, so "today" and "now" here must both come from the SAME local-time
+// reference. A previous version paired `Date#toISOString()` (UTC calendar
+// date) for `todayIso` with `Date#toTimeString()` (local time-of-day) for
+// `nowTime` — an internally inconsistent "today" that, depending on the
+// device's UTC offset, could push `todayIso` a day away from the device's
+// actual local date. Since that mismatched date is also sent straight to
+// `.gte('booking_date', ...)`, it could silently exclude every genuinely
+// upcoming row from the query result itself (not just the client-side
+// filter), which is exactly the "strip shows nothing" symptom even when
+// other Teams have real upcoming CONFIRMED bookings. Both values below are
+// derived from local date/time components only.
 export async function getUpcomingBookingsAcrossTeams(limit = 15): Promise<UpcomingTeamBooking[]> {
   const now = new Date();
-  const todayIso = now.toISOString().slice(0, 10);
-  const nowTime = now.toTimeString().slice(0, 8); // "HH:MM:SS"
+  const todayIso = localDateIso(now);
+  const nowTime = localTimeHms(now); // "HH:MM:SS"
 
   const { data, error } = await supabase
     .from('bookings')

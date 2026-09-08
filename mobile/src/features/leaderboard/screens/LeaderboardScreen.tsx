@@ -7,8 +7,9 @@ import { AppHeader } from '@/components/AppHeader';
 import { Avatar } from '@/components/Avatar';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
+import type { LeaderboardPeriod } from '../api';
 import { useLeaderboard } from '../useLeaderboard';
-import type { LeaderboardRow } from '@/types/db';
+import type { LiveLeaderboardRow } from '@/types/db';
 
 type Scope = 'TEAM' | 'MEMBER';
 
@@ -16,12 +17,13 @@ const PODIUM_COLORS = ['#D1D5DB', '#F59E0B', '#B45309'];
 
 export function LeaderboardScreen() {
   const [scope, setScope] = useState<Scope>('TEAM');
-  const { data: rows, isPending } = useLeaderboard(scope);
+  const [period, setPeriod] = useState<LeaderboardPeriod>('WEEK');
+  const { data: rows, isPending } = useLeaderboard(scope, period);
 
   const top3 = (rows ?? []).slice(0, 3);
   const rest = (rows ?? []).slice(3);
-  const weekLabel = rows?.[0]
-    ? `${formatShort(rows[0].week_start)} - ${formatShort(rows[0].week_end)}`
+  const periodLabel = rows?.[0]
+    ? `${formatShort(rows[0].period_start)} - ${formatShort(rows[0].period_end)}`
     : '';
 
   return (
@@ -36,10 +38,15 @@ export function LeaderboardScreen() {
         </View>
         <Text style={styles.tagline}>Compete. Play. Climb.</Text>
 
-        {!!weekLabel && (
+        <View style={styles.periodTabs}>
+          <PeriodTab label="THIS WEEK" active={period === 'WEEK'} onPress={() => setPeriod('WEEK')} />
+          <PeriodTab label="THIS MONTH" active={period === 'MONTH'} onPress={() => setPeriod('MONTH')} />
+        </View>
+
+        {!!periodLabel && (
           <View style={styles.weekChip}>
-            <Text style={styles.weekChipText}>THIS WEEK</Text>
-            <Text style={styles.weekChipDate}>· {weekLabel}</Text>
+            <Text style={styles.weekChipText}>{period === 'WEEK' ? 'THIS WEEK' : 'THIS MONTH'}</Text>
+            <Text style={styles.weekChipDate}>· {periodLabel}</Text>
           </View>
         )}
 
@@ -53,15 +60,21 @@ export function LeaderboardScreen() {
         ) : !rows || rows.length === 0 ? (
           <EmptyState
             icon="trophy-outline"
-            title="No leaderboard yet"
-            message="Rankings appear once this week's games are played."
+            title="No games played yet"
+            message={
+              period === 'WEEK'
+                ? 'Rankings appear as soon as a game is played this week.'
+                : 'Rankings appear as soon as a game is played this month.'
+            }
           />
         ) : (
           <>
             <Text style={styles.sectionTitle}>
               {scope === 'TEAM' ? 'Top Networks' : 'Top Members'}
             </Text>
-            <Text style={styles.sectionSubtitle}>Most active this week</Text>
+            <Text style={styles.sectionSubtitle}>
+              Most active {period === 'WEEK' ? 'this week' : 'this month'}
+            </Text>
 
             {top3.length > 0 && (
               <View style={styles.podiumRow}>
@@ -76,17 +89,17 @@ export function LeaderboardScreen() {
             )}
 
             {rest.map((row) => (
-              <View key={row.id} style={styles.listRow}>
-                <Text style={styles.listRank}>#{row.rank}</Text>
+              <View key={row.subject_id} style={styles.listRow}>
+                <Text style={styles.listRank}>#{row.rank_no}</Text>
                 {scope === 'MEMBER' ? (
-                  <Avatar uri={row.user?.avatar_url} name={row.user?.full_name} size={32} />
+                  <Avatar uri={row.avatar_url} name={row.display_name} size={32} />
                 ) : (
                   <View style={styles.listIcon}>
                     <Ionicons name="shield" size={16} color={colors.textMuted} />
                   </View>
                 )}
                 <Text style={styles.listName} numberOfLines={1}>
-                  {scope === 'TEAM' ? (row.team?.name ?? 'Network') : (row.user?.full_name ?? 'Member')}
+                  {row.display_name ?? (scope === 'TEAM' ? 'Network' : 'Member')}
                 </Text>
                 <Text style={styles.listValue}>{Math.round(row.metric_value)}</Text>
               </View>
@@ -106,14 +119,22 @@ function ScopeTab({ label, active, onPress }: { label: string; active: boolean; 
   );
 }
 
-function PodiumSlot({ row, rank, scope }: { row: LeaderboardRow; rank: number; scope: Scope }) {
+function PeriodTab({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable style={[styles.periodTab, active && styles.periodTabActive]} onPress={onPress}>
+      <Text style={[styles.periodTabLabel, active && styles.periodTabLabelActive]}>{label}</Text>
+    </Pressable>
+  );
+}
+
+function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: number; scope: Scope }) {
   const height = rank === 1 ? 88 : rank === 2 ? 64 : 52;
-  const name = scope === 'TEAM' ? (row.team?.name ?? 'Network') : (row.user?.full_name ?? 'Member');
+  const name = row.display_name ?? (scope === 'TEAM' ? 'Network' : 'Member');
 
   return (
     <View style={styles.podiumSlot}>
       {rank === 1 && <Ionicons name="trophy" size={16} color="#F59E0B" style={{ marginBottom: 4 }} />}
-      <Avatar uri={scope === 'MEMBER' ? row.user?.avatar_url : undefined} name={name} size={rank === 1 ? 52 : 44} />
+      <Avatar uri={scope === 'MEMBER' ? row.avatar_url : undefined} name={name} size={rank === 1 ? 52 : 44} />
       <Text style={styles.podiumName} numberOfLines={1}>
         {name}
       </Text>
@@ -138,6 +159,18 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: 22, fontWeight: '800', color: colors.text },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
 
+  periodTabs: {
+    flexDirection: 'row',
+    backgroundColor: '#EEF1F5',
+    borderRadius: radii.pill,
+    padding: 4,
+    marginTop: spacing.lg,
+  },
+  periodTab: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: radii.pill },
+  periodTabActive: { backgroundColor: '#0F1729' },
+  periodTabLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
+  periodTabLabelActive: { color: '#FFFFFF' },
+
   weekChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -151,7 +184,7 @@ const styles = StyleSheet.create({
   weekChipText: { fontSize: 11, fontWeight: '800', color: colors.primary },
   weekChipDate: { fontSize: 11, color: colors.textMuted, marginLeft: 4 },
 
-  scopeTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 4, marginTop: spacing.lg },
+  scopeTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 4, marginTop: spacing.md },
   scopeTab: { flex: 1, alignItems: 'center', paddingVertical: spacing.sm, borderRadius: radii.pill },
   scopeTabActive: { backgroundColor: colors.primary },
   scopeTabLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },

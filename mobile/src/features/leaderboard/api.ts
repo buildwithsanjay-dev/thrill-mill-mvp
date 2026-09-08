@@ -1,30 +1,33 @@
 import { supabase } from '@/lib/supabase';
-import type { LeaderboardRow } from '@/types/db';
+import type { CreditUsageLogRow, LiveLeaderboardRow } from '@/types/db';
 
-// Most recent computed week for the given scope — fn_compute_weekly_leaderboard
-// (an Admin/cron-driven RPC, not called from the client) is what populates
-// this table, so the client only ever reads it.
-export async function getLatestLeaderboard(scope: 'TEAM' | 'MEMBER'): Promise<LeaderboardRow[]> {
-  const { data: latest, error: latestError } = await supabase
-    .from('leaderboard_weekly')
-    .select('week_start')
-    .eq('scope', scope)
-    .order('week_start', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (latestError) throw latestError;
-  if (!latest) return [];
+export type LeaderboardPeriod = 'WEEK' | 'MONTH';
 
-  const { data, error } = await supabase
-    .from('leaderboard_weekly')
-    .select(
-      scope === 'TEAM'
-        ? '*, team:teams(name)'
-        : '*, user:profiles(full_name, avatar_url)'
-    )
-    .eq('scope', scope)
-    .eq('week_start', latest.week_start)
-    .order('rank', { ascending: true });
+// Live-computed standings for the current (possibly partial) Week or Month —
+// fn_leaderboard_live self-heals any booking whose session has actually
+// ended (server time) into COMPLETED + member_usage_attribution first, then
+// aggregates. This intentionally does NOT read the leaderboard_weekly
+// snapshot table: that table is only ever populated by the Admin/cron-driven
+// fn_compute_weekly_leaderboard RPC, so it stays empty absent an Admin
+// manually running it, which would make the current week's leaderboard look
+// perpetually empty even with real completed bookings.
+export async function getLiveLeaderboard(
+  scope: 'TEAM' | 'MEMBER',
+  period: LeaderboardPeriod
+): Promise<LiveLeaderboardRow[]> {
+  const { data, error } = await supabase.rpc('fn_leaderboard_live', {
+    p_scope: scope,
+    p_period: period,
+  });
   if (error) throw error;
-  return (data ?? []) as unknown as LeaderboardRow[];
+  return (data ?? []) as LiveLeaderboardRow[];
+}
+
+// The caller's own per-booking credit-usage attribution rows (analytics
+// only — never a Team-wallet split), Week or Month filtered, for the
+// Profile screen's Credit Usage log.
+export async function getMyCreditUsageLog(period: LeaderboardPeriod): Promise<CreditUsageLogRow[]> {
+  const { data, error } = await supabase.rpc('fn_my_credit_usage_log', { p_period: period });
+  if (error) throw error;
+  return (data ?? []) as CreditUsageLogRow[];
 }

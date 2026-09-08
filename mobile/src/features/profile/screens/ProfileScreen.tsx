@@ -10,9 +10,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, spacing } from '@/constants/theme';
+import { colors, radii, spacing } from '@/constants/theme';
 import { signOut } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
+import type { LeaderboardPeriod } from '@/features/leaderboard/api';
+import { useMyCreditUsageLog } from '@/features/leaderboard/useLeaderboard';
+import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
 
@@ -53,10 +56,19 @@ function ProfileForm({ profile }: { profile: Profile }) {
       Alert.alert('Permission needed', 'Allow photo access to update your profile picture.');
       return;
     }
+    // NOTE: `allowsEditing`/`aspect` would delegate to the OS's native image
+    // editor for a "crop" step, but that native screen's confirm action
+    // (labeled "Crop" on Android) is not reliable across Android versions —
+    // notably Android 13+'s system Photo Picker does not support in-picker
+    // editing at all, so the "Crop" screen either doesn't appear or its
+    // confirm button just returns the original, uncropped image (behaves
+    // like "Done", not "Crop"). expo-image-picker has no JS-level control
+    // over that native screen's label, so rather than show a step that
+    // falsely promises cropping, we skip it entirely: the picked image is
+    // used as-is, and framing to a square/circle is handled consistently by
+    // our own avatar preview (`contentFit: 'cover'` in a fixed-size circle).
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
       quality: 0.8,
     });
     if (!result.canceled && result.assets[0]) {
@@ -163,6 +175,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
         <View style={styles.divider} />
 
+        <CreditUsageSection />
+
+        <View style={styles.divider} />
+
         <Pressable style={styles.signOutRow} onPress={handleSignOut} disabled={isSigningOut}>
           {isSigningOut ? (
             <ActivityIndicator size="small" color={colors.danger} />
@@ -175,6 +191,65 @@ function ProfileForm({ profile }: { profile: Profile }) {
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// Per-member credit-usage log: `completed booking credits ÷ final
+// participant count` per booking the caller played in, Week/Month
+// filterable. Analytics only — this never represents a per-member wallet or
+// a Team-wallet split (the Team's wallet is the only real balance).
+function CreditUsageSection() {
+  const [period, setPeriod] = useState<LeaderboardPeriod>('WEEK');
+  const { data: rows, isPending } = useMyCreditUsageLog(period);
+
+  return (
+    <View style={styles.usageSection}>
+      <View style={styles.usageHeaderRow}>
+        <Text style={styles.usageTitle}>Credit Usage</Text>
+        <View style={styles.usagePeriodTabs}>
+          <Pressable
+            style={[styles.usagePeriodTab, period === 'WEEK' && styles.usagePeriodTabActive]}
+            onPress={() => setPeriod('WEEK')}
+          >
+            <Text style={[styles.usagePeriodLabel, period === 'WEEK' && styles.usagePeriodLabelActive]}>
+              Week
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.usagePeriodTab, period === 'MONTH' && styles.usagePeriodTabActive]}
+            onPress={() => setPeriod('MONTH')}
+          >
+            <Text style={[styles.usagePeriodLabel, period === 'MONTH' && styles.usagePeriodLabelActive]}>
+              Month
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {isPending ? (
+        <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.md }} />
+      ) : !rows || rows.length === 0 ? (
+        <Text style={styles.usageEmpty}>
+          {period === 'WEEK' ? 'No games played this week yet.' : 'No games played this month yet.'}
+        </Text>
+      ) : (
+        rows.map((row) => (
+          <View key={row.booking_id} style={styles.usageRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.usageTeam} numberOfLines={1}>
+                {row.team_name ?? 'Network'}
+              </Text>
+              <Text style={styles.usageMeta}>
+                {formatBookingDate(row.booking_date)} • {formatSlotTime(row.start_time)}
+                {' – '}
+                {formatSlotTime(row.end_time)} • {row.participant_count_at_completion} players
+              </Text>
+            </View>
+            <Text style={styles.usageCredits}>{Math.round(row.credits_attributed)}</Text>
+          </View>
+        ))
+      )}
+    </View>
   );
 }
 
@@ -225,4 +300,27 @@ const styles = StyleSheet.create({
   divider: { width: '100%', height: 1, backgroundColor: colors.border, marginTop: spacing.xl, marginBottom: spacing.lg },
   signOutRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, alignSelf: 'flex-start' },
   signOutText: { fontSize: 15, fontWeight: '700', color: colors.danger },
+
+  usageSection: { width: '100%' },
+  usageHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  usageTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
+  usagePeriodTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 3 },
+  usagePeriodTab: { paddingVertical: 6, paddingHorizontal: spacing.md, borderRadius: radii.pill },
+  usagePeriodTabActive: { backgroundColor: colors.primary },
+  usagePeriodLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
+  usagePeriodLabelActive: { color: '#FFFFFF' },
+  usageEmpty: { fontSize: 13, color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' },
+  usageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  usageTeam: { fontSize: 13, fontWeight: '700', color: colors.text },
+  usageMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  usageCredits: { fontSize: 14, fontWeight: '800', color: colors.primary, marginLeft: spacing.sm },
 });

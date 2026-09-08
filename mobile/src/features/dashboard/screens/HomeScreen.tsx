@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,10 +27,10 @@ function greeting(): string {
 }
 
 export function HomeScreen() {
-  const router = useRouter();
   const { data: profile } = useProfile();
   const { data: teams, isPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
+  const [switcherVisible, setSwitcherVisible] = useState(false);
 
   const activeTeam = useMemo(
     () => teams?.find((t) => t.team.id === activeTeamId) ?? teams?.[0],
@@ -67,11 +67,72 @@ export function HomeScreen() {
           <DashboardContent
             summary={activeTeam}
             hasMultipleTeams={(teams?.length ?? 0) > 1}
-            onSwitchTeam={() => router.push('/(app)/(tabs)/team')}
+            onSwitchTeam={() => setSwitcherVisible(true)}
           />
         )}
       </ScrollView>
+
+      <TeamSwitcherModal
+        visible={switcherVisible}
+        teams={teams ?? []}
+        activeTeamId={activeTeam?.team.id}
+        onSelect={(teamId) => {
+          setActiveTeamId(teamId);
+          setSwitcherVisible(false);
+        }}
+        onClose={() => setSwitcherVisible(false)}
+      />
     </SafeAreaView>
+  );
+}
+
+// In-place picker for the Home dashboard's team switcher — replaces the old
+// behaviour of navigating to the full Teams list just to change context.
+// Selecting a team only updates `activeTeamId` (client-only UI state) and
+// stays on Home; every screen re-derives that Team's own server data once
+// selected, so this never touches permission/financial state directly.
+function TeamSwitcherModal({
+  visible,
+  teams,
+  activeTeamId,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  teams: MyTeamSummary[];
+  activeTeamId: string | undefined;
+  onSelect: (teamId: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <Pressable style={styles.modalBackdrop} onPress={onClose}>
+        <Pressable style={styles.modalSheet} onPress={() => {}}>
+          <View style={styles.modalHandle} />
+          <Text style={styles.modalTitle}>Switch Network</Text>
+          <ScrollView style={styles.modalList} bounces={false}>
+            {teams.map(({ team }) => {
+              const isActive = team.id === activeTeamId;
+              return (
+                <Pressable
+                  key={team.id}
+                  style={styles.modalRow}
+                  onPress={() => onSelect(team.id)}
+                >
+                  <View style={styles.modalRowIcon}>
+                    <Ionicons name="albums" size={16} color={colors.text} />
+                  </View>
+                  <Text style={styles.modalRowLabel} numberOfLines={1}>
+                    {team.name}
+                  </Text>
+                  {isActive && <Ionicons name="checkmark-circle" size={20} color={colors.primary} />}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -405,4 +466,42 @@ const styles = StyleSheet.create({
   activityReason: { fontSize: 13, fontWeight: '600', color: colors.text, textTransform: 'capitalize' },
   activityDate: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   activityAmount: { fontSize: 14, fontWeight: '800' },
+
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 41, 0.5)', justifyContent: 'flex-end' },
+  modalSheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: radii.lg,
+    borderTopRightRadius: radii.lg,
+    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xl,
+    maxHeight: '70%',
+  },
+  modalHandle: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    marginBottom: spacing.md,
+  },
+  modalTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
+  modalList: { flexGrow: 0 },
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalRowIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalRowLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
 });
