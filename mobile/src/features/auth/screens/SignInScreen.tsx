@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
-import { colors, spacing } from '@/constants/theme';
+import { FadeSlideIn } from '@/components/FadeSlideIn';
+import { colors, radii, spacing } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { signInWithGoogle, signInWithUsername } from '../api';
 
@@ -71,6 +73,15 @@ export function SignInScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Decorative wash behind the logo — purely cosmetic, sits under
+          everything, doesn't affect layout/hitboxes below it. */}
+      <View pointerEvents="none" style={styles.glowWrap}>
+        <LinearGradient
+          colors={['rgba(12,92,84,0.14)', 'rgba(12,92,84,0)']}
+          style={styles.glow}
+        />
+      </View>
+
       <Pressable onPress={() => router.back()} style={styles.backButton} hitSlop={12}>
         <Ionicons name="arrow-back" size={22} color={colors.text} />
       </Pressable>
@@ -94,52 +105,54 @@ export function SignInScreen() {
         >
           <View style={styles.content}>
             <LogoBadge size={92} />
-            <Text style={styles.title}>Welcome to{'\n'}Thrill Mill Club</Text>
-            <Text style={styles.subtitle}>
-              Sign in to manage your teams,{'\n'}games and Turf bookings.
-            </Text>
+            <FadeSlideIn delay={60} style={{ width: '100%', alignItems: 'center' }}>
+              <Text style={styles.title}>Welcome to{'\n'}Thrill Mill Club</Text>
+              <Text style={styles.subtitle}>
+                Sign in to manage your teams,{'\n'}games and Turf bookings.
+              </Text>
 
-            <View style={styles.buttonGroup}>
-              <Button
-                title="Continue with Google"
-                iconLeft="logo-google"
-                onPress={handleGoogleSignIn}
-                loading={isSigningIn}
-              />
+              <View style={styles.buttonGroup}>
+                <Button
+                  title="Continue with Google"
+                  iconLeft="logo-google"
+                  onPress={handleGoogleSignIn}
+                  loading={isSigningIn}
+                />
 
-              {showAdminForm ? (
-                <View style={styles.adminForm}>
-                  <TextField
-                    label="Username"
-                    placeholder="admin"
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    value={username}
-                    onChangeText={setUsername}
-                  />
-                  <View style={{ height: spacing.sm }} />
-                  <TextField
-                    label="Password"
-                    placeholder="••••••••"
-                    secureTextEntry
-                    autoCapitalize="none"
-                    value={password}
-                    onChangeText={setPassword}
-                  />
-                  <View style={{ height: spacing.md }} />
-                  <Button
-                    title="Sign in"
-                    variant="outline"
-                    onPress={handleUsernameSignIn}
-                    loading={isSigningIn}
-                  />
-                </View>
-              ) : (
-                <Pressable onPress={() => setShowAdminForm(true)} hitSlop={12} style={styles.adminLink}>
-                  <Text style={styles.adminLinkText}>Sign in with username &amp; password</Text>
-                </Pressable>
-              )}
-            </View>
+                {showAdminForm ? (
+                  <View style={styles.adminForm}>
+                    <TextField
+                      label="Username"
+                      placeholder="admin"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      value={username}
+                      onChangeText={setUsername}
+                    />
+                    <View style={{ height: spacing.sm }} />
+                    <TextField
+                      label="Password"
+                      placeholder="••••••••"
+                      secureTextEntry
+                      autoCapitalize="none"
+                      value={password}
+                      onChangeText={setPassword}
+                    />
+                    <View style={{ height: spacing.md }} />
+                    <Button
+                      title="Sign in"
+                      variant="outline"
+                      onPress={handleUsernameSignIn}
+                      loading={isSigningIn}
+                    />
+                  </View>
+                ) : (
+                  <Pressable onPress={() => setShowAdminForm(true)} hitSlop={12} style={styles.adminLink}>
+                    <Text style={styles.adminLinkText}>Sign in with username &amp; password</Text>
+                  </Pressable>
+                )}
+              </View>
+            </FadeSlideIn>
           </View>
 
           <View style={styles.footer}>
@@ -205,7 +218,25 @@ const styles = StyleSheet.create({
   },
   adminForm: {
     width: '100%',
-    marginTop: spacing.xs,
+    marginTop: spacing.sm,
+    backgroundColor: '#FAFBFC',
+    borderRadius: radii.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  glowWrap: {
+    position: 'absolute',
+    top: -80,
+    left: 0,
+    right: 0,
+    height: 320,
+    alignItems: 'center',
+  },
+  glow: {
+    width: 420,
+    height: 420,
+    borderRadius: 210,
   },
   footer: {
     alignItems: 'center',
