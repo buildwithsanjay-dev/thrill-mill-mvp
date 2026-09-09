@@ -33,7 +33,7 @@ export type MyTeamSummary = {
   pendingRequestCount: number;
 };
 
-// "My Teams" (network page): every team I'm an ACTIVE member of, with the
+// "My Teams" (team page): every team I'm an ACTIVE member of, with the
 // per-card summary data the list needs. Several round trips per team, but
 // the expected fan-out (a member is rarely on more than a handful of
 // Teams) makes this simpler and more obviously correct than one giant
@@ -270,7 +270,7 @@ export type TeamBookingCounts = { upcoming: number; played: number };
 // time passes (fn_complete_booking is a separate explicit action), so
 // counting "Upcoming" purely off status would keep a played game counted
 // as upcoming forever. One RPC, called by both the member Team Details
-// screen and the Admin Network Details screen, so their numbers can never
+// screen and the Admin Team Details screen, so their numbers can never
 // disagree.
 export async function getTeamBookingCounts(teamId: string): Promise<TeamBookingCounts> {
   const { data, error } = await supabase.rpc('fn_get_team_booking_counts', { p_team_id: teamId });

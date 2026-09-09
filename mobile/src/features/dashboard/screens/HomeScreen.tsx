@@ -109,7 +109,7 @@ function TeamSwitcherModal({
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalSheet} onPress={() => {}}>
           <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>Switch Network</Text>
+          <Text style={styles.modalTitle}>Switch Team</Text>
           <ScrollView style={styles.modalList} bounces={false}>
             {teams.map((summary) => {
               const { team } = summary;
@@ -153,12 +153,12 @@ function NewMemberContent() {
         <Text style={styles.newMemberSubtitle}>Join the club, find your squad, and dominate the turf.</Text>
         <View style={{ height: spacing.lg }} />
         <Button
-          title="Create a Network"
+          title="Create a Team"
           iconRight="arrow-forward"
           onPress={() => router.push('/(app)/team/create')}
         />
         <View style={{ height: spacing.sm }} />
-        <Button title="Join a Network" variant="outline" onPress={() => router.push('/(app)/team/join')} />
+        <Button title="Join a Team" variant="outline" onPress={() => router.push('/(app)/team/join')} />
       </View>
     </View>
   );
@@ -180,7 +180,7 @@ function DashboardContent({
 
   return (
     <View>
-      <OtherNetworksUpcoming excludeTeamId={team.id} />
+      <OtherTeamsUpcoming excludeTeamId={team.id} />
 
       <View style={{ height: spacing.lg }} />
 
@@ -209,7 +209,7 @@ function DashboardContent({
 
       <View style={styles.creditsCard}>
         <View style={styles.creditsCardTop}>
-          <Text style={styles.creditsLabel}>NETWORK CREDITS</Text>
+          <Text style={styles.creditsLabel}>TEAM CREDITS</Text>
           <Badge label={team.name} tone="neutral" />
         </View>
         <Text style={styles.creditsValue}>{Math.round(wallet?.available_credits ?? 0).toLocaleString()}</Text>
@@ -309,7 +309,7 @@ function QuickAction({
   );
 }
 
-// Dashboard "Other Networks' Upcoming Events" strip — a horizontally
+// Dashboard "Other Teams' Upcoming Events" strip — a horizontally
 // scrollable row of every OTHER ACTIVE Team's upcoming CONFIRMED bookings —
 // excludes whichever Team is currently selected above, since that Team's
 // own next game is already shown in the "Upcoming" card below. Without this
@@ -320,7 +320,7 @@ function QuickAction({
 // jump.
 const UPCOMING_CARD_STRIDE = 168 + spacing.sm;
 
-function OtherNetworksUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
+function OtherTeamsUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
   const router = useRouter();
   const { data: allBookings, isPending } = useUpcomingBookingsAcrossTeams();
   const bookings = useMemo(
@@ -344,7 +344,7 @@ function OtherNetworksUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
   return (
     <View>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Other Networks&apos; Upcoming Events</Text>
+        <Text style={styles.sectionTitle}>Other Teams&apos; Upcoming Events</Text>
       </View>
 
       {isPending ? (
@@ -354,7 +354,7 @@ function OtherNetworksUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
           <EmptyState
             icon="calendar-outline"
             title="No upcoming events"
-            message="Nothing booked across your Networks yet."
+            message="Nothing booked across your Teams yet."
           />
         </View>
       ) : (
@@ -395,7 +395,7 @@ function UpcomingEventCard({ booking, onPress }: { booking: UpcomingTeamBooking;
       <View style={styles.upcomingCardTeamRow}>
         <Ionicons name="shield" size={12} color="#A7F3D0" />
         <Text style={styles.upcomingCardTeam} numberOfLines={1}>
-          {booking.team?.name ?? 'Network'}
+          {booking.team?.name ?? 'Team'}
         </Text>
       </View>
       <Text style={styles.upcomingCardTurf} numberOfLines={1}>

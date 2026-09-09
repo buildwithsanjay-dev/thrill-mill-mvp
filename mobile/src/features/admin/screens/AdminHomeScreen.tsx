@@ -65,8 +65,8 @@ export function AdminHomeScreen() {
                 icon="git-network"
                 iconBg="#ECFDF5"
                 label="ACTIVE"
-                value={stats?.activeNetworks ?? 0}
-                caption="Networks"
+                value={stats?.activeTeams ?? 0}
+                caption="Teams"
               />
               <StatCard
                 icon="person-add"
@@ -126,7 +126,7 @@ export function AdminHomeScreen() {
             >
               <Badge label="MEMBERSHIP REQUEST PENDING" tone="pending" />
               <Text style={styles.actionCardTitle}>{firstPending.team.name}</Text>
-              <Text style={styles.actionCardMeta}>Network ID: {firstPending.team.join_code}</Text>
+              <Text style={styles.actionCardMeta}>Team ID: {firstPending.team.join_code}</Text>
               <View style={styles.actionCardRow}>
                 <View>
                   <Text style={styles.actionCardLabel}>PLAN</Text>
@@ -140,7 +140,7 @@ export function AdminHomeScreen() {
                 </View>
               </View>
               <View style={{ marginTop: spacing.md }}>
-                <Button title="Review Network" iconRight="arrow-forward" onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)} />
+                <Button title="Review Team" iconRight="arrow-forward" onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)} />
               </View>
             </Pressable>
           </>
@@ -158,7 +158,7 @@ export function AdminHomeScreen() {
           upcomingBookings.map((b) => (
             <View key={b.id} style={styles.bookingCard}>
               <Badge label="CONFIRMED" tone="active" />
-              <Text style={styles.bookingTitle}>{b.team?.name ?? 'Network'}</Text>
+              <Text style={styles.bookingTitle}>{b.team?.name ?? 'Team'}</Text>
               <View style={styles.bookingMetaRow}>
                 <Ionicons name="football-outline" size={13} color={colors.textMuted} />
                 <Text style={styles.bookingMeta}>{b.turf?.name ?? 'Turf'}</Text>
@@ -175,7 +175,7 @@ export function AdminHomeScreen() {
 
         <Text style={styles.sectionTitle2}>Quick Actions</Text>
         <View style={styles.quickGrid}>
-          <QuickAction icon="git-network" label="Network Management" onPress={() => router.push('/(admin)/(tabs)/teams')} />
+          <QuickAction icon="git-network" label="Team Management" onPress={() => router.push('/(admin)/(tabs)/teams')} />
           <QuickAction
             icon="person-add"
             label="Membership Requests"

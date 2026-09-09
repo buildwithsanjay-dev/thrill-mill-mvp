@@ -73,6 +73,15 @@ function ProfileForm({ profile }: { profile: Profile }) {
       Alert.alert('Name required', 'Please enter your full name to continue.');
       return;
     }
+    // Mobile number is mandatory too (and can't be skipped) — the Host/
+    // Co-host contact numbers collected later during a Team's membership
+    // request assume every member already has one on file, and Admin
+    // verification of external payments relies on being able to reach
+    // whoever's involved.
+    if (!phone.trim()) {
+      Alert.alert('Mobile number required', 'Please enter your mobile number to continue.');
+      return;
+    }
     setIsSaving(true);
     try {
       let avatarUrl = profile.avatar_url ?? undefined;
@@ -81,22 +90,11 @@ function ProfileForm({ profile }: { profile: Profile }) {
       }
       await finishOnboarding({
         full_name: fullName.trim(),
-        phone: phone.trim() ? `+91${phone.trim()}` : undefined,
+        phone: `+91${phone.trim()}`,
         avatar_url: avatarUrl,
       });
     } catch (error) {
       Alert.alert('Could not save profile', error instanceof Error ? error.message : 'Please try again.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSkip = async () => {
-    setIsSaving(true);
-    try {
-      await finishOnboarding({});
-    } catch (error) {
-      Alert.alert('Something went wrong', error instanceof Error ? error.message : 'Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -107,9 +105,6 @@ function ProfileForm({ profile }: { profile: Profile }) {
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
-        </Pressable>
-        <Pressable onPress={handleSkip} hitSlop={12} disabled={isSaving}>
-          <Text style={styles.skip}>Skip</Text>
         </Pressable>
       </View>
 
@@ -168,11 +163,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: spacing.sm,
-  },
-  skip: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: colors.text,
   },
   title: {
     marginTop: spacing.lg,

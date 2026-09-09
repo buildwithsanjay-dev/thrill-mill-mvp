@@ -16,7 +16,7 @@ export function AppHeader({ children }: PropsWithChildren) {
 
   return (
     <View style={styles.row}>
-      <Pressable onPress={() => router.push('/(app)/profile')} hitSlop={8}>
+      <Pressable onPress={() => router.push('/(app)/(tabs)/profile')} hitSlop={8}>
         <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={40} />
       </Pressable>
       <View style={styles.content}>{children}</View>

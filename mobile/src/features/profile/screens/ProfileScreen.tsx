@@ -244,7 +244,7 @@ function CreditUsageSection() {
           <View key={row.booking_id} style={styles.usageRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.usageTeam} numberOfLines={1}>
-                {row.team_name ?? 'Network'}
+                {row.team_name ?? 'Team'}
               </Text>
               <Text style={styles.usageMeta}>
                 {formatBookingDate(row.booking_date)} • {formatSlotTime(row.start_time)}

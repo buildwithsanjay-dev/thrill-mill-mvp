@@ -61,7 +61,7 @@ export function WalletActivityScreen() {
         <View style={styles.balanceCard}>
           <View style={styles.balanceLabelRow}>
             <Ionicons name="card" size={14} color={darkColors.primaryLight} />
-            <Text style={styles.balanceLabel}>CURRENT NETWORK BALANCE</Text>
+            <Text style={styles.balanceLabel}>CURRENT TEAM BALANCE</Text>
           </View>
           {walletPending ? (
             <ActivityIndicator color={darkColors.primaryLight} style={{ marginTop: spacing.sm }} />
@@ -73,9 +73,9 @@ export function WalletActivityScreen() {
           )}
           <View style={styles.balanceNoteRow}>
             <Ionicons name="people" size={13} color={darkColors.textMuted} />
-            <Text style={styles.balanceNote}>Shared Network Wallet</Text>
+            <Text style={styles.balanceNote}>Shared Team Wallet</Text>
           </View>
-          <Text style={styles.balanceHint}>All Network credit activity is recorded here.</Text>
+          <Text style={styles.balanceHint}>All Team credit activity is recorded here.</Text>
         </View>
 
         <View style={styles.tabRow}>

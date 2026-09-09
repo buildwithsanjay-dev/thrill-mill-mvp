@@ -29,7 +29,15 @@ export function usePendingActivationTeams() {
 // Logs" view (larger limit + filters).
 export function useAdminAuditLogFeed(limit = 20, filters: AuditLogFilters = {}) {
   return useQuery({
-    queryKey: ['admin', 'audit-log-feed', limit, filters.action ?? null, filters.dateFrom ?? null, filters.dateTo ?? null],
+    queryKey: [
+      'admin',
+      'audit-log-feed',
+      limit,
+      filters.action ?? null,
+      filters.dateFrom ?? null,
+      filters.dateTo ?? null,
+      filters.teamId ?? null,
+    ],
     queryFn: () => getAdminAuditLogFeed(limit, filters),
   });
 }

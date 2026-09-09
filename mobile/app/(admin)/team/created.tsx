@@ -1,5 +1,5 @@
-import { NetworkCreatedScreen } from '@/features/admin/screens/create/NetworkCreatedScreen';
+import { TeamCreatedScreen } from '@/features/admin/screens/create/TeamCreatedScreen';
 
-export default function AdminNetworkCreated() {
-  return <NetworkCreatedScreen />;
+export default function AdminTeamCreated() {
+  return <TeamCreatedScreen />;
 }

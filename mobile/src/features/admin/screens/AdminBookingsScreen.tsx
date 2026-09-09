@@ -38,7 +38,7 @@ export function AdminBookingsScreen() {
   const handleCancel = (booking: AdminBookingRow) => {
     Alert.alert(
       'Cancel this booking?',
-      `${booking.team?.name ?? 'This Network'}'s booking on ${formatBookingDate(booking.booking_date)} at ${formatSlotTime(
+      `${booking.team?.name ?? 'This Team'}'s booking on ${formatBookingDate(booking.booking_date)} at ${formatSlotTime(
         booking.start_time
       )} will be cancelled. Full refund if cancelled 24 hours or more before the slot; no refund inside 24 hours — decided by server time, not this device.`,
       [
@@ -59,7 +59,7 @@ export function AdminBookingsScreen() {
               Alert.alert(
                 'Booking cancelled',
                 outcome === 'CANCELLED_REFUNDED'
-                  ? 'Full credits were refunded to the Network wallet.'
+                  ? 'Full credits were refunded to the Team wallet.'
                   : 'No refund — cancelled within 24 hours of the slot.'
               );
             } catch (error) {
@@ -121,7 +121,7 @@ export function AdminBookingsScreen() {
           <Ionicons name="search" size={16} color={colors.textMuted} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search Network or Booking ID"
+            placeholder="Search Team or Booking ID"
             placeholderTextColor={colors.textMuted}
             value={query}
             onChangeText={setQuery}
@@ -154,7 +154,7 @@ export function AdminBookingsScreen() {
                 <Badge label="FOOTBALL TURF" tone="neutral" />
                 <Badge label={b.status} tone={STATUS_TONE[b.status] ?? 'neutral'} />
               </View>
-              <Text style={[styles.cardTeam, b.status === 'CANCELLED' && styles.strike]}>{b.team?.name ?? 'Network'}</Text>
+              <Text style={[styles.cardTeam, b.status === 'CANCELLED' && styles.strike]}>{b.team?.name ?? 'Team'}</Text>
               <Text style={styles.cardRef}>{b.id.slice(0, 8).toUpperCase()}</Text>
               <View style={styles.cardDivider} />
               <Text style={styles.cardMeta}>

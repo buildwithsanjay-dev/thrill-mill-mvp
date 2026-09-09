@@ -9,14 +9,14 @@ import type { Team, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
 // every sensitive action still gets its ledger/audit-log entry.
 
 export type DashboardStats = {
-  activeNetworks: number;
+  activeTeams: number;
   pendingRequests: number;
   todaysBookings: number;
 };
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const today = new Date().toISOString().slice(0, 10);
-  const [{ count: activeNetworks }, { count: pendingRequests }, { count: todaysBookings }] = await Promise.all([
+  const [{ count: activeTeams }, { count: pendingRequests }, { count: todaysBookings }] = await Promise.all([
     supabase.from('teams').select('id', { count: 'exact', head: true }).eq('status', 'ACTIVE'),
     supabase
       .from('team_memberships')
@@ -29,7 +29,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       .in('status', ['CONFIRMED', 'IN_PROGRESS']),
   ]);
   return {
-    activeNetworks: activeNetworks ?? 0,
+    activeTeams: activeTeams ?? 0,
     pendingRequests: pendingRequests ?? 0,
     todaysBookings: todaysBookings ?? 0,
   };
@@ -92,7 +92,7 @@ export async function adminSearchMembers(query: string): Promise<AdminMemberSear
   return (data ?? []) as AdminMemberSearchResult[];
 }
 
-// -- Admin-assisted Create Network wizard ---------------------------------
+// -- Admin-assisted Create Team wizard ---------------------------------
 
 export async function adminCreateTeam(name: string): Promise<string> {
   const { data, error } = await supabase.rpc('fn_admin_create_team', { p_name: name });
@@ -273,6 +273,7 @@ export type AuditLogFilters = {
   action?: string | null;
   dateFrom?: string | null; // YYYY-MM-DD
   dateTo?: string | null; // YYYY-MM-DD
+  teamId?: string | null;
 };
 
 export async function getAdminAuditLogFeed(limit = 20, filters: AuditLogFilters = {}): Promise<AuditLogFeedRow[]> {
@@ -281,6 +282,7 @@ export async function getAdminAuditLogFeed(limit = 20, filters: AuditLogFilters 
     p_action: filters.action ?? null,
     p_date_from: filters.dateFrom ?? null,
     p_date_to: filters.dateTo ?? null,
+    p_team_id: filters.teamId ?? null,
   });
   if (error) throw error;
   return (data as AuditLogFeedRow[]) ?? [];

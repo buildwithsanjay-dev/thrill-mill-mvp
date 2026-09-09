@@ -70,11 +70,11 @@ export function SelectTeamScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.sectionTitle}>Find Network</Text>
-        <Text style={styles.sectionSubtitle}>Enter the Network ID shared by the member or search for a Network.</Text>
+        <Text style={styles.sectionTitle}>Find Team</Text>
+        <Text style={styles.sectionSubtitle}>Enter the Team ID shared by the member or search for a Team.</Text>
 
         <TextField
-          placeholder="TM-XXXXXX or Network ID"
+          placeholder="TM-XXXXXX or Team ID"
           autoCapitalize="characters"
           value={query}
           onChangeText={handleSearch}
@@ -110,7 +110,7 @@ export function SelectTeamScreen() {
         ))}
 
         {query.trim() && !isSearching && results.length === 0 && (
-          <Text style={styles.emptyText}>No active Network matches that search.</Text>
+          <Text style={styles.emptyText}>No active Team matches that search.</Text>
         )}
 
         <View style={styles.infoCard}>
@@ -118,8 +118,8 @@ export function SelectTeamScreen() {
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
             <Text style={styles.infoTitle}>ADMIN-ASSISTED BOOKING</Text>
             <Text style={styles.infoBody}>
-              The Admin can create a booking on behalf of an active Network. Booking price and credit
-              deduction will be calculated automatically based on Network membership rules.
+              The Admin can create a booking on behalf of an active Team. Booking price and credit
+              deduction will be calculated automatically based on Team membership rules.
             </Text>
           </View>
         </View>

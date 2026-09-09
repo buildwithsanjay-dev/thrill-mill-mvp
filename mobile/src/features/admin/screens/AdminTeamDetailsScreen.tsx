@@ -9,8 +9,19 @@ import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { useTeamBookingCounts, useTeamDetails } from '@/features/team/useTeams';
+import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
+import { useAdminAuditLogFeed } from '../useAdmin';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
+const BOOKING_STATUS_TONE = {
+  CONFIRMED: 'active',
+  COMPLETED: 'active',
+  CANCELLED: 'danger',
+  EXPIRED: 'danger',
+  FAILED: 'danger',
+  HOLDING: 'pending',
+  IN_PROGRESS: 'pending',
+} as const;
 
 export function AdminTeamDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,6 +29,11 @@ export function AdminTeamDetailsScreen() {
   const { data, isPending } = useTeamDetails(id);
   const { data: bookings } = useTeamBookings(id);
   const { data: bookingCounts } = useTeamBookingCounts(id);
+  // This Team's own slice of the Admin audit trail (membership approvals,
+  // credit adjustments, role changes, booking overrides made for it) —
+  // fn_admin_audit_log_feed's p_team_id filter resolves this across every
+  // target_type that's actually Team-scoped (see the migration for detail).
+  const { data: teamLogs } = useAdminAuditLogFeed(20, { teamId: id });
 
   if (isPending || !data) {
     return (
@@ -30,6 +46,13 @@ export function AdminTeamDetailsScreen() {
   const { team, members, wallet, membership } = data;
   const activeMembers = members.filter((m) => m.status === 'ACTIVE');
   const isPendingActivation = membership && membership.status !== 'ACTIVE';
+  const upcomingBooking = bookings?.find(
+    (b) => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS'
+  );
+
+  const goToUpcoming = () => {
+    if (upcomingBooking) router.push(`/(app)/booking/${upcomingBooking.id}`);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -37,7 +60,7 @@ export function AdminTeamDetailsScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Network Details</Text>
+        <Text style={styles.headerTitle}>Team Details</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -113,33 +136,90 @@ export function AdminTeamDetailsScreen() {
         </View>
 
         <View style={styles.walletCard}>
-          <Text style={styles.walletLabel}>NETWORK WALLET</Text>
+          <Text style={styles.walletLabel}>TEAM WALLET</Text>
           <Text style={styles.walletValue}>₹{Math.round(wallet?.available_credits ?? 0).toLocaleString()} Credits</Text>
           <Text style={styles.walletCaption}>
-            {isPendingActivation ? 'Membership not activated' : 'Shared network wallet'}
+            {isPendingActivation ? 'Membership not activated' : 'Shared team wallet'}
           </Text>
         </View>
 
         <View style={styles.statsRow}>
           <StatBox icon="people" value={activeMembers.length} label="MEMBERS" />
           <StatBox icon="football" value={bookingCounts?.played ?? 0} label="GAMES PLAYED" />
-          <StatBox icon="calendar" value={bookingCounts?.upcoming ?? 0} label="UPCOMING" highlight />
+          <StatBox
+            icon="calendar"
+            value={bookingCounts?.upcoming ?? 0}
+            label="UPCOMING"
+            highlight
+            onPress={upcomingBooking ? goToUpcoming : undefined}
+          />
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>NETWORK INFO</Text>
-          <InfoRow label="Network ID" value={team.join_code} />
+          <Text style={styles.cardLabel}>TEAM INFO</Text>
+          <InfoRow label="Team ID" value={team.join_code} />
           <InfoRow label="Created Date" value={new Date(team.created_at).toLocaleDateString('en-IN')} />
           <InfoRow label="Membership Plan" value={membership?.plan ? `₹${membership.plan.price_inr.toLocaleString()} Membership` : '—'} />
         </View>
 
+        <Text style={styles.sectionTitle}>Bookings</Text>
         {(bookings ?? []).length === 0 ? (
           <View style={styles.emptyCard}>
             <Ionicons name="calendar-outline" size={22} color={colors.textMuted} />
             <Text style={styles.emptyTitle}>No bookings yet</Text>
-            <Text style={styles.emptyBody}>Booking history will appear here once the network is active.</Text>
+            <Text style={styles.emptyBody}>Booking history will appear here once the team is active.</Text>
           </View>
-        ) : null}
+        ) : (
+          <View style={styles.card}>
+            {(bookings ?? []).slice(0, 10).map((b, idx) => (
+              <Pressable
+                key={b.id}
+                style={[styles.bookingRow, idx > 0 && styles.bookingRowDivider]}
+                onPress={() => router.push(`/(app)/booking/${b.id}`)}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.bookingTurf}>{b.turf?.name ?? 'Turf Booking'}</Text>
+                  <Text style={styles.bookingMeta}>
+                    {formatBookingDate(b.booking_date)} · {formatSlotTime(b.start_time)}–{formatSlotTime(b.end_time)}
+                  </Text>
+                </View>
+                <Badge label={b.status} tone={BOOKING_STATUS_TONE[b.status] ?? 'neutral'} />
+                <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
+              </Pressable>
+            ))}
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>Team Activity Log</Text>
+        {(teamLogs ?? []).length === 0 ? (
+          <View style={styles.emptyCard}>
+            <Ionicons name="document-text-outline" size={22} color={colors.textMuted} />
+            <Text style={styles.emptyTitle}>No Admin activity yet</Text>
+            <Text style={styles.emptyBody}>
+              Membership approvals, credit adjustments, and other Admin actions for this Team appear here.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.card}>
+            {(teamLogs ?? []).map((log, idx) => (
+              <View key={log.id} style={[styles.logRow, idx > 0 && styles.bookingRowDivider]}>
+                <View style={styles.logTopRow}>
+                  <Text style={styles.logAction}>{log.action.replaceAll('_', ' ')}</Text>
+                  <Text style={styles.logTime}>
+                    {new Date(log.created_at).toLocaleString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      hour: 'numeric',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
+                <Text style={styles.logMeta}>by {log.admin_name}</Text>
+                {!!log.reason && <Text style={styles.logReason}>{log.reason}</Text>}
+              </View>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -159,20 +239,22 @@ function StatBox({
   value,
   label,
   highlight,
+  onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   value: number;
   label: string;
   highlight?: boolean;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.statBox}>
+    <Pressable style={styles.statBox} onPress={onPress} disabled={!onPress}>
       <View style={[styles.statIcon, highlight && styles.statIconHighlight]}>
         <Ionicons name={icon} size={16} color={highlight ? colors.primary : colors.text} />
       </View>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -267,4 +349,18 @@ const styles = StyleSheet.create({
   emptyCard: { alignItems: 'center', padding: spacing.xl },
   emptyTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.sm },
   emptyBody: { fontSize: 12, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
+
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.md, marginBottom: spacing.sm },
+
+  bookingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
+  bookingRowDivider: { borderTopWidth: 1, borderTopColor: colors.border },
+  bookingTurf: { fontSize: 14, fontWeight: '700', color: colors.text },
+  bookingMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+
+  logRow: { paddingVertical: spacing.sm },
+  logTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  logAction: { fontSize: 13, fontWeight: '800', color: colors.text, textTransform: 'capitalize' },
+  logTime: { fontSize: 11, color: colors.textMuted },
+  logMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+  logReason: { fontSize: 12, color: colors.textMuted, marginTop: 2, fontStyle: 'italic' },
 });

@@ -48,7 +48,7 @@ export function useTeamMembers(teamId: string | undefined) {
 }
 
 // Server-computed Upcoming/Games-Played counts (see getTeamBookingCounts) —
-// shared by the member Team Details screen and the Admin Network Details
+// shared by the member Team Details screen and the Admin Team Details
 // screen so neither ever shows a number the other disagrees with.
 export function useTeamBookingCounts(teamId: string | undefined) {
   return useQuery({

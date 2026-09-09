@@ -15,7 +15,7 @@ export function useDefaultTurf() {
   return useQuery({ queryKey: ['default-turf'], queryFn: getDefaultTurf, staleTime: 60 * 60 * 1000 });
 }
 
-// Dashboard "Other Networks' Upcoming Events" strip — every ACTIVE Team the
+// Dashboard "Other Teams' Upcoming Events" strip — every ACTIVE Team the
 // member belongs to, not just the currently selected one. Keyed by userId so
 // it never leaks across an account switch on the same device.
 export function useUpcomingBookingsAcrossTeams() {

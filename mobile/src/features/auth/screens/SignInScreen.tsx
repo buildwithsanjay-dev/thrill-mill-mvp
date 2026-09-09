@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -75,62 +75,81 @@ export function SignInScreen() {
         <Ionicons name="arrow-back" size={22} color={colors.text} />
       </Pressable>
 
-      <View style={styles.content}>
-        <LogoBadge size={92} />
-        <Text style={styles.title}>Welcome to{'\n'}Thrill Mill Club</Text>
-        <Text style={styles.subtitle}>
-          Sign in to manage your networks,{'\n'}games and Turf bookings.
-        </Text>
+      {/* Without this, the admin username/password fields (which sit
+          roughly mid-screen since `content` is vertically centered) could
+          end up hidden behind the on-screen keyboard on shorter devices —
+          nothing was shifting the layout up to keep the field being typed
+          into visible. KeyboardAvoidingView does that shift; the ScrollView
+          inside lets the form scroll into view too if it still doesn't
+          fully fit above the keyboard. */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.content}>
+            <LogoBadge size={92} />
+            <Text style={styles.title}>Welcome to{'\n'}Thrill Mill Club</Text>
+            <Text style={styles.subtitle}>
+              Sign in to manage your teams,{'\n'}games and Turf bookings.
+            </Text>
 
-        <View style={styles.buttonGroup}>
-          <Button
-            title="Continue with Google"
-            iconLeft="logo-google"
-            onPress={handleGoogleSignIn}
-            loading={isSigningIn}
-          />
-
-          {showAdminForm ? (
-            <View style={styles.adminForm}>
-              <TextField
-                label="Username"
-                placeholder="admin"
-                autoCapitalize="none"
-                autoCorrect={false}
-                value={username}
-                onChangeText={setUsername}
-              />
-              <View style={{ height: spacing.sm }} />
-              <TextField
-                label="Password"
-                placeholder="••••••••"
-                secureTextEntry
-                autoCapitalize="none"
-                value={password}
-                onChangeText={setPassword}
-              />
-              <View style={{ height: spacing.md }} />
+            <View style={styles.buttonGroup}>
               <Button
-                title="Sign in"
-                variant="outline"
-                onPress={handleUsernameSignIn}
+                title="Continue with Google"
+                iconLeft="logo-google"
+                onPress={handleGoogleSignIn}
                 loading={isSigningIn}
               />
-            </View>
-          ) : (
-            <Pressable onPress={() => setShowAdminForm(true)} hitSlop={12} style={styles.adminLink}>
-              <Text style={styles.adminLinkText}>Sign in with username &amp; password</Text>
-            </Pressable>
-          )}
-        </View>
-      </View>
 
-      <View style={styles.footer}>
-        <PaginationDots count={4} activeIndex={1} />
-        <Text style={styles.terms}>
-          By signing in, you agree to our Terms of Service and Privacy Policy.
-        </Text>
-      </View>
+              {showAdminForm ? (
+                <View style={styles.adminForm}>
+                  <TextField
+                    label="Username"
+                    placeholder="admin"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    value={username}
+                    onChangeText={setUsername}
+                  />
+                  <View style={{ height: spacing.sm }} />
+                  <TextField
+                    label="Password"
+                    placeholder="••••••••"
+                    secureTextEntry
+                    autoCapitalize="none"
+                    value={password}
+                    onChangeText={setPassword}
+                  />
+                  <View style={{ height: spacing.md }} />
+                  <Button
+                    title="Sign in"
+                    variant="outline"
+                    onPress={handleUsernameSignIn}
+                    loading={isSigningIn}
+                  />
+                </View>
+              ) : (
+                <Pressable onPress={() => setShowAdminForm(true)} hitSlop={12} style={styles.adminLink}>
+                  <Text style={styles.adminLinkText}>Sign in with username &amp; password</Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.footer}>
+            <PaginationDots count={4} activeIndex={1} />
+            <Text style={styles.terms}>
+              By signing in, you agree to our Terms of Service and Privacy Policy.
+            </Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -145,8 +164,12 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     alignSelf: 'flex-start',
   },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    paddingBottom: spacing.md,
+  },
   content: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

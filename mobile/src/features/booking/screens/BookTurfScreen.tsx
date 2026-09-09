@@ -198,8 +198,8 @@ export function BookTurfScreen() {
         </View>
         <EmptyState
           icon="football-outline"
-          title="No Network yet"
-          message="Create or join a Network before booking a Turf."
+          title="No Team yet"
+          message="Create or join a Team before booking a Turf."
         />
       </SafeAreaView>
     );
@@ -308,7 +308,7 @@ export function BookTurfScreen() {
         <View style={styles.teamPill}>
           <Ionicons name="business" size={16} color={colors.textMuted} />
           <View style={{ marginLeft: spacing.sm }}>
-            <Text style={styles.teamPillLabel}>YOUR SELECTED NETWORK</Text>
+            <Text style={styles.teamPillLabel}>YOUR SELECTED TEAM</Text>
             <Text style={styles.teamPillValue}>{activeTeam.team.name}</Text>
           </View>
         </View>

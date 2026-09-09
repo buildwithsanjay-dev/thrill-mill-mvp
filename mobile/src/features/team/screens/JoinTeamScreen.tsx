@@ -18,7 +18,7 @@ export function JoinTeamScreen() {
 
   const handleJoin = async () => {
     if (!code.trim()) {
-      Alert.alert('Enter a code', 'Ask your Team Host for their Network ID.');
+      Alert.alert('Enter a code', 'Ask your Team Host for their Team ID.');
       return;
     }
     setIsSubmitting(true);
@@ -33,13 +33,13 @@ export function JoinTeamScreen() {
     } catch (error) {
       const message =
         error instanceof Error && error.message.includes('INVALID_JOIN_CODE')
-          ? 'That Network ID was not found. Double-check the code and try again.'
+          ? 'That Team ID was not found. Double-check the code and try again.'
           : error instanceof Error && error.message.includes('ALREADY_ON_TEAM')
-            ? "You're already on this Network."
+            ? "You're already on this Team."
             : error instanceof Error && error.message.includes('TEAM_FULL')
-              ? 'This Network already has the maximum of 10 members.'
+              ? 'This Team already has the maximum of 10 members.'
               : 'Please try again.';
-      Alert.alert('Could not join Network', message);
+      Alert.alert('Could not join Team', message);
     } finally {
       setIsSubmitting(false);
     }
@@ -55,15 +55,15 @@ export function JoinTeamScreen() {
         <View style={styles.iconWrap}>
           <Ionicons name="git-network" size={28} color={colors.primary} />
         </View>
-        <Text style={styles.title}>Join a Network</Text>
+        <Text style={styles.title}>Join a Team</Text>
         <Text style={styles.subtitle}>
-          Ask your Team Host for their Network ID (e.g. TM-NW-7429) and enter it below to request to
+          Ask your Team Host for their Team ID (e.g. TM-NW-7429) and enter it below to request to
           join.
         </Text>
 
         <View style={styles.form}>
           <TextField
-            label="Network ID"
+            label="Team ID"
             placeholder="TM-XXXXXX"
             autoCapitalize="characters"
             autoCorrect={false}

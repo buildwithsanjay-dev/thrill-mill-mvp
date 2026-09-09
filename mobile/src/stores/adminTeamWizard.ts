@@ -4,7 +4,7 @@ import type { LookupUserResult } from '@/features/team/api';
 
 type WizardMember = LookupUserResult & { teamMemberId: string; role: 'HOST' | 'CO_HOST' | 'MEMBER' };
 
-// Draft state for the Admin's 5-step Create Network wizard (Details ->
+// Draft state for the Admin's 5-step Create Team wizard (Details ->
 // Members -> Roles -> Membership -> Review). Same philosophy as
 // createTeamWizard.ts: each step commits to the backend immediately
 // (fn_admin_create_team, fn_admin_add_team_member...), this store just

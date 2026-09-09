@@ -118,7 +118,7 @@ export function ManageBookingScreen() {
               invalidate({ teamId: booking.team_id, bookingId: booking.id, turfId: booking.turf_id });
               Alert.alert(
                 'Booking cancelled',
-                outcome.includes('REFUND') ? 'Full credits were refunded to the Network wallet.' : 'No refund — cancelled within 24 hours of the slot.'
+                outcome.includes('REFUND') ? 'Full credits were refunded to the Team wallet.' : 'No refund — cancelled within 24 hours of the slot.'
               );
               router.back();
             } catch (error) {
@@ -248,7 +248,7 @@ export function ManageBookingScreen() {
             canEditParticipants && (
               <Pressable style={styles.addMemberRow} onPress={startEditing}>
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
-                <Text style={styles.addMemberText}>Add / Remove Network Member</Text>
+                <Text style={styles.addMemberText}>Add / Remove Team Member</Text>
               </Pressable>
             )
           )}

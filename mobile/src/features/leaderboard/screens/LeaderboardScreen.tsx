@@ -51,7 +51,7 @@ export function LeaderboardScreen() {
         )}
 
         <View style={styles.scopeTabs}>
-          <ScopeTab label="NETWORKS" active={scope === 'TEAM'} onPress={() => setScope('TEAM')} />
+          <ScopeTab label="TEAMS" active={scope === 'TEAM'} onPress={() => setScope('TEAM')} />
           <ScopeTab label="MEMBERS" active={scope === 'MEMBER'} onPress={() => setScope('MEMBER')} />
         </View>
 
@@ -70,7 +70,7 @@ export function LeaderboardScreen() {
         ) : (
           <>
             <Text style={styles.sectionTitle}>
-              {scope === 'TEAM' ? 'Top Networks' : 'Top Members'}
+              {scope === 'TEAM' ? 'Top Teams' : 'Top Members'}
             </Text>
             <Text style={styles.sectionSubtitle}>
               Most active {period === 'WEEK' ? 'this week' : 'this month'}
@@ -99,7 +99,7 @@ export function LeaderboardScreen() {
                   </View>
                 )}
                 <Text style={styles.listName} numberOfLines={1}>
-                  {row.display_name ?? (scope === 'TEAM' ? 'Network' : 'Member')}
+                  {row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member')}
                 </Text>
                 <Text style={styles.listValue}>{Math.round(row.metric_value)}</Text>
               </View>
@@ -129,7 +129,7 @@ function PeriodTab({ label, active, onPress }: { label: string; active: boolean;
 
 function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: number; scope: Scope }) {
   const height = rank === 1 ? 88 : rank === 2 ? 64 : 52;
-  const name = row.display_name ?? (scope === 'TEAM' ? 'Network' : 'Member');
+  const name = row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member');
 
   return (
     <View style={styles.podiumSlot}>

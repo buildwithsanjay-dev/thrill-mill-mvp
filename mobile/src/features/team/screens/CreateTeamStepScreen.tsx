@@ -25,7 +25,7 @@ export function CreateTeamStepScreen() {
 
   const handleContinue = async () => {
     if (!teamName.trim()) {
-      Alert.alert('Team name required', 'Give your Network a name to continue.');
+      Alert.alert('Team name required', 'Give your Team a name to continue.');
       return;
     }
     setIsCreating(true);
@@ -36,7 +36,7 @@ export function CreateTeamStepScreen() {
       invalidate();
       router.push('/(app)/team/create-members');
     } catch (error) {
-      Alert.alert('Could not create Network', error instanceof Error ? error.message : 'Please try again.');
+      Alert.alert('Could not create Team', error instanceof Error ? error.message : 'Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -53,7 +53,7 @@ export function CreateTeamStepScreen() {
         <Pressable onPress={handleBack} hitSlop={12}>
           <Ionicons name="arrow-back" size={22} color={darkColors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Create Network</Text>
+        <Text style={styles.headerTitle}>Create Team</Text>
         <View style={{ width: 22 }} />
       </View>
       <Text style={styles.headerSubtitle}>Build your team and start playing together.</Text>
@@ -65,7 +65,7 @@ export function CreateTeamStepScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.sectionTitle}>Let&apos;s build your Team</Text>
         <Text style={styles.sectionSubtitle}>
-          Your Network is your dedicated group for booking Turfs and managing games.
+          Your Team is your dedicated group for booking Turfs and managing games.
         </Text>
 
         <View style={styles.card}>
@@ -99,7 +99,7 @@ export function CreateTeamStepScreen() {
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
             <Text style={styles.infoTitle}>Build Your Playing Team</Text>
             <Text style={styles.infoBody}>
-              Add your existing Thrill Mill members to your Network in the next step. A Network can
+              Add your existing Thrill Mill members to your Team in the next step. A Team can
               have up to 10 playing members for seamless booking.
             </Text>
           </View>

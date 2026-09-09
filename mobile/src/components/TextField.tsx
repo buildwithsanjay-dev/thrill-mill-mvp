@@ -5,7 +5,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 type TextFieldProps = TextInputProps & {
   label?: string;
   prefix?: string;
-  // Some screens (Create Network, Add Members, Choose Membership...) sit on
+  // Some screens (Create Team, Add Members, Choose Membership...) sit on
   // a dark surface — this swaps label/prefix text to a light color rather
   // than requiring every call site to override styles individually.
   labelColor?: string;

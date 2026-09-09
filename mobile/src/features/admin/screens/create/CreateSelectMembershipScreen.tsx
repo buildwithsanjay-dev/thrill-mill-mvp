@@ -44,7 +44,7 @@ export function CreateSelectMembershipScreen() {
       </View>
 
       <Text style={styles.sectionTitle}>Select Membership</Text>
-      <Text style={styles.sectionSubtitle}>Choose the membership plan for this Network.</Text>
+      <Text style={styles.sectionSubtitle}>Choose the membership plan for this Team.</Text>
 
       <View style={styles.stepMeta}>
         <Text style={styles.stepMetaLabel}>STEP 4 OF 5</Text>
@@ -73,7 +73,7 @@ export function CreateSelectMembershipScreen() {
             <Ionicons name="information-circle-outline" size={16} color={colors.text} />
             <Text style={styles.infoBody}>
               Payment collection is managed externally. Once you select a plan and complete the setup, the
-              Admin will verify the offline payment before the Network becomes active.
+              Admin will verify the offline payment before the Team becomes active.
             </Text>
           </View>
 

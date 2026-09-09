@@ -48,7 +48,7 @@ export function CreateAddMembersScreen() {
 
   const handleAdd = async (user: AdminMemberSearchResult) => {
     if (members.length >= MAX_MEMBERS) {
-      Alert.alert('Team is full', `A Network can have up to ${MAX_MEMBERS} playing members.`);
+      Alert.alert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
       return;
     }
     setAddingId(user.id);

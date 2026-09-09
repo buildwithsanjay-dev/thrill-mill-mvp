@@ -120,7 +120,7 @@ export function AdminLeaderboardScreen() {
         {leaderboardPending ? (
           <ActivityIndicator style={{ marginTop: spacing.lg }} color={colors.primary} />
         ) : !leaderboard || leaderboard.teams.length === 0 ? (
-          <EmptyState icon="trophy-outline" title="No Networks yet" message="Rankings appear once Teams exist." />
+          <EmptyState icon="trophy-outline" title="No Teams yet" message="Rankings appear once Teams exist." />
         ) : (
           <View style={styles.leaderboardCard}>
             {leaderboard.teams.map((row) => (
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
 
   sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   sectionSubtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
-  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.sm },
+  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
 
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.sm, marginBottom: spacing.md },
   filterScroll: { marginTop: spacing.sm, marginBottom: spacing.md },

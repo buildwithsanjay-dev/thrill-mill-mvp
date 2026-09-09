@@ -11,7 +11,7 @@ import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { useInvalidateAdminQueries } from '../../useAdmin';
 
-export function NetworkCreatedScreen() {
+export function TeamCreatedScreen() {
   const router = useRouter();
   const invalidateAdmin = useInvalidateAdminQueries();
   const { teamName, teamId, teamJoinCode, members, planCode, reset } = useAdminTeamWizard();
@@ -82,7 +82,7 @@ export function NetworkCreatedScreen() {
         <View style={styles.card}>
           <View style={styles.cardTopRow}>
             <View style={styles.premiumTag}>
-              <Text style={styles.premiumTagText}>NETWORK</Text>
+              <Text style={styles.premiumTagText}>TEAM</Text>
             </View>
             <Ionicons name="people" size={18} color={colors.textMuted} />
           </View>
@@ -117,10 +117,10 @@ export function NetworkCreatedScreen() {
             </View>
             <View style={styles.planBox}>
               <Text style={styles.planName}>₹{plan.price_inr.toLocaleString()} Membership</Text>
-              <Text style={styles.planCaption}>Exclusive Network Rates</Text>
+              <Text style={styles.planCaption}>Exclusive Team Rates</Text>
             </View>
             <View style={styles.rowBetween}>
-              <Text style={styles.rowLabel}>Network Rate</Text>
+              <Text style={styles.rowLabel}>Team Rate</Text>
               <Text style={styles.rowValue}>₹{plan.membership_day_rate_per_hour}/hr</Text>
             </View>
             <View style={styles.rowBetween}>
@@ -156,7 +156,7 @@ export function NetworkCreatedScreen() {
       <View style={styles.footer}>
         <Button title="Activate Membership" onPress={goToActivate} />
         <View style={{ height: spacing.sm }} />
-        <Button title="View Network Details" variant="outline" onPress={goToDetails} />
+        <Button title="View Team Details" variant="outline" onPress={goToDetails} />
         <View style={{ height: spacing.sm }} />
         <Text style={styles.backLink} onPress={goToDashboard}>
           Back to Dashboard

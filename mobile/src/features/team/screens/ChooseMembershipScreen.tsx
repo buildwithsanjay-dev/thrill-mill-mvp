@@ -84,7 +84,7 @@ function MembershipForm({
       router.replace('/(app)/(tabs)');
       reset();
       Alert.alert(
-        'Network created!',
+        'Team created!',
         'Your membership request has been submitted. A Thrill Mill Admin will contact you to collect and verify payment before credits are loaded.'
       );
     } catch (error) {
@@ -104,7 +104,7 @@ function MembershipForm({
       </View>
 
       <View style={styles.stepRow}>
-        <StepIndicator steps={['NETWORK', 'MEMBERS', 'MEMBERSHIP']} activeIndex={2} />
+        <StepIndicator steps={['TEAM', 'MEMBERS', 'MEMBERSHIP']} activeIndex={2} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -139,7 +139,7 @@ function MembershipForm({
             <View style={{ flex: 1, marginLeft: spacing.sm }}>
               <Text style={styles.infoTitle}>HOW MEMBERSHIP WORKS</Text>
               <Text style={styles.infoBody}>
-                Membership and credits belong to the Network collectively. The Host will complete
+                Membership and credits belong to the Team collectively. The Host will complete
                 payment externally for Admin verification.
               </Text>
             </View>

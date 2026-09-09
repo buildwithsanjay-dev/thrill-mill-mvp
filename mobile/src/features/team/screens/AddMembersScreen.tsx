@@ -69,7 +69,7 @@ export function AddMembersScreen() {
       return;
     }
     if (selectedMembers.length >= MAX_MEMBERS - 1) {
-      Alert.alert('Team is full', `A Network can have up to ${MAX_MEMBERS} playing members.`);
+      Alert.alert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
       return;
     }
     setInvitingId(user.id);
@@ -80,7 +80,7 @@ export function AddMembersScreen() {
     } catch (error) {
       const message =
         error instanceof Error && error.message.includes('TEAM_FULL')
-          ? `A Network can have up to ${MAX_MEMBERS} playing members.`
+          ? `A Team can have up to ${MAX_MEMBERS} playing members.`
           : error instanceof Error
             ? error.message
             : 'Please try again.';
@@ -93,7 +93,7 @@ export function AddMembersScreen() {
   const handleInviteByShare = async () => {
     try {
       await Share.share({
-        message: `Join me on Thrill Mill Club! Download the app, sign in, then open "Join a Network" and enter this Network ID: ${teamJoinCode ?? ''}`,
+        message: `Join me on Thrill Mill Club! Download the app, sign in, then open "Join a Team" and enter this Team ID: ${teamJoinCode ?? ''}`,
       });
     } catch {
       // User dismissed the share sheet — nothing to do.
@@ -199,7 +199,7 @@ export function AddMembersScreen() {
         ))}
 
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryLabel}>NETWORK SUMMARY</Text>
+          <Text style={styles.summaryLabel}>TEAM SUMMARY</Text>
           <Text style={styles.summaryTeam}>{teamName}</Text>
           <Text style={styles.summaryMeta}>
             Members: {selectedMembers.length + 1} / {MAX_MEMBERS} · Host: You

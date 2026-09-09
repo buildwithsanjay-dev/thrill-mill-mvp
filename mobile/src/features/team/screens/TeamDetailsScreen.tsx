@@ -52,12 +52,12 @@ export function TeamDetailsScreen() {
   // react-native's built-in Share sheet (SMS/WhatsApp/anything) needs no
   // extra native module — unlike expo-clipboard, this works on an
   // already-built dev-client without a rebuild. It also doubles as the
-  // "invite someone not on the app yet" flow: they get the Network ID and
-  // instructions to enter it in Join a Network once they've signed up.
+  // "invite someone not on the app yet" flow: they get the Team ID and
+  // instructions to enter it in Join a Team once they've signed up.
   const handleShareInvite = async () => {
     try {
       await Share.share({
-        message: `Join my Thrill Mill Club Network "${team.name}"!\n\n1. Download Thrill Mill Club\n2. Sign in and open "Join a Network"\n3. Enter this Network ID: ${team.join_code}`,
+        message: `Join my Thrill Mill Club Team "${team.name}"!\n\n1. Download Thrill Mill Club\n2. Sign in and open "Join a Team"\n3. Enter this Team ID: ${team.join_code}`,
       });
     } catch {
       // User dismissed the share sheet — nothing to do.
@@ -95,7 +95,7 @@ export function TeamDetailsScreen() {
       });
     }
     options.push({
-      text: 'Remove from Network',
+      text: 'Remove from Team',
       style: 'destructive',
       onPress: async () => {
         try {
@@ -130,7 +130,7 @@ export function TeamDetailsScreen() {
           <Text style={styles.headerTitle}>{team.name}</Text>
           <View style={styles.activeDotRow}>
             <View style={styles.activeDot} />
-            <Text style={styles.headerSubtitle}>ACTIVE NETWORK</Text>
+            <Text style={styles.headerSubtitle}>ACTIVE TEAM</Text>
           </View>
         </View>
         <View style={{ width: 22 }} />
@@ -182,10 +182,10 @@ export function TeamDetailsScreen() {
         </View>
 
         <Pressable style={styles.walletCard} onPress={() => router.push(`/(app)/wallet/${team.id}`)}>
-          <Text style={styles.walletLabel}>Network Credits</Text>
+          <Text style={styles.walletLabel}>Team Credits</Text>
           <Text style={styles.walletValue}>{Math.round(wallet?.available_credits ?? 0).toLocaleString()}</Text>
           <Text style={styles.walletCaption}>Credits</Text>
-          <Text style={styles.walletSub}>Shared network wallet{'\n'}Credits are owned by the network.</Text>
+          <Text style={styles.walletSub}>Shared team wallet{'\n'}Credits are owned by the team.</Text>
           <View style={styles.walletCta}>
             <Text style={styles.walletCtaText}>VIEW ACTIVITY</Text>
             <Ionicons name="arrow-forward" size={14} color="#FFFFFF" />

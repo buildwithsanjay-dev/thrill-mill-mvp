@@ -28,8 +28,8 @@ export const radii = {
   pill: 999,
 } as const;
 
-// A handful of screens in the Figma export (Create Network, Add Members,
-// Choose Membership, Wallet Activity, the top cards on Network/Manage
+// A handful of screens in the Figma export (Create Team, Add Members,
+// Choose Membership, Wallet Activity, the top cards on Team/Manage
 // Booking) are intentionally dark-surfaced, not a global light/dark mode
 // toggle. These tokens are scoped to just those screens.
 export const darkColors = {

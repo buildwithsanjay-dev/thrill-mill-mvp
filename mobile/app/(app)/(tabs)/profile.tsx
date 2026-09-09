@@ -1,5 +1,5 @@
 import { ProfileScreen } from '@/features/profile/screens/ProfileScreen';
 
-export default function Profile() {
+export default function MemberProfile() {
   return <ProfileScreen />;
 }

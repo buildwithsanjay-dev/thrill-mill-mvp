@@ -46,7 +46,7 @@ export function AdminTeamsScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <AppHeader>
-          <Text style={styles.title}>Networks</Text>
+          <Text style={styles.title}>Teams</Text>
         </AppHeader>
 
         {isPending ? (
@@ -54,7 +54,7 @@ export function AdminTeamsScreen() {
         ) : (
           <>
             <View style={styles.statCard}>
-              <Text style={styles.statLabel}>TOTAL NETWORKS</Text>
+              <Text style={styles.statLabel}>TOTAL TEAMS</Text>
               <Text style={styles.statValue}>{counts.total}</Text>
             </View>
             <View style={styles.statCard}>
@@ -73,7 +73,7 @@ export function AdminTeamsScreen() {
               <Ionicons name="search" size={16} color={colors.textMuted} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search Network Name or Network ID"
+                placeholder="Search Team Name or Team ID"
                 placeholderTextColor={colors.textMuted}
                 value={query}
                 onChangeText={setQuery}
@@ -118,9 +118,9 @@ export function AdminTeamsScreen() {
               </>
             )}
 
-            <Text style={styles.sectionTitle2}>All Networks</Text>
+            <Text style={styles.sectionTitle2}>All Teams</Text>
             {filtered.length === 0 ? (
-              <EmptyState icon="git-network-outline" title="No networks found" />
+              <EmptyState icon="git-network-outline" title="No teams found" />
             ) : (
               filtered.map((row) => <TeamRow key={row.team.id} row={row} onPress={() => router.push(`/(admin)/team/${row.team.id}`)} />)
             )}
@@ -130,7 +130,7 @@ export function AdminTeamsScreen() {
 
       <Pressable style={styles.fab} onPress={() => router.push('/(admin)/team/create')}>
         <Ionicons name="add" size={18} color="#FFFFFF" />
-        <Text style={styles.fabLabel}>Create Network</Text>
+        <Text style={styles.fabLabel}>Create Team</Text>
       </Pressable>
     </SafeAreaView>
   );

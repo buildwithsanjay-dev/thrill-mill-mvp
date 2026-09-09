@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import type { LookupUserResult } from '@/features/team/api';
 
-// Client-only draft state for the 3-step Create Network wizard (Team ->
+// Client-only draft state for the 3-step Create Team wizard (Team ->
 // Members -> Membership). Nothing here is authoritative: the team isn't
 // created until step 1's Continue, members aren't invited until step 2's
 // Continue, and the membership request isn't submitted until step 3's

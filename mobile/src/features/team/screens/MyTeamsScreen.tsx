@@ -76,7 +76,7 @@ export function MyTeamsScreen() {
           <EmptyState
             icon="people-outline"
             title="No Teams yet"
-            message="Create a Network to start booking Turfs with your squad."
+            message="Create a Team to start booking Turfs with your squad."
           />
         ) : (
           teams.map((summary) => (
@@ -93,10 +93,10 @@ export function MyTeamsScreen() {
 
         <Pressable style={styles.createButton} onPress={() => router.push('/(app)/team/create')}>
           <Ionicons name="add-circle-outline" size={18} color={colors.text} />
-          <Text style={styles.createButtonLabel}>Create a new Network</Text>
+          <Text style={styles.createButtonLabel}>Create a new Team</Text>
         </Pressable>
         <Pressable style={styles.joinLink} onPress={() => router.push('/(app)/team/join')}>
-          <Text style={styles.joinLinkLabel}>Have a code? Join a Network</Text>
+          <Text style={styles.joinLinkLabel}>Have a code? Join a Team</Text>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
@@ -131,7 +131,7 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
           <View style={styles.cardCreditsRow}>
             <Ionicons name="card-outline" size={16} color={colors.primary} />
             <Text style={styles.cardCredits}>
-              {Math.round(wallet?.available_credits ?? 0).toLocaleString()} NETWORK CREDITS
+              {Math.round(wallet?.available_credits ?? 0).toLocaleString()} TEAM CREDITS
             </Text>
           </View>
           <Text style={styles.cardMembers}>{memberCount} Active Member{memberCount === 1 ? '' : 's'}</Text>

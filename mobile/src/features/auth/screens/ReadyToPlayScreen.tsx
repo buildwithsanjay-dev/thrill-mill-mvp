@@ -25,7 +25,7 @@ export function ReadyToPlayScreen() {
           </View>
         </View>
         <Text style={styles.title}>You&apos;re ready to play.</Text>
-        <Text style={styles.subtitle}>Join your Network, manage your games and book your Turf.</Text>
+        <Text style={styles.subtitle}>Join your Team, manage your games and book your Turf.</Text>
       </View>
 
       <View style={styles.footer}>

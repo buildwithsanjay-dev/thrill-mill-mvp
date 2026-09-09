@@ -28,7 +28,7 @@ export function CreateTeamDetailsScreen() {
 
   const handleContinue = async () => {
     if (!teamName.trim()) {
-      Alert.alert('Team name required', 'Give this Network a name to continue.');
+      Alert.alert('Team name required', 'Give this Team a name to continue.');
       return;
     }
     setIsCreating(true);
@@ -39,7 +39,7 @@ export function CreateTeamDetailsScreen() {
       invalidateAdmin();
       router.push('/(admin)/team/create-members');
     } catch (error) {
-      Alert.alert('Could not create Network', error instanceof Error ? error.message : 'Please try again.');
+      Alert.alert('Could not create Team', error instanceof Error ? error.message : 'Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -69,8 +69,8 @@ export function CreateTeamDetailsScreen() {
             <Ionicons name="people" size={18} color={colors.text} />
           </View>
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
-            <Text style={styles.infoTitle}>Start a New Network</Text>
-            <Text style={styles.infoBody}>Create the Network first, then add members and select the membership plan.</Text>
+            <Text style={styles.infoTitle}>Start a New Team</Text>
+            <Text style={styles.infoBody}>Create the Team first, then add members and select the membership plan.</Text>
           </View>
         </View>
 
@@ -100,8 +100,8 @@ export function CreateTeamDetailsScreen() {
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
             <Text style={styles.assistTitle}>Admin-Assisted Registration</Text>
             <Text style={styles.assistBody}>
-              You are creating this Network on behalf of members. The Network will function the same as a
-              member-created Network once setup is complete.
+              You are creating this Team on behalf of members. The Team will function the same as a
+              member-created Team once setup is complete.
             </Text>
           </View>
         </View>

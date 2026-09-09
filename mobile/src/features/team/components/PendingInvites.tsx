@@ -32,12 +32,12 @@ export function PendingInvites() {
     <View style={styles.wrap}>
       <View style={styles.headerRow}>
         <Ionicons name="mail-unread" size={16} color={colors.primary} />
-        <Text style={styles.title}>Network Invitations</Text>
+        <Text style={styles.title}>Team Invitations</Text>
       </View>
       {invites.map((invite) => (
         <View key={invite.team_member_id} style={styles.card}>
           <Text style={styles.teamName}>{invite.team_name}</Text>
-          <Text style={styles.subtitle}>invited you to join their Network</Text>
+          <Text style={styles.subtitle}>invited you to join their Team</Text>
           <View style={styles.actionsRow}>
             <Pressable
               style={styles.declineButton}
