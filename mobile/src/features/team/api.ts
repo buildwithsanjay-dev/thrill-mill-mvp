@@ -47,7 +47,7 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
 
   const { data: memberships, error: memberError } = await supabase
     .from('team_members')
-    .select('team_role, team:teams(id, name, status, created_by, join_code, created_at)')
+    .select('team_role, team:teams(id, name, status, created_by, join_code, banner_url, created_at)')
     .eq('user_id', userId)
     .eq('status', 'ACTIVE');
   if (memberError) throw memberError;

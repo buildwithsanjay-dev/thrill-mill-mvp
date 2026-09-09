@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -110,7 +111,17 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={[styles.cardHero, { backgroundColor: heroColorFor(team.id) }]}>
-        <Ionicons name="football" size={64} color="rgba(255,255,255,0.15)" style={styles.cardHeroIcon} />
+        {team.banner_url ? (
+          <>
+            <Image source={{ uri: team.banner_url }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            {/* Scrim so the name/badge stay readable over an arbitrary photo —
+                the solid-color fallback below doesn't need one, its own
+                deliberately-dim icon already provides enough contrast. */}
+            <View style={styles.cardHeroScrim} />
+          </>
+        ) : (
+          <Ionicons name="football" size={64} color="rgba(255,255,255,0.15)" style={styles.cardHeroIcon} />
+        )}
         <Text style={styles.cardHeroTitle}>{team.name}</Text>
         <View style={styles.cardHeroBadge}>
           <Badge label={ROLE_LABEL[myRole]} tone={ROLE_TONE[myRole]} />
@@ -193,6 +204,14 @@ const styles = StyleSheet.create({
   },
   cardHero: { height: 120, justifyContent: 'flex-end', padding: spacing.md, overflow: 'hidden' },
   cardHeroIcon: { position: 'absolute', right: -8, bottom: -12 },
+  cardHeroScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(15, 23, 41, 0.45)',
+  },
   cardHeroTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
   cardHeroBadge: { position: 'absolute', top: spacing.md, right: spacing.md },
 

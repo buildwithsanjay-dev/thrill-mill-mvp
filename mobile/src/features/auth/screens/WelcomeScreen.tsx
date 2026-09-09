@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,14 +8,14 @@ import { PaginationDots } from '@/components/PaginationDots';
 import { colors, spacing } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 
+const HERO_IMAGE = require('../../../assets/welcome-hero.webp');
+
 export function WelcomeScreen() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      {/* TODO: replace with the real Turf photography from assets/ui/welcome.png
-          once it's exported as a standalone image asset. */}
-      <View style={styles.hero} />
+      <Image source={HERO_IMAGE} style={styles.hero} contentFit="cover" />
 
       <SafeAreaView style={styles.content} edges={['bottom']}>
         <LogoBadge size={92} />
