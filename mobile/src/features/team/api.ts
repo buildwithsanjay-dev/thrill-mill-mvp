@@ -1,3 +1,6 @@
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
+
 import { supabase } from '@/lib/supabase';
 import { localDateIso, localTimeHms } from '@/features/booking/api';
 import type { MembershipRequestStatus, Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
@@ -141,6 +144,40 @@ export async function getTeamJoinCode(teamId: string): Promise<string> {
   const { data, error } = await supabase.from('teams').select('join_code').eq('id', teamId).single();
   if (error) throw error;
   return data.join_code as string;
+}
+
+// Uploads to the (public, per migration) "team-banners" bucket at
+// "<team_id>/banner.<ext>" and returns a cache-busted public URL — same
+// pattern as profile/api.ts's uploadAvatar. Storage RLS on this bucket only
+// allows the write if the caller is this Team's ACTIVE Host (or Admin) —
+// fn_set_team_banner below independently re-checks the same rule server-side
+// before touching teams.banner_url, so hiding the edit affordance
+// client-side for a non-Host is a UX nicety, never the actual authorization.
+export async function uploadTeamBanner(teamId: string, localUri: string): Promise<string> {
+  const extMatch = /\.(\w+)$/.exec(localUri);
+  const ext = (extMatch?.[1] ?? 'jpg').toLowerCase();
+  const contentType = ext === 'png' ? 'image/png' : 'image/jpeg';
+  const path = `${teamId}/banner.${ext}`;
+
+  const base64 = await FileSystem.readAsStringAsync(localUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  const { error: uploadError } = await supabase.storage
+    .from('team-banners')
+    .upload(path, decode(base64), { contentType, upsert: true });
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from('team-banners').getPublicUrl(path);
+  return `${data.publicUrl}?t=${Date.now()}`;
+}
+
+export async function setTeamBanner(teamId: string, bannerUrl: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_set_team_banner', {
+    p_team_id: teamId,
+    p_banner_url: bannerUrl,
+  });
+  if (error) throw error;
 }
 
 type TeamRosterRow = {

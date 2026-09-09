@@ -35,6 +35,7 @@ export type Team = {
   status: TeamStatus;
   created_by: string | null;
   join_code: string;
+  banner_url: string | null;
   created_at: string;
 };
 

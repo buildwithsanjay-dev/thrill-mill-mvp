@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,7 +14,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { useActiveTeamStore } from '@/stores/activeTeam';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
-import { assignCoHost, removeTeamMember, respondToJoinRequest } from '../api';
+import { assignCoHost, removeTeamMember, respondToJoinRequest, setTeamBanner, uploadTeamBanner } from '../api';
 import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '../useTeams';
 import type { TeamMember, TeamRole } from '@/types/db';
 
@@ -32,6 +34,7 @@ export function TeamDetailsScreen() {
   const invalidate = useInvalidateTeamQueries();
   const setActiveTeamId = useActiveTeamStore((s) => s.setActiveTeamId);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
 
   if (isPending || !data) {
     return (
@@ -47,6 +50,10 @@ export function TeamDetailsScreen() {
   const pendingRequests = members.filter((m) => m.status === 'PENDING');
   const myMembership = members.find((m) => m.user_id === session?.user.id);
   const isHostOrCoHost = myMembership?.team_role === 'HOST' || myMembership?.team_role === 'CO_HOST';
+  // Banner edit is Host-only (narrower than the usual Host-or-Co-host rule) —
+  // fn_set_team_banner and the team-banners storage RLS both independently
+  // enforce this server-side; hiding the affordance here is UX only.
+  const isHost = myMembership?.team_role === 'HOST';
   const upcoming = bookings?.find((b) => b.status === 'CONFIRMED');
 
   // react-native's built-in Share sheet (SMS/WhatsApp/anything) needs no
@@ -120,6 +127,32 @@ export function TeamDetailsScreen() {
     router.push('/(app)/(tabs)/book');
   };
 
+  const handleEditBanner = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Allow photo access to set a Team banner.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+      aspect: [16, 9],
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    setIsUploadingBanner(true);
+    try {
+      const bannerUrl = await uploadTeamBanner(team.id, result.assets[0].uri);
+      await setTeamBanner(team.id, bannerUrl);
+      invalidate(team.id);
+      refetch();
+    } catch (error) {
+      Alert.alert('Could not update banner', error instanceof Error ? error.message : 'Please try again.');
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -137,6 +170,30 @@ export function TeamDetailsScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
+        <Pressable
+          style={styles.bannerWrap}
+          onPress={isHost ? handleEditBanner : undefined}
+          disabled={!isHost || isUploadingBanner}
+        >
+          {team.banner_url ? (
+            <Image source={{ uri: team.banner_url }} style={styles.bannerImage} contentFit="cover" />
+          ) : (
+            <View style={styles.bannerPlaceholder}>
+              <Ionicons name="image-outline" size={22} color="#94A3B8" />
+              {isHost && <Text style={styles.bannerPlaceholderText}>Add a Team banner</Text>}
+            </View>
+          )}
+          {isHost && (
+            <View style={styles.bannerEditBadge}>
+              {isUploadingBanner ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Ionicons name="camera" size={14} color="#FFFFFF" />
+              )}
+            </View>
+          )}
+        </Pressable>
+
         <View style={styles.summaryCard}>
           <View style={styles.summaryTopRow}>
             <View>
@@ -314,6 +371,29 @@ const styles = StyleSheet.create({
   activeDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary },
   headerSubtitle: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.4 },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
+
+  bannerWrap: {
+    width: '100%',
+    height: 140,
+    borderRadius: radii.lg,
+    overflow: 'hidden',
+    backgroundColor: '#0F1729',
+    marginBottom: spacing.md,
+  },
+  bannerImage: { width: '100%', height: '100%' },
+  bannerPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
+  bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: '#94A3B8' },
+  bannerEditBadge: {
+    position: 'absolute',
+    right: spacing.sm,
+    bottom: spacing.sm,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(15, 23, 41, 0.75)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   summaryCard: {
     backgroundColor: '#FFFFFF',
