@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 
 import { colors } from '@/constants/theme';
 
-const LOGO = require('../../../assets/logo.jpeg');
+const LOGO = require('../../../../assets/logo.jpeg');
 
 // The real Thrill Mill Club logo (mobile/assets/logo.jpeg) — a square image
 // whose corners are white, so cropping it to a circle via the badge's own

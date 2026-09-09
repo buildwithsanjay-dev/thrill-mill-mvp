@@ -8,7 +8,7 @@ import { PaginationDots } from '@/components/PaginationDots';
 import { colors, spacing } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 
-const HERO_IMAGE = require('../../../assets/welcome-hero.webp');
+const HERO_IMAGE = require('../../../../assets/welcome-hero.webp');
 
 export function WelcomeScreen() {
   const router = useRouter();
