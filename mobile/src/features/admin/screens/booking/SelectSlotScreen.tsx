@@ -9,7 +9,7 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '@/features/booking/api';
-import { useDefaultTurf, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
+import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
@@ -30,7 +30,23 @@ type SelectedHold = { holdId: string; expiresAt: number };
 export function SelectSlotScreen() {
   const router = useRouter();
   const { teamId, teamName, teamJoinCode, walletCredits } = useAdminBookingDraft();
-  const { data: turf } = useDefaultTurf();
+  const { data: turfResources } = useTurfResources();
+  const [selectedSport, setSelectedSport] = useState<'TURF' | 'PICKLEBALL'>('TURF');
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+
+  const resourcesForSport = useMemo(
+    () => (turfResources ?? []).filter((r) => r.sport === selectedSport),
+    [turfResources, selectedSport]
+  );
+  const turf = selectedSport === 'TURF'
+    ? resourcesForSport[0]
+    : resourcesForSport.find((r) => r.id === selectedResourceId);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset dependent state when sport selection changes
+    setSelectedResourceId(null);
+  }, [selectedSport]);
+
   const { data: teamDetails } = useTeamDetails(teamId ?? undefined);
   const { data: teamMembers } = useTeamMembers(teamId ?? undefined);
   const invalidateBooking = useInvalidateBookingQueries();
@@ -102,7 +118,10 @@ export function SelectSlotScreen() {
       .sort((a, b) => a.start_time.localeCompare(b.start_time));
   }, [slots, selectedHolds]);
 
-  const preview = useMemo(() => computeBookingPreview(selectedSlots, plan), [selectedSlots, plan]);
+  const preview = useMemo(
+    () => computeBookingPreview(selectedSlots, plan, selectedDate),
+    [selectedSlots, plan, selectedDate]
+  );
 
   const walletBefore = teamDetails?.wallet?.available_credits ?? walletCredits;
   const walletAfter = walletBefore - preview.totalCredits;
@@ -239,6 +258,45 @@ export function SelectSlotScreen() {
             {plan && <Text style={styles.teamMeta}>{plan.name}</Text>}
           </View>
         </View>
+
+        <Text style={styles.sectionTitle}>Select Sport</Text>
+        <View style={styles.sportRow}>
+          {(['TURF', 'PICKLEBALL'] as const).map((sport) => (
+            <Pressable
+              key={sport}
+              style={[styles.sportChip, selectedSport === sport && styles.sportChipSelected]}
+              onPress={() => setSelectedSport(sport)}
+            >
+              <Ionicons
+                name={sport === 'TURF' ? 'football-outline' : 'tennisball-outline'}
+                size={16}
+                color={selectedSport === sport ? '#FFFFFF' : colors.text}
+              />
+              <Text style={[styles.sportChipText, selectedSport === sport && styles.sportChipTextSelected]}>
+                {sport === 'TURF' ? 'Turf' : 'Pickleball'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {selectedSport === 'PICKLEBALL' && (
+          <>
+            <Text style={styles.sectionTitle}>Select Court</Text>
+            <View style={styles.sportRow}>
+              {resourcesForSport.map((court) => (
+                <Pressable
+                  key={court.id}
+                  style={[styles.sportChip, selectedResourceId === court.id && styles.sportChipSelected]}
+                  onPress={() => setSelectedResourceId(court.id)}
+                >
+                  <Text style={[styles.sportChipText, selectedResourceId === court.id && styles.sportChipTextSelected]}>
+                    {court.name.replace('Pickleball ', '')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
 
         <Text style={styles.sectionTitle}>Select Date</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
@@ -438,10 +496,19 @@ type BookingPreview = {
 // bookings in the rolling 24h window (that requires a DB query the server
 // already does) — it applies the discount cap only across the hours selected
 // in this draft, which is a reasonable best-effort estimate, not a promise.
-function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | undefined): BookingPreview {
+function computeBookingPreview(
+  sortedSlots: TurfSlot[],
+  plan: MembershipPlan | undefined,
+  isoDate: string
+): BookingPreview {
   if (!plan || sortedSlots.length === 0) {
     return { groups: [], totalCredits: 0, rangeLabel: '' };
   }
+
+  const isWeekend = [0, 6].includes(new Date(`${isoDate}T00:00:00`).getDay());
+  const standardNightRate = isWeekend
+    ? plan.standard_night_weekend_rate_per_hour
+    : plan.standard_night_weekday_rate_per_hour;
 
   let remaining = plan.discounted_hours_cap_per_24h ?? Number.POSITIVE_INFINITY;
   const groups = new Map<string, PreviewGroup>();
@@ -459,7 +526,7 @@ function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | u
         : plan.membership_night_rate_per_hour
       : isDay
         ? plan.standard_day_rate_per_hour
-        : plan.standard_night_rate_per_hour;
+        : standardNightRate;
 
     totalCredits += rate;
     const key = `${rateType}-${isDay ? 'day' : 'night'}`;
@@ -561,6 +628,22 @@ const styles = StyleSheet.create({
 
   insufficientNote: { fontSize: 11, color: colors.danger, marginTop: spacing.sm },
   previewDisclaimer: { fontSize: 10, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic', textAlign: 'center' },
+
+  sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  sportChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+  },
+  sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
+  sportChipTextSelected: { color: '#FFFFFF' },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
 });
