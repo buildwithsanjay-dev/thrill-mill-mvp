@@ -216,9 +216,10 @@ function PlanCard({
 
       <PlanFeature text={`All Days 5AM–5PM: ₹${plan.membership_day_rate_per_hour}/hr`} />
       <PlanFeature text={`All Days 5PM–Midnight: ₹${plan.membership_night_rate_per_hour}/hr`} />
+      <PlanFeature text="Credits shared across Turf & Pickleball" />
       <PlanFeature
         muted
-        text={`Standard price: 5AM–5PM ₹${plan.standard_day_rate_per_hour}/hr · 5PM–Midnight ₹${plan.standard_night_rate_per_hour}/hr`}
+        text={`Standard price: 5AM–5PM ₹${plan.standard_day_rate_per_hour}/hr · Weekday 5PM–Mid ₹${plan.standard_night_weekday_rate_per_hour}/hr · Weekend 5PM–Mid ₹${plan.standard_night_weekend_rate_per_hour}/hr`}
       />
       {plan.discounted_hours_cap_per_24h ? (
         <>
