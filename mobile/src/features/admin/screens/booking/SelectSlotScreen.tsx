@@ -99,6 +99,23 @@ export function SelectSlotScreen() {
     };
   }, []);
 
+  // Release every currently-held slot when the resolved resource changes
+  // (sport/court switch) — mirrors BookTurfScreen.tsx's release-on-resource-
+  // change effect (whole-branch review Finding 1). Without this, switching
+  // sport/court left the previous resource's holds ACTIVE and un-released:
+  // a self-inflicted <=1min slot block plus a stale "Selected" badge and a
+  // confusing HOLD_EXPIRED on confirm.
+  const turfIdRef = useRef(turf?.id);
+  useEffect(() => {
+    if (turfIdRef.current && turfIdRef.current !== turf?.id && Object.keys(selectedHolds).length > 0) {
+      const toRelease = Object.values(selectedHolds);
+      setSelectedHolds({});
+      Promise.all(toRelease.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
+    }
+    turfIdRef.current = turf?.id;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only resource-id changes should trigger this release
+  }, [turf?.id]);
+
   const dateOptions = useMemo(() => Array.from({ length: DATE_WINDOW }, (_, i) => addDaysIso(todayIso(), i)), []);
   const plan = teamDetails?.membership?.plan;
   const activeMembers = useMemo(() => (teamMembers ?? []).filter((m) => m.status === 'ACTIVE'), [teamMembers]);
@@ -326,7 +343,9 @@ export function SelectSlotScreen() {
             </View>
           )}
         </View>
-        {slotsPending ? (
+        {selectedSport === 'PICKLEBALL' && !turf ? (
+          <Text style={styles.hintText}>Select a court above to see availability.</Text>
+        ) : slotsPending ? (
           <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
         ) : (
           <View style={styles.slotGrid}>
@@ -405,7 +424,7 @@ export function SelectSlotScreen() {
             <View style={styles.summaryTopRow}>
               <View style={styles.summaryRow}>
                 <Ionicons name="location-outline" size={14} color={colors.textMuted} />
-                <Text style={styles.summaryText}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
+                <Text style={styles.summaryText}>{turf?.name ?? '—'}</Text>
               </View>
               <Text style={styles.summaryDate}>{formatDayLabel(selectedDate).weekday} {formatDayLabel(selectedDate).day}</Text>
             </View>
@@ -587,6 +606,7 @@ const styles = StyleSheet.create({
 
   hoursBadge: { backgroundColor: '#ECFDF5', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   hoursBadgeText: { fontSize: 11, fontWeight: '800', color: colors.primary },
+  hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: spacing.sm },
 
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: '#FFFFFF' },

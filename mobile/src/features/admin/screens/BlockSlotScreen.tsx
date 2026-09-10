@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,7 +17,26 @@ const DATE_WINDOW = 14;
 export function BlockSlotScreen() {
   const router = useRouter();
   const { data: turfResources } = useTurfResources();
-  const turf = turfResources?.find((r) => r.sport === 'TURF');
+  const [selectedSport, setSelectedSport] = useState<'TURF' | 'PICKLEBALL'>('TURF');
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+
+  // Same Sport/Court selection pattern as BookTurfScreen.tsx/SelectSlotScreen.tsx
+  // (whole-branch review Finding 6) — without this, none of the 4 Pickleball
+  // courts could ever be blocked for maintenance through this screen, since
+  // the derivation used to be hardcoded to the single Turf resource.
+  const resourcesForSport = useMemo(
+    () => (turfResources ?? []).filter((r) => r.sport === selectedSport),
+    [turfResources, selectedSport]
+  );
+  const turf = selectedSport === 'TURF'
+    ? resourcesForSport[0]
+    : resourcesForSport.find((r) => r.id === selectedResourceId);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset when the resolved resource changes (sport/court switch)
+    setSelectedResourceId(null);
+  }, [selectedSport]);
+
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const { data: slots, isPending, refetch } = useTurfSlots(turf?.id, selectedDate);
   const [selectedSlot, setSelectedSlot] = useState<TurfSlot | null>(null);
@@ -37,7 +56,7 @@ export function BlockSlotScreen() {
       setSelectedSlot(null);
       setReason('');
       refetch();
-      Alert.alert('Slot blocked', 'This Turf slot is no longer bookable.');
+      Alert.alert('Slot blocked', 'This slot is no longer bookable.');
     } catch (error) {
       Alert.alert('Could not block slot', error instanceof Error ? error.message : 'Please try again.');
     } finally {
@@ -68,11 +87,56 @@ export function BlockSlotScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="arrow-back" size={22} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Block Turf Slot</Text>
+        <Text style={styles.headerTitle}>Block Slot</Text>
         <View style={{ width: 22 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll}>
+        <Text style={styles.sectionTitle}>Select Sport</Text>
+        <View style={styles.sportRow}>
+          {(['TURF', 'PICKLEBALL'] as const).map((sport) => (
+            <Pressable
+              key={sport}
+              style={[styles.sportChip, selectedSport === sport && styles.sportChipSelected]}
+              onPress={() => {
+                setSelectedSport(sport);
+                setSelectedSlot(null);
+              }}
+            >
+              <Ionicons
+                name={sport === 'TURF' ? 'football-outline' : 'tennisball-outline'}
+                size={16}
+                color={selectedSport === sport ? '#FFFFFF' : colors.text}
+              />
+              <Text style={[styles.sportChipText, selectedSport === sport && styles.sportChipTextSelected]}>
+                {sport === 'TURF' ? 'Turf' : 'Pickleball'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {selectedSport === 'PICKLEBALL' && (
+          <>
+            <Text style={styles.sectionTitle}>Select Court</Text>
+            <View style={styles.sportRow}>
+              {resourcesForSport.map((court) => (
+                <Pressable
+                  key={court.id}
+                  style={[styles.sportChip, selectedResourceId === court.id && styles.sportChipSelected]}
+                  onPress={() => {
+                    setSelectedResourceId(court.id);
+                    setSelectedSlot(null);
+                  }}
+                >
+                  <Text style={[styles.sportChipText, selectedResourceId === court.id && styles.sportChipTextSelected]}>
+                    {court.name.replace('Pickleball ', '')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
         <Text style={styles.sectionTitle}>Select Date</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
           {dateOptions.map((iso) => {
@@ -95,7 +159,9 @@ export function BlockSlotScreen() {
         </ScrollView>
 
         <Text style={styles.sectionTitle}>Slots</Text>
-        {isPending ? (
+        {selectedSport === 'PICKLEBALL' && !turf ? (
+          <Text style={styles.hintText}>Select a court above to see availability.</Text>
+        ) : isPending ? (
           <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
         ) : (
           <View style={styles.slotGrid}>
@@ -158,6 +224,22 @@ const styles = StyleSheet.create({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.lg, marginBottom: spacing.sm },
+  sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  sportChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+  },
+  sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
+  sportChipTextSelected: { color: '#FFFFFF' },
+  hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: spacing.sm },
   dateRow: { flexDirection: 'row' },
   dateChip: { width: 56, height: 60, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, backgroundColor: '#FFFFFF' },
   dateChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },

@@ -1,7 +1,10 @@
--- Weekday/weekend-aware standard (non-member) night rate, per
--- docs/superpowers/specs/2026-09-10-pricing-pickleball-shared-credits-design.md.
--- The membership (member) rate and both day rates are unaffected — only the
--- standard/night credit line now branches on day-of-week.
+-- Restores non-obvious-invariant comments that were dropped (with no logic
+-- change) during the Task 2 rewrite in
+-- 20260910095422_weekday_weekend_pricing_rpcs.sql (whole-branch review
+-- Finding 4). Pure comment restoration — create or replace function with
+-- byte-identical logic, differing only in restored comments; Postgres
+-- persists comments in pg_proc.prosrc so this actually changes the deployed
+-- function source, not just the migration file on disk.
 
 create or replace function public.fn_confirm_booking(
   p_hold_id uuid,

@@ -12,6 +12,10 @@
 --     3. Cross-sport shared wallet: a Turf booking and a Pickleball booking for the
 --        same Team both debit the same team_wallets row (credits are shared across
 --        sports, per docs/superpowers/specs/2026-09-10-pricing-pickleball-shared-credits-design.md).
+--     4. Cross-sport price parity + shared discount-hour cap: a Turf hour and a
+--        Pickleball hour price identically per-hour, and the PLAN_10K rolling-24h
+--        discount allowance is a single Team-wide counter, not tracked per sport
+--        (whole-branch review Finding 3).
 --
 -- How to run:
 --   - Via Supabase SQL editor or `psql "$DATABASE_URL" -f supabase/tests/pricing_pickleball_verification.sql`,
@@ -453,6 +457,174 @@ begin
 
   raise notice 'PASS Block 3: Turf and Pickleball bookings for Team % both debited the same team_wallets row (% -> % -> %)',
     v_team_id, v_balance_before, v_balance_after_turf, v_balance_after_pb;
+end $$;
+
+rollback;
+
+
+-- -----------------------------------------------------------------------------
+-- Block 4: cross-sport price parity + shared rolling-24h discount cap.
+--   Expect (cap = v_cap, membership/standard day rates from PLAN_10K):
+--     - A first-discounted-hour booked on Turf and a first-discounted-hour booked
+--       on Pickleball (both within the same rolling-24h window, same Team) price
+--       IDENTICALLY per hour — proving Turf and Pickleball share one rate table,
+--       not sport-specific pricing.
+--     - After v_cap total hours have been booked across BOTH sports (mixed, not
+--       all on one sport), the (v_cap+1)-th hour — booked on Pickleball — falls to
+--       the standard day rate, proving the rolling-24h discount allowance is one
+--       Team-wide counter shared across sports, not a per-sport counter (which
+--       would incorrectly still have discount budget left for Pickleball).
+-- -----------------------------------------------------------------------------
+begin;
+
+do $$
+declare
+  v_team_id uuid;
+  v_cap integer;
+  v_host uuid;
+  v_turf_id uuid;
+  v_pb_id uuid;
+  v_membership_day_rate numeric;
+  v_standard_day_rate numeric;
+  v_hours time[];
+  v_i integer;
+  v_date date;
+  v_slot uuid;
+  v_hold uuid;
+  v_booking uuid[];
+  v_turf_first_credits numeric;
+  v_pb_first_credits numeric;
+  v_cap_exceeding_credits numeric;
+begin
+  select tm.team_id, mp.discounted_hours_cap_per_24h,
+         mp.membership_day_rate_per_hour, mp.standard_day_rate_per_hour
+    into v_team_id, v_cap, v_membership_day_rate, v_standard_day_rate
+    from public.team_memberships tm
+    join public.membership_plans mp on mp.id = tm.plan_id
+    where tm.status = 'ACTIVE' and mp.discounted_hours_cap_per_24h is not null
+    limit 1;
+  if v_team_id is null then
+    raise exception 'NO_FIXTURE: no ACTIVE Team found on a capped membership plan';
+  end if;
+  if v_cap < 2 then
+    raise exception 'NO_FIXTURE: capped plan''s discounted_hours_cap_per_24h (%) is too small for this test (needs >= 2)', v_cap;
+  end if;
+
+  select user_id into v_host from public.team_members
+    where team_id = v_team_id and status = 'ACTIVE' and team_role in ('HOST', 'CO_HOST')
+    limit 1;
+  if v_host is null then
+    raise exception 'NO_FIXTURE: fixture Team % has no ACTIVE Host/Co-host', v_team_id;
+  end if;
+
+  select id into v_turf_id from public.turf_resources where sport = 'TURF' limit 1;
+  select id into v_pb_id from public.turf_resources where sport = 'PICKLEBALL' limit 1;
+  if v_turf_id is null or v_pb_id is null then
+    raise exception 'NO_FIXTURE: missing a TURF or PICKLEBALL turf_resources row';
+  end if;
+
+  -- v_cap+1 consecutive day-band hours starting at 09:00 — same slot times must be
+  -- AVAILABLE on BOTH resources for the same date, since this block interleaves
+  -- bookings across sports at these hours.
+  v_hours := array[]::time[];
+  for v_i in 0 .. v_cap loop
+    v_hours := v_hours || make_time(9 + v_i, 0, 0);
+  end loop;
+
+  select ts.slot_date into v_date
+    from public.turf_slots ts
+    where ts.turf_id = v_turf_id
+      and ts.status = 'AVAILABLE'
+      and ts.slot_date > current_date + interval '14 days'
+      and ts.start_time = any(v_hours)
+      and not exists (
+        select 1 from public.bookings b
+        where b.team_id = v_team_id and b.status in ('CONFIRMED', 'IN_PROGRESS', 'COMPLETED')
+          and b.booking_date between ts.slot_date - 1 and ts.slot_date
+      )
+      and exists (
+        select 1 from public.turf_slots pb
+        where pb.turf_id = v_pb_id and pb.slot_date = ts.slot_date
+          and pb.status = 'AVAILABLE' and pb.start_time = any(v_hours)
+        group by pb.slot_date
+        having count(distinct pb.start_time) = array_length(v_hours, 1)
+      )
+    group by ts.slot_date
+    having count(distinct ts.start_time) = array_length(v_hours, 1)
+    order by ts.slot_date
+    limit 1;
+
+  if v_date is null then
+    raise exception 'NO_FIXTURE: could not find a date with % free day slots from 09:00 on BOTH Turf % and Pickleball %', array_length(v_hours, 1), v_turf_id, v_pb_id;
+  end if;
+
+  perform set_config('request.jwt.claim.sub', v_host::text, true);
+
+  -- Hour 0 (first discounted hour, 09:00) on Turf.
+  select id into v_slot from public.turf_slots
+    where turf_id = v_turf_id and slot_date = v_date and start_time = v_hours[1] and status = 'AVAILABLE';
+  insert into public.slot_holds (slot_id, team_id, status, expires_at)
+    values (v_slot, v_team_id, 'ACTIVE', now() + interval '1 minute') returning id into v_hold;
+  update public.turf_slots set status = 'HELD' where id = v_slot;
+  v_booking := public.fn_confirm_multi_slot_booking(array[v_hold], array[v_host]);
+  select total_credits into v_turf_first_credits from public.bookings where id = v_booking[1];
+
+  -- Hour 1 (second discounted hour, 10:00) on Pickleball — same rolling-24h window
+  -- as the Turf hour just booked (same Team, same day). Should price identically
+  -- to the Turf hour above: both are membership-rate day hours.
+  select id into v_slot from public.turf_slots
+    where turf_id = v_pb_id and slot_date = v_date and start_time = v_hours[2] and status = 'AVAILABLE';
+  insert into public.slot_holds (slot_id, team_id, status, expires_at)
+    values (v_slot, v_team_id, 'ACTIVE', now() + interval '1 minute') returning id into v_hold;
+  update public.turf_slots set status = 'HELD' where id = v_slot;
+  v_booking := public.fn_confirm_multi_slot_booking(array[v_hold], array[v_host]);
+  select total_credits into v_pb_first_credits from public.bookings where id = v_booking[1];
+
+  raise notice 'Block 4: first-discounted-hour prices — turf=% pickleball=%', v_turf_first_credits, v_pb_first_credits;
+
+  if v_turf_first_credits <> v_membership_day_rate or v_pb_first_credits <> v_membership_day_rate then
+    raise exception 'FAIL Block 4: expected both first-discounted hours to price at membership day rate % (turf=%, pickleball=%)',
+      v_membership_day_rate, v_turf_first_credits, v_pb_first_credits;
+  end if;
+  if v_turf_first_credits <> v_pb_first_credits then
+    raise exception 'FAIL Block 4: Turf and Pickleball priced DIFFERENTLY for the same discounted day hour (turf=%, pickleball=%) — sport-specific pricing detected',
+      v_turf_first_credits, v_pb_first_credits;
+  end if;
+
+  -- Consume the rest of the cap (hours 2 .. v_cap-1, i.e. v_cap-2 more hours) on
+  -- Turf, alternating resource just to keep this from looking like "only Turf
+  -- exhausts the cap" — still same Team, same rolling-24h window.
+  for v_i in 3 .. v_cap loop
+    select id into v_slot from public.turf_slots
+      where turf_id = v_turf_id and slot_date = v_date and start_time = v_hours[v_i] and status = 'AVAILABLE';
+    insert into public.slot_holds (slot_id, team_id, status, expires_at)
+      values (v_slot, v_team_id, 'ACTIVE', now() + interval '1 minute') returning id into v_hold;
+    update public.turf_slots set status = 'HELD' where id = v_slot;
+    perform public.fn_confirm_multi_slot_booking(array[v_hold], array[v_host]);
+  end loop;
+
+  -- The (v_cap+1)-th hour overall, booked on PICKLEBALL. If the discount cap were
+  -- tracked per-sport, Pickleball would (wrongly) still see its own fresh budget
+  -- here since only 1 prior hour was booked on Pickleball. Since the cap is
+  -- Team-wide and shared, this hour must fall through to the standard day rate.
+  select id into v_slot from public.turf_slots
+    where turf_id = v_pb_id and slot_date = v_date and start_time = v_hours[v_cap + 1] and status = 'AVAILABLE';
+  insert into public.slot_holds (slot_id, team_id, status, expires_at)
+    values (v_slot, v_team_id, 'ACTIVE', now() + interval '1 minute') returning id into v_hold;
+  update public.turf_slots set status = 'HELD' where id = v_slot;
+  v_booking := public.fn_confirm_multi_slot_booking(array[v_hold], array[v_host]);
+  select total_credits into v_cap_exceeding_credits from public.bookings where id = v_booking[1];
+
+  raise notice 'Block 4: cap-exceeding (hour %+1) booked on Pickleball priced at % (expected standard day rate %)',
+    v_cap, v_cap_exceeding_credits, v_standard_day_rate;
+
+  if v_cap_exceeding_credits <> v_standard_day_rate then
+    raise exception 'FAIL Block 4: expected cap-exceeding hour (on Pickleball) to fall to standard day rate % (Team-wide shared cap), got % — discount cap may be tracked per-sport instead of per-Team',
+      v_standard_day_rate, v_cap_exceeding_credits;
+  end if;
+
+  raise notice 'PASS Block 4: Turf/Pickleball price identically per hour (%), and the rolling-24h discount cap is shared across sports (hour %+1 on Pickleball correctly fell to standard rate %)',
+    v_membership_day_rate, v_cap, v_standard_day_rate;
 end $$;
 
 rollback;

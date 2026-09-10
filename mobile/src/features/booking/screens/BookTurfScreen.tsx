@@ -311,9 +311,32 @@ export function BookTurfScreen() {
 
   const handleConfirm = async () => {
     if (heldSlots.size === 0 || effectiveParticipantIds.length === 0) return;
+    // Guard against a hold landing in heldSlots for a resource the user has
+    // since navigated away from (see whole-branch review Finding 1): a slot
+    // tap awaits createSlotHold before writing into heldSlots, so a user can
+    // switch sport/court while that await is in flight — the release-on-
+    // resource-change effect below fires on the *old* (possibly empty) map,
+    // then the in-flight hold lands afterward, invisible in the slot grid
+    // (which renders `slots`, not `heldSlots`) but still present here. Only
+    // ever confirm holds that belong to the currently-resolved resource.
+    const currentResourceHeldSlots = sortedHeldSlots.filter((h) => h.slot.turf_id === turf?.id);
+    if (currentResourceHeldSlots.length !== sortedHeldSlots.length) {
+      const stale = sortedHeldSlots.filter((h) => h.slot.turf_id !== turf?.id);
+      setHeldSlots((prev) => {
+        const next = new Map(prev);
+        stale.forEach((h) => next.delete(h.slot.id));
+        return next;
+      });
+      Promise.all(stale.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
+      Alert.alert(
+        'Selection changed',
+        'A held slot belonged to a resource you navigated away from and was released. Please review your selection.'
+      );
+      return;
+    }
     setIsConfirming(true);
     try {
-      const holdIds = sortedHeldSlots.map((h) => h.holdId);
+      const holdIds = currentResourceHeldSlots.map((h) => h.holdId);
       const bookingIds = await confirmMultiSlotBooking(holdIds, effectiveParticipantIds);
       invalidateBooking({ teamId: activeTeam.team.id, turfId: turf?.id });
       setHeldSlots(new Map());
@@ -391,13 +414,15 @@ export function BookTurfScreen() {
           </>
         )}
 
-        <View style={styles.heroCard}>
-          <Text style={styles.heroTitle}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
-          <View style={styles.heroBadgeRow}>
-            <View style={styles.heroDot} />
-            <Text style={styles.heroBadgeText}>Available for booking</Text>
+        {turf && (
+          <View style={styles.heroCard}>
+            <Text style={styles.heroTitle}>{turf.name}</Text>
+            <View style={styles.heroBadgeRow}>
+              <View style={styles.heroDot} />
+              <Text style={styles.heroBadgeText}>Available for booking</Text>
+            </View>
           </View>
-        </View>
+        )}
 
         <Text style={styles.sectionLabel}>Select Date</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
@@ -418,7 +443,9 @@ export function BookTurfScreen() {
         </ScrollView>
 
         <Text style={styles.sectionLabel}>Available Slots</Text>
-        {slotsPending ? (
+        {selectedSport === 'PICKLEBALL' && !turf ? (
+          <Text style={styles.hintText}>Select a court above to see availability.</Text>
+        ) : slotsPending ? (
           <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
         ) : (
           <View style={styles.slotGrid}>
@@ -485,7 +512,7 @@ export function BookTurfScreen() {
             <Text style={styles.summaryTitle}>Booking Summary</Text>
             <View style={styles.summaryRow}>
               <Ionicons name="location-outline" size={14} color={colors.textMuted} />
-              <Text style={styles.summaryText}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
+              <Text style={styles.summaryText}>{turf?.name ?? '—'}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Ionicons name="calendar-outline" size={14} color={colors.textMuted} />
@@ -605,6 +632,7 @@ const styles = StyleSheet.create({
   heroBadgeText: { fontSize: 12, color: '#A7F3D0', fontWeight: '600' },
 
   sectionLabel: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
+  hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
   sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   sportChip: {
     flexDirection: 'row',
