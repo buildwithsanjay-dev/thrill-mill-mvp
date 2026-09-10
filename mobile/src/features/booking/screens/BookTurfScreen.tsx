@@ -123,7 +123,7 @@ export function BookTurfScreen() {
     : resourcesForSport.find((r) => r.id === selectedResourceId);
 
   useEffect(() => {
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional reset when the resolved resource changes (sport/court switch)
     setSelectedResourceId(null);
   }, [selectedSport]);
 
