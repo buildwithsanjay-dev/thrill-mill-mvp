@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,7 +16,7 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
 import { mapBookingError } from '../errors';
-import { useDefaultTurf, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
+import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, TurfSlot } from '@/types/db';
 
 const DATE_WINDOW = 14;
@@ -50,8 +50,17 @@ type BookingPreview = { totalCredits: number; totalHours: number; lines: Preview
 // by earlier bookings today, this preview can look slightly more optimistic
 // than the server's real number. That's fine per CLAUDE.md: previews are
 // UX-only, the server is always authoritative for the final total.
-function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | undefined): BookingPreview | null {
+function computeBookingPreview(
+  sortedSlots: TurfSlot[],
+  plan: MembershipPlan | undefined,
+  isoDate: string
+): BookingPreview | null {
   if (!plan || sortedSlots.length === 0) return null;
+
+  const isWeekend = [0, 6].includes(new Date(`${isoDate}T00:00:00`).getDay());
+  const standardNightRate = isWeekend
+    ? plan.standard_night_weekend_rate_per_hour
+    : plan.standard_night_weekday_rate_per_hour;
 
   let discountRemaining = plan.discounted_hours_cap_per_24h ?? Infinity;
   let totalCredits = 0;
@@ -76,7 +85,7 @@ function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | u
         discountRemaining -= 1;
         addHour(isDay ? 'Membership Day' : 'Membership Night', isDay ? plan.membership_day_rate_per_hour : plan.membership_night_rate_per_hour);
       } else {
-        addHour(isDay ? 'Standard Day' : 'Standard Night', isDay ? plan.standard_day_rate_per_hour : plan.standard_night_rate_per_hour);
+        addHour(isDay ? 'Standard Day' : 'Standard Night', isDay ? plan.standard_day_rate_per_hour : standardNightRate);
       }
     }
   }
@@ -96,8 +105,27 @@ export function BookTurfScreen() {
   const { session } = useAuth();
   const { data: teams, isPending: teamsPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
-  const { data: turf } = useDefaultTurf();
+  const { data: turfResources } = useTurfResources();
   const invalidateBooking = useInvalidateBookingQueries();
+
+  const [selectedSport, setSelectedSport] = useState<'TURF' | 'PICKLEBALL'>('TURF');
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+
+  const resourcesForSport = useMemo(
+    () => (turfResources ?? []).filter((r) => r.sport === selectedSport),
+    [turfResources, selectedSport]
+  );
+  // Turf only ever has one resource — auto-select it so the flow feels
+  // unchanged from before Pickleball existed. Pickleball has 4, so the user
+  // picks explicitly (selectedResourceId stays null until they do).
+  const turf = selectedSport === 'TURF'
+    ? resourcesForSport[0]
+    : resourcesForSport.find((r) => r.id === selectedResourceId);
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    setSelectedResourceId(null);
+  }, [selectedSport]);
 
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const [heldSlots, setHeldSlots] = useState<Map<string, HeldSlot>>(new Map());
@@ -132,8 +160,8 @@ export function BookTurfScreen() {
   );
 
   const preview = useMemo(
-    () => computeBookingPreview(sortedHeldSlots.map((h) => h.slot), plan),
-    [sortedHeldSlots, plan]
+    () => computeBookingPreview(sortedHeldSlots.map((h) => h.slot), plan, selectedDate),
+    [sortedHeldSlots, plan, selectedDate]
   );
 
   // Shared "earliest expiring" countdown across every currently-held slot —
@@ -174,6 +202,17 @@ export function BookTurfScreen() {
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [heldSlots]);
+
+  const turfIdRef = useRef(turf?.id);
+  useEffect(() => {
+    if (turfIdRef.current && turfIdRef.current !== turf?.id && heldSlots.size > 0) {
+      const toRelease = Array.from(heldSlots.values());
+      setHeldSlots(new Map());
+      Promise.all(toRelease.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
+    }
+    turfIdRef.current = turf?.id;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turf?.id]);
 
   const dateOptions = useMemo(
     () => Array.from({ length: DATE_WINDOW }, (_, i) => addDaysIso(todayIso(), i)),
@@ -312,6 +351,45 @@ export function BookTurfScreen() {
             <Text style={styles.teamPillValue}>{activeTeam.team.name}</Text>
           </View>
         </View>
+
+        <Text style={styles.sectionLabel}>Select Sport</Text>
+        <View style={styles.sportRow}>
+          {(['TURF', 'PICKLEBALL'] as const).map((sport) => (
+            <Pressable
+              key={sport}
+              style={[styles.sportChip, selectedSport === sport && styles.sportChipSelected]}
+              onPress={() => setSelectedSport(sport)}
+            >
+              <Ionicons
+                name={sport === 'TURF' ? 'football-outline' : 'tennisball-outline'}
+                size={16}
+                color={selectedSport === sport ? '#FFFFFF' : colors.text}
+              />
+              <Text style={[styles.sportChipText, selectedSport === sport && styles.sportChipTextSelected]}>
+                {sport === 'TURF' ? 'Turf' : 'Pickleball'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {selectedSport === 'PICKLEBALL' && (
+          <>
+            <Text style={styles.sectionLabel}>Select Court</Text>
+            <View style={styles.sportRow}>
+              {resourcesForSport.map((court) => (
+                <Pressable
+                  key={court.id}
+                  style={[styles.sportChip, selectedResourceId === court.id && styles.sportChipSelected]}
+                  onPress={() => setSelectedResourceId(court.id)}
+                >
+                  <Text style={[styles.sportChipText, selectedResourceId === court.id && styles.sportChipTextSelected]}>
+                    {court.name.replace('Pickleball ', '')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
 
         <View style={styles.heroCard}>
           <Text style={styles.heroTitle}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
@@ -527,6 +605,21 @@ const styles = StyleSheet.create({
   heroBadgeText: { fontSize: 12, color: '#A7F3D0', fontWeight: '600' },
 
   sectionLabel: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
+  sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  sportChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+  },
+  sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
+  sportChipTextSelected: { color: '#FFFFFF' },
   dateRow: { flexDirection: 'row' },
   dateChip: {
     width: 60,
