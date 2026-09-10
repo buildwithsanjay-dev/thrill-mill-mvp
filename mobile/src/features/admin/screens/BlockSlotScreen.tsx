@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { colors, radii, spacing } from '@/constants/theme';
-import { useDefaultTurf, useTurfSlots } from '@/features/booking/useBooking';
+import { useTurfResources, useTurfSlots } from '@/features/booking/useBooking';
 import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
 import { adminBlockSlot, adminUnblockSlot } from '../api';
 import type { TurfSlot } from '@/types/db';
@@ -16,7 +16,8 @@ const DATE_WINDOW = 14;
 
 export function BlockSlotScreen() {
   const router = useRouter();
-  const { data: turf } = useDefaultTurf();
+  const { data: turfResources } = useTurfResources();
+  const turf = turfResources?.find((r) => r.sport === 'TURF');
   const [selectedDate, setSelectedDate] = useState(todayIso());
   const { data: slots, isPending, refetch } = useTurfSlots(turf?.id, selectedDate);
   const [selectedSlot, setSelectedSlot] = useState<TurfSlot | null>(null);

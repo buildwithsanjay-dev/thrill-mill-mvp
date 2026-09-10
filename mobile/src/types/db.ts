@@ -62,7 +62,8 @@ export type MembershipPlan = {
   membership_day_rate_per_hour: number;
   membership_night_rate_per_hour: number;
   standard_day_rate_per_hour: number;
-  standard_night_rate_per_hour: number;
+  standard_night_weekday_rate_per_hour: number;
+  standard_night_weekend_rate_per_hour: number;
   is_active: boolean;
 };
 
@@ -96,10 +97,13 @@ export type WalletLedgerEntry = {
   created_at: string;
 };
 
+export type Sport = 'TURF' | 'PICKLEBALL';
+
 export type TurfResource = {
   id: string;
   name: string;
   description: string | null;
+  sport: Sport;
 };
 
 export type TurfSlot = {

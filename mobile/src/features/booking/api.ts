@@ -23,16 +23,15 @@ export function localTimeHms(d: Date): string {
   return `${h}:${m}:${s}`;
 }
 
-export async function getDefaultTurf(): Promise<TurfResource> {
+export async function getTurfResources(): Promise<TurfResource[]> {
   const { data, error } = await supabase
     .from('turf_resources')
     .select('*')
     .eq('is_active', true)
-    .order('created_at', { ascending: true })
-    .limit(1)
-    .single();
+    .order('sport', { ascending: true })
+    .order('name', { ascending: true });
   if (error) throw error;
-  return data as TurfResource;
+  return data as TurfResource[];
 }
 
 export async function getTurfSlotsForDate(turfId: string, isoDate: string): Promise<TurfSlot[]> {
