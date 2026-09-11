@@ -42,9 +42,17 @@ export function useReactions(messageIds: string[]) {
 
 export function useInvalidateChatQueries() {
   const queryClient = useQueryClient();
-  return (opts: { roomId?: string; messageIds?: string[] }) => {
+  return (opts: { roomId?: string; messageIds?: string[]; readMarker?: { roomId: string; userId: string } }) => {
     if (opts.roomId) queryClient.invalidateQueries({ queryKey: ['chat-messages', opts.roomId] });
     if (opts.messageIds) queryClient.invalidateQueries({ queryKey: ['chat-reactions', opts.messageIds] });
+    // The dashboard's red dot reads this same key — without invalidating
+    // it here, the global 30s default staleTime means returning to the
+    // dashboard right after reading a chat can still show the dot for up
+    // to 30s, since the cached "last read" value hasn't been told to
+    // refresh yet even though markRoomRead() already wrote the new value.
+    if (opts.readMarker) {
+      queryClient.invalidateQueries({ queryKey: ['chat-last-read-at', opts.readMarker.roomId, opts.readMarker.userId] });
+    }
   };
 }
 

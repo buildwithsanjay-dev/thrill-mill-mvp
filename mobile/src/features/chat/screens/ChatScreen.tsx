@@ -40,7 +40,17 @@ export function ChatScreen() {
   // block viewing the chat, so it's swallowed rather than surfaced.
   useEffect(() => {
     if (!room?.id || !session?.user.id) return;
-    markRoomRead(room.id, session.user.id).catch(() => undefined);
+    const roomId = room.id;
+    const userId = session.user.id;
+    markRoomRead(roomId, userId)
+      .then(() => invalidateChat({ readMarker: { roomId, userId } }))
+      .catch(() => undefined);
+    // invalidateChat is intentionally omitted: useInvalidateChatQueries
+    // returns a new function identity every render (same as its sibling
+    // useInvalidateBookingQueries), so including it here would refire
+    // this effect on every render instead of only when room/session/
+    // messages actually change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.id, session?.user.id, messages]);
 
   const messageIds = useMemo(() => (messages ?? []).map((m) => m.id), [messages]);
