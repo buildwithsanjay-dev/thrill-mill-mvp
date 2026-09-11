@@ -36,6 +36,13 @@
         {
           "photosPermission": "Thrill Mill Club needs access to your photos so you can set a profile picture."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#0C5C54"
+        }
       ]
     ],
     "extra": {

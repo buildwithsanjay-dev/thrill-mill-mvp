@@ -7,6 +7,7 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
+import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 
 // This context exists purely to gate navigation (logged in vs. not) and to
 // know *who* is calling. It is NOT a source of authorization truth — no
@@ -30,10 +31,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
       lastUserId.current = data.session?.user.id ?? null;
       setSession(data.session);
       setIsLoading(false);
+      // Best-effort, never blocks app load — a user already signed in when
+      // the app opens still needs a fresh push token registered.
+      if (data.session) registerForPushNotificationsAsync().catch(() => undefined);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       const newUserId = newSession?.user.id ?? null;
+      if (newSession && newUserId !== lastUserId.current) {
+        registerForPushNotificationsAsync().catch(() => undefined);
+      }
       // Every cached query (profile, teams, wallets, bookings...) is keyed
       // by the previous user's data. Switching accounts — sign-out,
       // sign-in as someone else, or even a silent token refresh landing on
