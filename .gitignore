@@ -4,6 +4,11 @@ supabase/.temp/
 # Subagent git-worktree scratch space — ephemeral, never committed
 .claude/worktrees/
 
+# Firebase Admin SDK service account keys — grant full admin access to the
+# Firebase project, never committed. Used once to upload to EAS via
+# `eas credentials`, then safe to delete locally.
+*firebase-adminsdk*.json
+
 # OS
 .DS_Store
 Thumbs.db
