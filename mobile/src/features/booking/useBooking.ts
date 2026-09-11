@@ -5,14 +5,14 @@ import { teamBookingCountsQueryKey } from '@/features/team/useTeams';
 import {
   getBooking,
   getBookingParticipants,
-  getDefaultTurf,
+  getTurfResources,
   getTeamBookings,
   getTurfSlotsForDate,
   getUpcomingBookingsAcrossTeams,
 } from './api';
 
-export function useDefaultTurf() {
-  return useQuery({ queryKey: ['default-turf'], queryFn: getDefaultTurf, staleTime: 60 * 60 * 1000 });
+export function useTurfResources() {
+  return useQuery({ queryKey: ['turf-resources'], queryFn: getTurfResources, staleTime: 60 * 60 * 1000 });
 }
 
 // Dashboard "Other Teams' Upcoming Events" strip — every ACTIVE Team the

@@ -2,10 +2,11 @@
 
 ## Product Context
 
-Thrill Mill Club is a sports-club community management and Turf booking app. The MVP covers
-Turf operations and Team-based community management only (no Pickleball, no multi-sport, no
-verified match results/tournaments). It must be a **functional, production-oriented app**, not a
-prototype — financial, booking, and authorization correctness take priority over feature breadth.
+Thrill Mill Club is a sports-club community management and booking app. The MVP covers Turf and
+Pickleball booking (two sports, sharing one Team credit pool) and Team-based community
+management only (no multi-sport beyond these two, no verified match results/tournaments). It
+must be a **functional, production-oriented app**, not a prototype — financial, booking, and
+authorization correctness take priority over feature breadth.
 
 Full detail: the product spec PDF is at `assets/Thrill MIll Final MVP Blueprint_v1.pdf` (source of
 truth for anything not covered here or in `docs/`) and the condensed dev-facing summary is at
@@ -52,15 +53,22 @@ underlying engine/rules as a Host/Co-host would.
     bookings/day/members) — the 4th+ hour in that window falls to the standard rate.
   - ₹25,000 plan → **40,000 credits allocated on activation**. No discount-hour cap — every
     booked hour is charged at the membership rate.
-  - **Both plans share the same time-banded rates** (Turf operates 5AM–midnight only; every
-    slot is whole-hour aligned so no slot straddles a band boundary):
+  - **Both plans share the same time-banded rates** (Turf and Pickleball both operate
+    5AM–midnight only; every slot is whole-hour aligned so no slot straddles a band boundary).
+    Rates are **identical for both sports — no sport-specific pricing** — and both plans' credits
+    are spendable on either sport interchangeably from the same Team wallet:
     | Band | Membership rate | Standard rate |
     |---|---|---|
-    | 5AM–5PM (day) | ₹450/hr | ₹500/hr |
-    | 5PM–midnight (night) | ₹800/hr | ₹1,000/hr |
+    | 5AM–5PM (day), all days | ₹350/hr | ₹400/hr |
+    | 5PM–midnight, weekdays | ₹650/hr | ₹700/hr |
+    | 5PM–midnight, weekends | ₹650/hr | ₹800/hr |
+  - Membership day/night rates do **not** vary by weekday/weekend. The standard (non-member)
+    night rate **does** vary by weekday/weekend; the standard day rate does not.
   - A booking spanning both bands is priced hour-by-hour; the rolling-24h discount allowance
-    is consumed in booking order regardless of band, then remaining hours bill at the
-    standard rate for their own band.
+    is consumed in booking order regardless of band, **shared across both sports** (a Pickleball
+    hour and a Turf hour draw from the same rolling-24h allowance for a Team), then remaining
+    hours bill at the standard rate for their own band. The ₹10,000 plan's 3-discounted-hour cap
+    stays in force under the new rates; the ₹25,000 plan remains uncapped.
 - **Credits do not expire** under the current rule — never implement auto-expiry.
 - **Cancellation:** ≥24 hours before session → full refund + restore discounted-hour usage; <24
   hours → no refund. Eligibility is decided by **server time**, never device time.
@@ -235,9 +243,13 @@ bundle.
 
 ## Things That Must Not Be Changed Without Explicit Approval
 
-- The two membership plans' pricing, credits allocated, day/night rate bands, and the
-  ₹10,000 plan's 3-hour/rolling-24-hour discount cap.
-- The Team-owns-credits model (no individual wallets, no member-to-member transfers).
+- The two membership plans' pricing, credits allocated, day/night rate bands (₹350/650 member,
+  ₹400/700-weekday-night/₹800-weekend-night standard), and the ₹10,000 plan's 3-hour/
+  rolling-24-hour discount cap.
+- Rates being identical for Turf and Pickleball (no sport-specific pricing) and the rolling-24h
+  discount-hour cap being shared across both sports, not tracked per sport.
+- The Team-owns-credits model (no individual wallets, no member-to-member transfers) — this
+  now explicitly includes credits being shared across both sports from the same Team wallet.
 - The external-payment + Admin-verification model (no payment gateway).
 - The platform-role vs Team-role separation and Team-role contextuality.
 - The client/server responsibility boundary (client never authoritative for money, inventory,

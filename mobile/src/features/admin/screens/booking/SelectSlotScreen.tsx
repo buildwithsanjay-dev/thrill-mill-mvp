@@ -9,7 +9,7 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '@/features/booking/api';
-import { useDefaultTurf, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
+import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
@@ -30,7 +30,23 @@ type SelectedHold = { holdId: string; expiresAt: number };
 export function SelectSlotScreen() {
   const router = useRouter();
   const { teamId, teamName, teamJoinCode, walletCredits } = useAdminBookingDraft();
-  const { data: turf } = useDefaultTurf();
+  const { data: turfResources } = useTurfResources();
+  const [selectedSport, setSelectedSport] = useState<'TURF' | 'PICKLEBALL'>('TURF');
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+
+  const resourcesForSport = useMemo(
+    () => (turfResources ?? []).filter((r) => r.sport === selectedSport),
+    [turfResources, selectedSport]
+  );
+  const turf = selectedSport === 'TURF'
+    ? resourcesForSport[0]
+    : resourcesForSport.find((r) => r.id === selectedResourceId);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset dependent state when sport selection changes
+    setSelectedResourceId(null);
+  }, [selectedSport]);
+
   const { data: teamDetails } = useTeamDetails(teamId ?? undefined);
   const { data: teamMembers } = useTeamMembers(teamId ?? undefined);
   const invalidateBooking = useInvalidateBookingQueries();
@@ -83,6 +99,23 @@ export function SelectSlotScreen() {
     };
   }, []);
 
+  // Release every currently-held slot when the resolved resource changes
+  // (sport/court switch) — mirrors BookTurfScreen.tsx's release-on-resource-
+  // change effect (whole-branch review Finding 1). Without this, switching
+  // sport/court left the previous resource's holds ACTIVE and un-released:
+  // a self-inflicted <=1min slot block plus a stale "Selected" badge and a
+  // confusing HOLD_EXPIRED on confirm.
+  const turfIdRef = useRef(turf?.id);
+  useEffect(() => {
+    if (turfIdRef.current && turfIdRef.current !== turf?.id && Object.keys(selectedHolds).length > 0) {
+      const toRelease = Object.values(selectedHolds);
+      setSelectedHolds({});
+      Promise.all(toRelease.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
+    }
+    turfIdRef.current = turf?.id;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- only resource-id changes should trigger this release
+  }, [turf?.id]);
+
   const dateOptions = useMemo(() => Array.from({ length: DATE_WINDOW }, (_, i) => addDaysIso(todayIso(), i)), []);
   const plan = teamDetails?.membership?.plan;
   const activeMembers = useMemo(() => (teamMembers ?? []).filter((m) => m.status === 'ACTIVE'), [teamMembers]);
@@ -102,7 +135,10 @@ export function SelectSlotScreen() {
       .sort((a, b) => a.start_time.localeCompare(b.start_time));
   }, [slots, selectedHolds]);
 
-  const preview = useMemo(() => computeBookingPreview(selectedSlots, plan), [selectedSlots, plan]);
+  const preview = useMemo(
+    () => computeBookingPreview(selectedSlots, plan, selectedDate),
+    [selectedSlots, plan, selectedDate]
+  );
 
   const walletBefore = teamDetails?.wallet?.available_credits ?? walletCredits;
   const walletAfter = walletBefore - preview.totalCredits;
@@ -240,6 +276,45 @@ export function SelectSlotScreen() {
           </View>
         </View>
 
+        <Text style={styles.sectionTitle}>Select Sport</Text>
+        <View style={styles.sportRow}>
+          {(['TURF', 'PICKLEBALL'] as const).map((sport) => (
+            <Pressable
+              key={sport}
+              style={[styles.sportChip, selectedSport === sport && styles.sportChipSelected]}
+              onPress={() => setSelectedSport(sport)}
+            >
+              <Ionicons
+                name={sport === 'TURF' ? 'football-outline' : 'tennisball-outline'}
+                size={16}
+                color={selectedSport === sport ? '#FFFFFF' : colors.text}
+              />
+              <Text style={[styles.sportChipText, selectedSport === sport && styles.sportChipTextSelected]}>
+                {sport === 'TURF' ? 'Turf' : 'Pickleball'}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {selectedSport === 'PICKLEBALL' && (
+          <>
+            <Text style={styles.sectionTitle}>Select Court</Text>
+            <View style={styles.sportRow}>
+              {resourcesForSport.map((court) => (
+                <Pressable
+                  key={court.id}
+                  style={[styles.sportChip, selectedResourceId === court.id && styles.sportChipSelected]}
+                  onPress={() => setSelectedResourceId(court.id)}
+                >
+                  <Text style={[styles.sportChipText, selectedResourceId === court.id && styles.sportChipTextSelected]}>
+                    {court.name.replace('Pickleball ', '')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
         <Text style={styles.sectionTitle}>Select Date</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
           {dateOptions.map((iso) => {
@@ -268,7 +343,9 @@ export function SelectSlotScreen() {
             </View>
           )}
         </View>
-        {slotsPending ? (
+        {selectedSport === 'PICKLEBALL' && !turf ? (
+          <Text style={styles.hintText}>Select a court above to see availability.</Text>
+        ) : slotsPending ? (
           <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} />
         ) : (
           <View style={styles.slotGrid}>
@@ -347,7 +424,7 @@ export function SelectSlotScreen() {
             <View style={styles.summaryTopRow}>
               <View style={styles.summaryRow}>
                 <Ionicons name="location-outline" size={14} color={colors.textMuted} />
-                <Text style={styles.summaryText}>{turf?.name ?? 'Thrill Mill Turf'}</Text>
+                <Text style={styles.summaryText}>{turf?.name ?? '—'}</Text>
               </View>
               <Text style={styles.summaryDate}>{formatDayLabel(selectedDate).weekday} {formatDayLabel(selectedDate).day}</Text>
             </View>
@@ -438,10 +515,19 @@ type BookingPreview = {
 // bookings in the rolling 24h window (that requires a DB query the server
 // already does) — it applies the discount cap only across the hours selected
 // in this draft, which is a reasonable best-effort estimate, not a promise.
-function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | undefined): BookingPreview {
+function computeBookingPreview(
+  sortedSlots: TurfSlot[],
+  plan: MembershipPlan | undefined,
+  isoDate: string
+): BookingPreview {
   if (!plan || sortedSlots.length === 0) {
     return { groups: [], totalCredits: 0, rangeLabel: '' };
   }
+
+  const isWeekend = [0, 6].includes(new Date(`${isoDate}T00:00:00`).getDay());
+  const standardNightRate = isWeekend
+    ? plan.standard_night_weekend_rate_per_hour
+    : plan.standard_night_weekday_rate_per_hour;
 
   let remaining = plan.discounted_hours_cap_per_24h ?? Number.POSITIVE_INFINITY;
   const groups = new Map<string, PreviewGroup>();
@@ -459,7 +545,7 @@ function computeBookingPreview(sortedSlots: TurfSlot[], plan: MembershipPlan | u
         : plan.membership_night_rate_per_hour
       : isDay
         ? plan.standard_day_rate_per_hour
-        : plan.standard_night_rate_per_hour;
+        : standardNightRate;
 
     totalCredits += rate;
     const key = `${rateType}-${isDay ? 'day' : 'night'}`;
@@ -520,6 +606,7 @@ const styles = StyleSheet.create({
 
   hoursBadge: { backgroundColor: '#ECFDF5', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   hoursBadgeText: { fontSize: 11, fontWeight: '800', color: colors.primary },
+  hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: spacing.sm },
 
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: '#FFFFFF' },
@@ -561,6 +648,22 @@ const styles = StyleSheet.create({
 
   insufficientNote: { fontSize: 11, color: colors.danger, marginTop: spacing.sm },
   previewDisclaimer: { fontSize: 10, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic', textAlign: 'center' },
+
+  sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  sportChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+  },
+  sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
+  sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
+  sportChipTextSelected: { color: '#FFFFFF' },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
 });

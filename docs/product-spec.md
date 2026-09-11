@@ -6,13 +6,13 @@ wording or edge cases not covered here). This file is a summary, not a replaceme
 
 ## 1. Overview & Objective
 
-Sports-club community management + Turf booking app. MVP scope = Turf operations +
-Team-based community management. Validate whether the club can run Team community/Turf
-booking digitally, replacing manual/WhatsApp coordination, while getting membership, credit,
-booking, and cancellation logic *correct* — that correctness matters more than feature breadth
-for this MVP.
+Sports-club community management + Turf/Pickleball booking app. MVP scope = Turf and
+Pickleball booking (two sports, sharing one Team credit pool) + Team-based community
+management. Validate whether the club can run Team community/booking digitally, replacing
+manual/WhatsApp coordination, while getting membership, credit, booking, and cancellation
+logic *correct* — that correctness matters more than feature breadth for this MVP.
 
-**Explicitly outside MVP:** Pickleball booking, multi-sport management, verified match
+**Explicitly outside MVP:** multi-sport management beyond Turf and Pickleball, verified match
 results/score-based ranking, tournament management, advanced AI moderation, individual
 wallet-to-wallet transfers, individual payment splitting, automatic participant credit collection,
 advanced financial settlement, complex enterprise Admin dashboards, advanced reporting,
@@ -81,20 +81,27 @@ independently verify. Financial ops are Admin-controlled only. Sensitive Admin o
 1. Teams are the primary community unit; credits belong to the Team, never individual Members.
 2. Two Team-creation paths (Member-created, Admin-assisted-on-behalf-of-customer) produce
    identical Team objects with identical subsequent rules — no separate "Admin Team" type.
-3. **Membership plans:** Turf operates 5AM–midnight only; every slot is whole-hour aligned
-   (no slot straddles the 5PM band boundary), so pricing is computed hour-by-hour.
-   - Time-banded rates, shared by both plans:
+3. **Membership plans:** both Turf and Pickleball operate 5AM–midnight only; every slot is
+   whole-hour aligned (no slot straddles the 5PM band boundary), so pricing is computed
+   hour-by-hour.
+   - Time-banded rates, shared by both plans, and **identical for both Turf and Pickleball**
+     (no sport-specific pricing):
      | Band | Membership rate | Standard rate |
      |---|---|---|
-     | 5AM–5PM (day) | ₹450/hr | ₹500/hr |
-     | 5PM–midnight (night) | ₹800/hr | ₹1,000/hr |
+     | 5AM–5PM (day), all days | ₹350/hr | ₹400/hr |
+     | 5PM–midnight, weekdays | ₹650/hr | ₹700/hr |
+     | 5PM–midnight, weekends | ₹650/hr | ₹800/hr |
+     Membership day/night rates do not vary by weekday/weekend; the standard night rate does
+     (standard day rate does not).
    - ₹10,000 plan: pay ₹10,000 → **15,000 credits allocated**. **Max 3 discounted playing
      hours per rolling 24-hour window** (by hours, not booking count/day/member count) — the
-     discount allowance is consumed in booking order regardless of band; hours beyond it bill
-     at the standard rate for their own band.
+     discount allowance is consumed in booking order regardless of band **and is shared across
+     both sports** (a Pickleball hour and a Turf hour draw from the same rolling-24h allowance
+     for a Team); hours beyond it bill at the standard rate for their own band.
    - ₹25,000 plan: pay ₹25,000 → **40,000 credits allocated**. No discount-hour cap — every
-     booked hour bills at the membership day/night rate.
-   - Credits never expire under the current rule.
+     booked hour bills at the membership day/night rate, on either sport.
+   - Credits never expire under the current rule. Both plans' credits are spendable on either
+     sport interchangeably — one wallet per Team, no separate per-sport pools.
 4. **Membership request flow:** Team created → members added → plan selected → confirm →
    request sent to Admin → Admin sees Team/Host/Co-host details + phone numbers → Admin
    contacts Host/Co-host → external payment collected (UPI/QR/bank/cash — club's choice) →
