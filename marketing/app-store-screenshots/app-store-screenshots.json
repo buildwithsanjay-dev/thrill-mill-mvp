@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 2,
+  "appName": "Thrill Mill Club",
+  "themeId": "thrill-mill",
+  "connectedCanvas": false,
+  "locales": [
+    "en"
+  ],
+  "locale": "en",
+  "device": "android",
+  "orientation": "portrait",
+  "appIcon": "/app-icon.png",
+  "slidesByDevice": {
+    "iphone": [],
+    "android": [
+      {
+        "id": "tmc_01_hero",
+        "layout": "hero",
+        "label": {
+          "en": "MEET THRILL MILL CLUB"
+        },
+        "headline": {
+          "en": "Play. Compete.\nConnect."
+        },
+        "screenshot": "/screenshots/android/phone/en/01.jpeg"
+      },
+      {
+        "id": "tmc_02_dashboard",
+        "layout": "device-bottom",
+        "label": {
+          "en": "YOUR DASHBOARD"
+        },
+        "headline": {
+          "en": "One app for your\nwhole squad."
+        },
+        "screenshot": "/screenshots/android/phone/en/02.jpeg"
+      },
+      {
+        "id": "tmc_03_teams",
+        "layout": "device-top",
+        "label": {
+          "en": "TEAM MANAGEMENT"
+        },
+        "headline": {
+          "en": "Build your Team.\nInvite your crew."
+        },
+        "screenshot": "/screenshots/android/phone/en/03.jpeg",
+        "inverted": true
+      },
+      {
+        "id": "tmc_04_manage_team",
+        "layout": "device-bottom",
+        "label": {
+          "en": "ROSTER & WALLET"
+        },
+        "headline": {
+          "en": "Manage rosters\nand wallets."
+        },
+        "screenshot": "/screenshots/android/phone/en/04.jpeg"
+      },
+      {
+        "id": "tmc_05_booking",
+        "layout": "device-top",
+        "label": {
+          "en": "TURF & PICKLEBALL"
+        },
+        "headline": {
+          "en": "Book Turf or\nPickleball instantly."
+        },
+        "screenshot": "/screenshots/android/phone/en/05.jpeg"
+      },
+      {
+        "id": "tmc_06_wallet",
+        "layout": "device-bottom",
+        "label": {
+          "en": "WALLET TRACKING"
+        },
+        "headline": {
+          "en": "Track every\ncredit you spend."
+        },
+        "screenshot": "/screenshots/android/phone/en/06.jpeg",
+        "inverted": true
+      },
+      {
+        "id": "tmc_07_leaderboard",
+        "layout": "device-top",
+        "label": {
+          "en": "LEADERBOARDS"
+        },
+        "headline": {
+          "en": "Climb the weekly\nleaderboard."
+        },
+        "screenshot": "/screenshots/android/phone/en/07.jpeg"
+      }
+    ],
+    "ipad": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": [
+      {
+        "id": "tmc_feature_graphic",
+        "layout": "feature-graphic",
+        "label": {},
+        "headline": {
+          "en": "Play. Compete. Connect."
+        },
+        "screenshot": "/screenshots/android/phone/en/02.jpeg"
+      }
+    ]
+  },
+  "crossScreenMockupsByDevice": {
+    "iphone": [],
+    "ipad": [],
+    "android": [],
+    "android-7": [],
+    "android-10": [],
+    "feature-graphic": []
+  }
+}
