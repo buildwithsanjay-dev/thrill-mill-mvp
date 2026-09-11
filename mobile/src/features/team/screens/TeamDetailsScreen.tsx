@@ -127,6 +127,10 @@ export function TeamDetailsScreen() {
     router.push('/(app)/(tabs)/book');
   };
 
+  const handleOpenChat = () => {
+    router.push(`/(app)/team/${team.id}/chat`);
+  };
+
   const handleEditBanner = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -251,6 +255,9 @@ export function TeamDetailsScreen() {
 
         <View style={styles.bookTurfWrap}>
           <Button title="Book Turf" iconLeft="football" onPress={handleBookTurf} />
+        </View>
+        <View style={styles.bookTurfWrap}>
+          <Button title="Team Chat" iconLeft="chatbubbles-outline" variant="outline" onPress={handleOpenChat} />
         </View>
 
         <View style={styles.statsRow}>

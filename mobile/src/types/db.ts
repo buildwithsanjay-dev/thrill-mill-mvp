@@ -181,3 +181,37 @@ export type CreditUsageLogRow = {
   credits_attributed: number;
   participant_count_at_completion: number;
 };
+
+export type ChatPresetCategory = 'ARRIVAL' | 'GAME' | 'LOGISTICS' | 'QUICK_REPLY';
+export type ChatReactionEmoji = '👍' | '❤️' | '😂' | '😮' | '😢' | '👏';
+
+export type ChatPreset = {
+  key: string;
+  category: ChatPresetCategory;
+  text: string;
+  sort_order: number;
+};
+
+export type ChatRoom = {
+  id: string;
+  team_id: string;
+  created_at: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  room_id: string;
+  sender_id: string;
+  preset_key: string;
+  is_deleted: boolean;
+  created_at: string;
+  sender?: { full_name: string | null; avatar_url: string | null };
+};
+
+export type ChatMessageReaction = {
+  id: string;
+  message_id: string;
+  user_id: string;
+  emoji: ChatReactionEmoji;
+  created_at: string;
+};
