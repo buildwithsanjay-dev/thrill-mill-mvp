@@ -232,6 +232,22 @@ Run from repo root:
 Test tooling (Jest for the client, pgTAP or equivalent for DB/RPC logic) is not yet set up — to be
 added alongside the first real feature implementation, per the Testing Requirements above.
 
+## Agent / Subagent Workflow Notes
+
+- **Do not dispatch subagents (Agent tool, Task tool, subagent-driven-development / dispatching-
+  parallel-agents style flows) by default.** Do the work directly in the current session unless the
+  user explicitly asks for a subagent, parallel-agent, or "Subagent-Driven" workflow, or a task is
+  genuinely too large to fit in one session's context with no reasonable way to shrink it. Each
+  subagent dispatch has a real token cost on top of the work itself — the project owner works on a
+  constrained daily token budget and has explicitly asked to avoid burning it on unnecessary
+  subagent usage.
+- When a skill's own process (e.g. a brainstorming/writing-plans handoff) offers a choice between
+  subagent-driven and inline execution, default to inline execution unless the user actively picks
+  the subagent path when asked.
+- If subagents are genuinely warranted, keep dispatches minimal — batch related work into as few
+  subagent calls as reasonably possible (one dispatch covering several small, related steps) rather
+  than one subagent per tiny step, and prefer the cheapest model tier that can actually do the job.
+
 ## Security Requirements
 
 See `docs/architecture.md` and blueprint §9 for full detail. Minimum invariants that must always
