@@ -11,6 +11,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
 import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
+import { useAuth } from '@/features/auth/AuthProvider';
+import { useHasUnreadChat } from '@/features/chat/useChat';
 import type { MyTeamSummary } from '@/features/team/api';
 import { PendingInvites } from '@/features/team/components/PendingInvites';
 import { useProfile } from '@/features/profile/useProfile';
@@ -177,6 +179,8 @@ function DashboardContent({
   const { team, wallet, upcomingBooking } = summary;
   const { data: ledger } = useWalletLedger(team.id);
   const recentActivity = (ledger ?? []).slice(0, 3);
+  const { session } = useAuth();
+  const hasUnreadChat = useHasUnreadChat(team.id, session?.user.id);
 
   return (
     <View>
@@ -257,7 +261,12 @@ function DashboardContent({
           label="Activity"
           onPress={() => router.push(`/(app)/wallet/${team.id}`)}
         />
-        <QuickAction icon="stats-chart" label="Leaderboard" onPress={() => router.push('/(app)/(tabs)/leaderboard')} />
+        <QuickAction
+          icon="chatbubbles-outline"
+          label="Chat"
+          showDot={hasUnreadChat}
+          onPress={() => router.push(`/(app)/team/${team.id}/chat`)}
+        />
       </View>
 
       <View style={styles.sectionHeader}>
@@ -292,15 +301,18 @@ function QuickAction({
   icon,
   label,
   onPress,
+  showDot = false,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress: () => void;
+  showDot?: boolean;
 }) {
   return (
     <Pressable style={styles.quickAction} onPress={onPress}>
       <View style={styles.quickIcon}>
         <Ionicons name={icon} size={16} color={colors.text} />
+        {showDot && <View style={styles.notificationDot} />}
       </View>
       <Text style={styles.quickLabel} numberOfLines={2}>
         {label}

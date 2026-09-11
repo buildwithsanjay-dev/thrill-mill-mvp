@@ -57,3 +57,40 @@ export async function setReaction(messageId: string, userId: string, emoji: Chat
     .upsert({ message_id: messageId, user_id: userId, emoji }, { onConflict: 'message_id,user_id' });
   if (error) throw error;
 }
+
+// Latest message's timestamp only (not the full message) — cheap enough
+// to poll from the dashboard just to compare against last_read_at, unlike
+// getMessages() which pulls every message + sender join.
+export async function getLatestMessageAt(roomId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('created_at')
+    .eq('room_id', roomId)
+    .eq('is_deleted', false)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.created_at ?? null;
+}
+
+export async function getLastReadAt(roomId: string, userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('chat_room_reads')
+    .select('last_read_at')
+    .eq('room_id', roomId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.last_read_at ?? null;
+}
+
+// Called when the chat screen opens (and again whenever new messages
+// arrive while it's open) — upsert, not insert, since a read marker for
+// this room may already exist from a prior visit.
+export async function markRoomRead(roomId: string, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('chat_room_reads')
+    .upsert({ room_id: roomId, user_id: userId, last_read_at: new Date().toISOString() }, { onConflict: 'room_id,user_id' });
+  if (error) throw error;
+}

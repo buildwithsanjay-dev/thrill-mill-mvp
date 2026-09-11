@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getChatRoom, getMessages, getPresetCatalog, getReactions } from './api';
+import { getChatRoom, getLastReadAt, getLatestMessageAt, getMessages, getPresetCatalog, getReactions } from './api';
 
 // Fixed reference data — long staleTime, same pattern as other
 // rarely-changing lookups in this app (cf. useDefaultTurf's 1h staleTime
@@ -46,4 +46,36 @@ export function useInvalidateChatQueries() {
     if (opts.roomId) queryClient.invalidateQueries({ queryKey: ['chat-messages', opts.roomId] });
     if (opts.messageIds) queryClient.invalidateQueries({ queryKey: ['chat-reactions', opts.messageIds] });
   };
+}
+
+// Dashboard "has unread chat" red-dot support. Polled independently of
+// the chat screen itself (which the user isn't necessarily on) — a
+// longer interval than the in-chat polls is enough for a badge, and
+// avoids hammering the DB from the dashboard for something this
+// low-urgency.
+export function useHasUnreadChat(teamId: string | undefined, userId: string | undefined) {
+  const { data: room } = useQuery({
+    queryKey: ['chat-room', teamId],
+    queryFn: () => getChatRoom(teamId as string),
+    enabled: !!teamId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: latestMessageAt } = useQuery({
+    queryKey: ['chat-latest-message-at', room?.id],
+    queryFn: () => getLatestMessageAt(room?.id as string),
+    enabled: !!room?.id,
+    refetchInterval: 20_000,
+  });
+
+  const { data: lastReadAt } = useQuery({
+    queryKey: ['chat-last-read-at', room?.id, userId],
+    queryFn: () => getLastReadAt(room?.id as string, userId as string),
+    enabled: !!room?.id && !!userId,
+    refetchInterval: 20_000,
+  });
+
+  if (!latestMessageAt) return false; // no messages at all yet
+  if (!lastReadAt) return true; // never opened this room's chat
+  return new Date(latestMessageAt).getTime() > new Date(lastReadAt).getTime();
 }

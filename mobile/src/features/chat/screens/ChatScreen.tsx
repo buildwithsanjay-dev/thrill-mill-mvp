@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,7 +9,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamDetails } from '@/features/team/useTeams';
 import type { ChatPresetCategory, ChatReactionEmoji } from '@/types/db';
-import { sendMessage, setReaction } from '../api';
+import { markRoomRead, sendMessage, setReaction } from '../api';
 import { useChatRoom, useInvalidateChatQueries, useMessages, usePresetCatalog, useReactions } from '../useChat';
 
 const REACTION_EMOJIS: ChatReactionEmoji[] = ['👍', '❤️', '😂', '😮', '😢', '👏'];
@@ -32,6 +32,16 @@ export function ChatScreen() {
 
   const [reactingToMessageId, setReactingToMessageId] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+
+  // Marks the dashboard's unread red dot as seen. Runs on mount, and again
+  // whenever new messages come in while this screen is still open — so the
+  // dot doesn't reappear the moment the user navigates away right after a
+  // message arrived mid-session. Best-effort: a failure here shouldn't
+  // block viewing the chat, so it's swallowed rather than surfaced.
+  useEffect(() => {
+    if (!room?.id || !session?.user.id) return;
+    markRoomRead(room.id, session.user.id).catch(() => undefined);
+  }, [room?.id, session?.user.id, messages]);
 
   const messageIds = useMemo(() => (messages ?? []).map((m) => m.id), [messages]);
   const { data: reactions } = useReactions(messageIds);
