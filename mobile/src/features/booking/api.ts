@@ -176,7 +176,13 @@ export async function getBooking(bookingId: string): Promise<Booking> {
 export async function getBookingParticipants(bookingId: string): Promise<BookingParticipant[]> {
   const { data, error } = await supabase
     .from('booking_participants')
-    .select('*, profile:profiles(full_name, avatar_url)')
+    // Explicit FK hint required: booking_participants has TWO foreign keys
+    // into profiles (user_id and added_by), so a bare `profiles(...)` embed
+    // is ambiguous to PostgREST and throws PGRST201 on every call — not an
+    // RLS or data issue, a query-shape one. This was silently making every
+    // Manage Booking screen show 0 participants (isPending settles to false
+    // on error just as it does on success, and nothing here checked isError).
+    .select('*, profile:profiles!booking_participants_user_id_fkey(full_name, avatar_url)')
     .eq('booking_id', bookingId)
     .neq('status', 'REMOVED')
     .order('created_at', { ascending: true });

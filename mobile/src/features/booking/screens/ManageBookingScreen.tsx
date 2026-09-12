@@ -36,7 +36,12 @@ export function ManageBookingScreen() {
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const { data: booking, isPending } = useBooking(id);
-  const { data: participants, isPending: participantsPending } = useBookingParticipants(id);
+  const {
+    data: participants,
+    isPending: participantsPending,
+    isError: participantsError,
+    refetch: refetchParticipants,
+  } = useBookingParticipants(id);
   const { data: teamMembers } = useTeamMembers(booking?.team_id);
   const invalidate = useInvalidateBookingQueries();
 
@@ -72,8 +77,11 @@ export function ManageBookingScreen() {
     // for the rest of this editing session (the snapshot below is taken
     // once, not re-synced as the query resolves later). The button/link
     // that calls this is also hidden below while participantsPending, so
-    // this is defense in depth, not the only guard.
-    if (participantsPending) return;
+    // this is defense in depth, not the only guard. Same reasoning applies
+    // to a permanently FAILED fetch (participantsError) — currentIds would
+    // be just as wrong (empty) in that case, and isPending alone doesn't
+    // catch it since a query settles isPending=false on error too.
+    if (participantsPending || participantsError) return;
     setPendingIds(currentIds);
     setIsEditing(true);
   };
@@ -208,6 +216,15 @@ export function ManageBookingScreen() {
           <Text style={styles.counter}>{editableIds.length}/10</Text>
         </View>
         <View style={styles.participantsCard}>
+          {participantsError && !isEditing && (
+            <View style={styles.participantsErrorRow}>
+              <Ionicons name="alert-circle-outline" size={16} color={colors.danger} />
+              <Text style={styles.participantsErrorText}>Couldn&apos;t load participants.</Text>
+              <Pressable onPress={() => refetchParticipants()} hitSlop={8}>
+                <Text style={styles.participantsRetryText}>Retry</Text>
+              </Pressable>
+            </View>
+          )}
           {isEditing
             ? teamMembers
                 ?.filter((m) => m.status === 'ACTIVE')
@@ -256,6 +273,7 @@ export function ManageBookingScreen() {
             </View>
           ) : (
             canEditParticipants &&
+            !participantsError &&
             (participantsPending ? (
               <ActivityIndicator style={{ paddingTop: spacing.sm }} size="small" color={colors.primary} />
             ) : (
@@ -305,7 +323,7 @@ export function ManageBookingScreen() {
               <Text style={styles.cancelBookingText}>Cancel Booking</Text>
             )}
           </Pressable>
-          {canEditParticipants && (
+          {canEditParticipants && !participantsError && (
             <View style={{ flex: 1 }}>
               <Button
                 title="Update Participants"
@@ -374,6 +392,15 @@ const styles = StyleSheet.create({
   memberToggleAdd: { backgroundColor: colors.primary },
   memberToggleRemove: { backgroundColor: '#DC2626' },
   memberToggleText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
+
+  participantsErrorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingBottom: spacing.sm,
+  },
+  participantsErrorText: { flex: 1, fontSize: 12, color: colors.danger },
+  participantsRetryText: { fontSize: 12, fontWeight: '700', color: colors.primary, textDecorationLine: 'underline' },
 
   addMemberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, paddingTop: spacing.sm },
   addMemberText: { fontSize: 13, fontWeight: '700', color: colors.primary },
