@@ -47,7 +47,7 @@ export function ReadyToPlayScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PaginationDots count={4} activeIndex={3} />
+        <PaginationDots count={5} activeIndex={4} />
         <GradientButton title="Enter Thrill Mill" iconRight="arrow-forward" onPress={() => router.replace('/')} />
       </View>
     </SafeAreaView>

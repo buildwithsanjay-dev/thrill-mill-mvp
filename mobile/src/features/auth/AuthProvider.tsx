@@ -38,9 +38,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       const newUserId = newSession?.user.id ?? null;
-      if (newSession && newUserId !== lastUserId.current) {
-        registerForPushNotificationsAsync().catch(() => undefined);
-      }
+      // Deliberately NOT calling registerForPushNotificationsAsync() here for
+      // a fresh sign-in — that would fire the raw OS permission popup
+      // instantly, before the onboarding flow's own Permissions screen (see
+      // (auth)/permissions.tsx) gets a chance to explain why first. A brand
+      // new sign-in's registration is owned by that screen instead; this
+      // provider stays permission-agnostic, matching its own "gate
+      // navigation only" scope note above. The cold-start branch in
+      // getSession().then(...) above still auto-registers for an ALREADY
+      // signed-in returning session — permission state is already settled
+      // by then (granted/denied), so there's no priming moment to protect.
       // Every cached query (profile, teams, wallets, bookings...) is keyed
       // by the previous user's data. Switching accounts — sign-out,
       // sign-in as someone else, or even a silent token refresh landing on

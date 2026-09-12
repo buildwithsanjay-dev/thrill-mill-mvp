@@ -52,7 +52,7 @@ export function WelcomeScreen() {
               />
             </View>
 
-            <PaginationDots count={4} activeIndex={0} />
+            <PaginationDots count={5} activeIndex={0} />
           </FadeSlideIn>
         </View>
       </SafeAreaView>

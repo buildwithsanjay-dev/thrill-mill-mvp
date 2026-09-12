@@ -156,7 +156,7 @@ export function SignInScreen() {
           </View>
 
           <View style={styles.footer}>
-            <PaginationDots count={4} activeIndex={1} />
+            <PaginationDots count={5} activeIndex={1} />
             <Text style={styles.terms}>
               By signing in, you agree to our Terms of Service and Privacy Policy.
             </Text>

@@ -25,7 +25,13 @@ export default function Index() {
   }
 
   if (!profile?.onboarded_at) {
-    return <Redirect href="/(auth)/profile-setup" />;
+    // Permissions screen is the first stop for anyone not yet onboarded —
+    // it forwards to profile-setup itself once done/skipped. A user who
+    // backgrounds the app mid-flow and reopens lands back here again (not
+    // resumed mid-permissions-screen), which is fine: it's a priming UI
+    // step, not a hard gate, and PermissionsScreen itself auto-forwards
+    // instantly if both permissions are already granted by then.
+    return <Redirect href="/(auth)/permissions" />;
   }
 
   // Same app, same login — the platform role alone decides which shell
