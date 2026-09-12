@@ -38,7 +38,14 @@ if (__DEV__) {
   console.log('[auth] Google OAuth redirectTo:', redirectTo);
 }
 
-async function createSessionFromUrl(url: string): Promise<Session | null> {
+// Exported so a root-level deep-link listener (see AuthProvider.tsx) can
+// call this too, independent of whether the specific signInWithGoogle()
+// invocation that started the flow is still alive to receive it — see that
+// listener's own comment for why that independence matters. Silently
+// returns null (not an error) for any URL that isn't actually an OAuth
+// response — this lets a caller run it unconditionally against every
+// incoming deep link without needing its own "is this our callback?" check.
+export async function createSessionFromUrl(url: string): Promise<Session | null> {
   const { params, errorCode } = QueryParams.getQueryParams(url);
   if (errorCode) {
     throw new Error(errorCode);

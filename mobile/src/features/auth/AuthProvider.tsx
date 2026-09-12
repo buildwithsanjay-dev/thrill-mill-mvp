@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import * as Linking from 'expo-linking';
 import type { Session } from '@supabase/supabase-js';
 
 import { queryClient } from '@/lib/queryClient';
@@ -7,6 +8,7 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
+import { createSessionFromUrl } from '@/features/auth/api';
 import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 
 // This context exists purely to gate navigation (logged in vs. not) and to
@@ -83,6 +85,31 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
 
     return () => listener.subscription.unsubscribe();
+  }, []);
+
+  // Safety net for Google sign-in on Android, independent of
+  // signInWithGoogle()'s own WebBrowser.openAuthSessionAsync() call: that
+  // call's returned promise only resolves if the SAME JS context that
+  // started it is still alive when the browser redirects back. A brand-new
+  // Google account's first-time consent flow (extra "choose account" /
+  // permissions screens) takes noticeably longer, and on a memory-
+  // constrained or aggressively battery-optimized Android device (MIUI in
+  // particular), the OS can kill the backgrounded app process during that
+  // longer flow — the redirect still arrives as a deep link, but into a
+  // freshly cold-started app whose original in-flight promise no longer
+  // exists to receive it, which looked exactly like "the app just closes
+  // and restarts to Welcome, sign-in never completes." createSessionFromUrl
+  // silently no-ops for any URL that isn't actually an OAuth response, so
+  // it's safe to run against every incoming deep link unconditionally.
+  useEffect(() => {
+    Linking.getInitialURL().then((url) => {
+      if (url) createSessionFromUrl(url).catch((error) => console.warn('[auth] deep-link session recovery failed:', error));
+    });
+
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      createSessionFromUrl(url).catch((error) => console.warn('[auth] deep-link session recovery failed:', error));
+    });
+    return () => subscription.remove();
   }, []);
 
   return <AuthContext.Provider value={{ session, isLoading }}>{children}</AuthContext.Provider>;
