@@ -37,3 +37,12 @@ export function formatDayLabel(isoDate: string): { weekday: string; day: string 
     day: d.toLocaleDateString('en-IN', { day: '2-digit' }),
   };
 }
+
+// UI-only affordance (grey out a slot chip that's already elapsed) — never
+// the actual availability check. The server independently rejects a hold/
+// confirm on a past slot regardless of what the client shows; this just
+// stops a user from wasting a tap (and, if the server ever allowed it,
+// credits) on a slot that's obviously already gone by device-clock time.
+export function isSlotInPast(isoDate: string, startTime: string): boolean {
+  return new Date(`${isoDate}T${startTime}`).getTime() < Date.now();
+}

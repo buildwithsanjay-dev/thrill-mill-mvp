@@ -13,7 +13,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useMyTeams, useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useActiveTeamStore } from '@/stores/activeTeam';
-import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
+import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
 import { mapBookingError } from '../errors';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
@@ -277,7 +277,7 @@ export function BookTurfScreen() {
       return;
     }
 
-    if (slot.status !== 'AVAILABLE') return;
+    if (slot.status !== 'AVAILABLE' || isSlotInPast(selectedDate, slot.start_time)) return;
     setMutatingSlotId(slot.id);
     try {
       const result = await createSlotHold(slot.id, activeTeam.team.id);
@@ -451,7 +451,8 @@ export function BookTurfScreen() {
           <View style={styles.slotGrid}>
             {(slots ?? []).map((slot) => {
               const isSelected = heldSlots.has(slot.id);
-              const isDisabled = slot.status !== 'AVAILABLE' && !isSelected;
+              const isPast = isSlotInPast(selectedDate, slot.start_time);
+              const isDisabled = (slot.status !== 'AVAILABLE' || isPast) && !isSelected;
               return (
                 <Pressable
                   key={slot.id}

@@ -12,7 +12,7 @@ import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '@/feat
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
-import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
+import { addDaysIso, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
 import type { MembershipPlan, TurfSlot } from '@/types/db';
 
 const DATE_WINDOW = 14;
@@ -197,7 +197,7 @@ export function SelectSlotScreen() {
       return;
     }
 
-    if (slot.status !== 'AVAILABLE') return;
+    if (slot.status !== 'AVAILABLE' || isSlotInPast(selectedDate, slot.start_time)) return;
     setPendingSlotIds((prev) => ({ ...prev, [slot.id]: true }));
     try {
       const result = await createSlotHold(slot.id, teamId);
@@ -352,8 +352,15 @@ export function SelectSlotScreen() {
             {(slots ?? []).map((slot) => {
               const isSelected = !!selectedHolds[slot.id];
               const isPending = !!pendingSlotIds[slot.id];
-              const isDisabled = (slot.status !== 'AVAILABLE' && !isSelected) || isPending;
-              const statusLabel = isSelected ? 'Selected' : slot.status === 'AVAILABLE' ? 'Available' : 'Booked';
+              const isPast = isSlotInPast(selectedDate, slot.start_time);
+              const isDisabled = ((slot.status !== 'AVAILABLE' || isPast) && !isSelected) || isPending;
+              const statusLabel = isSelected
+                ? 'Selected'
+                : slot.status !== 'AVAILABLE'
+                  ? 'Booked'
+                  : isPast
+                    ? 'Past'
+                    : 'Available';
               return (
                 <Pressable
                   key={slot.id}
@@ -372,7 +379,7 @@ export function SelectSlotScreen() {
                         style={[
                           styles.slotStatusText,
                           isSelected && styles.slotStatusTextSelected,
-                          !isSelected && slot.status !== 'AVAILABLE' && styles.slotStatusTextBooked,
+                          !isSelected && (slot.status !== 'AVAILABLE' || isPast) && styles.slotStatusTextBooked,
                         ]}
                       >
                         {statusLabel}
