@@ -32,8 +32,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
       setSession(data.session);
       setIsLoading(false);
       // Best-effort, never blocks app load — a user already signed in when
-      // the app opens still needs a fresh push token registered.
-      if (data.session) registerForPushNotificationsAsync().catch(() => undefined);
+      // the app opens still needs a fresh push token registered. Stays
+      // silent for every outcome except a real 'error' (the function itself
+      // never throws now, it returns a discriminated result) — this call
+      // has no UI surface to show feedback from; a user-initiated retry path
+      // exists via the Profile screen's notification row instead.
+      if (data.session) {
+        registerForPushNotificationsAsync().then((result) => {
+          if (result.status === 'error') {
+            console.warn('[push] background token refresh failed on cold start:', result.error);
+          }
+        });
+      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {

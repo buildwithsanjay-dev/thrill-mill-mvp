@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
@@ -70,7 +70,15 @@ export function PermissionsScreen() {
       // helper AuthProvider uses for a returning session, just invoked here
       // explicitly instead of automatically, so it only ever fires from a
       // screen that's already explained why.
-      await registerForPushNotificationsAsync();
+      const pushResult = await registerForPushNotificationsAsync();
+      if (pushResult.status === 'error') {
+        // Distinct from simply declining (which the card's own "not
+        // granted" state already communicates plainly, no extra copy
+        // needed) — this is a real failure the user didn't choose, worth a
+        // one-line heads-up. Fire-and-forget: still proceeds regardless,
+        // same as every other outcome here.
+        Alert.alert('Notifications could not be set up', 'You can try again later from your Profile.');
+      }
       const notifStatus = await Notifications.getPermissionsAsync();
       setNotificationsGranted(notifStatus.status === 'granted' ? 'granted' : 'not-granted');
 
