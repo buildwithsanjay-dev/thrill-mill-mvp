@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "278356020682",
+    "project_id": "trillmill",
+    "storage_bucket": "trillmill.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:278356020682:android:6250f5c51097ae1fe4d333",
+        "android_client_info": {
+          "package_name": "com.thrillmillclub.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9ccs3kvZoKym979kch1QuIVcVHydkF8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -203,9 +203,15 @@ decided.
   Client registers an Expo push token (via `expo-notifications`) and stores it on the user's
   `profiles` row; the backend sends to Expo's push endpoint, which relays to FCM (Android) /
   APNs (iOS later). This means no `FCM_SERVER_KEY`/Firebase Admin credential is needed
-  server-side — only `mobile/google-services.json` (gitignored, supplied locally by each
-  developer from the Firebase project) is needed client-side for Android push registration to
-  work at all.
+  server-side — only `mobile/google-services.json` (committed to the repo — see below) is
+  needed client-side for Android push registration to work at all.
+- `mobile/google-services.json` is intentionally **not** gitignored, unlike an actual Firebase
+  Admin SDK service-account key. It's a client config file, not a private credential — Google's
+  own security model for it relies on API-key restrictions (package name + SHA-1 fingerprint) set
+  in the Firebase console, not on hiding the file — and EAS's cloud builder needs to see it in the
+  uploaded project archive to wire push notifications into the compiled app (`android.
+  googleServicesFile` in `app.json`). Gitignoring it silently breaks every cloud build's push
+  notifications with no error surfaced anywhere.
 
 ## Testing Requirements
 

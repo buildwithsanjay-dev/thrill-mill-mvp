@@ -35,8 +35,12 @@ yarn-error.*
 .env.local
 .env*.local
 
-# Firebase / native secrets — provided locally by each developer, never committed
-google-services.json
+# Firebase Admin SDK service account keys are the actual secret here (see
+# repo-root .gitignore) — google-services.json itself is NOT gitignored:
+# it's a client config file (not a private credential; Google's own
+# security model for it relies on API-key restrictions in the Firebase
+# console, not on hiding the file), and EAS's cloud builder needs to see it
+# to wire push notifications into the compiled app at all.
 GoogleService-Info.plist
 
 # typescript
