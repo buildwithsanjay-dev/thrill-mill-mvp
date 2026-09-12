@@ -36,7 +36,7 @@ export function ManageBookingScreen() {
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const { data: booking, isPending } = useBooking(id);
-  const { data: participants } = useBookingParticipants(id);
+  const { data: participants, isPending: participantsPending } = useBookingParticipants(id);
   const { data: teamMembers } = useTeamMembers(booking?.team_id);
   const invalidate = useInvalidateBookingQueries();
 
@@ -64,6 +64,16 @@ export function ManageBookingScreen() {
   const editableIds = isEditing ? pendingIds : currentIds;
 
   const startEditing = () => {
+    // Guard against a race: useBookingParticipants(id) is a separate query
+    // from useBooking(id) and isn't guaranteed to have resolved by the time
+    // this screen is interactive — if it hasn't, `participants` is still
+    // undefined, `currentIds` would be an empty array, and every existing
+    // participant would incorrectly render as "Add" instead of "Remove"
+    // for the rest of this editing session (the snapshot below is taken
+    // once, not re-synced as the query resolves later). The button/link
+    // that calls this is also hidden below while participantsPending, so
+    // this is defense in depth, not the only guard.
+    if (participantsPending) return;
     setPendingIds(currentIds);
     setIsEditing(true);
   };
@@ -245,12 +255,15 @@ export function ManageBookingScreen() {
               </Pressable>
             </View>
           ) : (
-            canEditParticipants && (
+            canEditParticipants &&
+            (participantsPending ? (
+              <ActivityIndicator style={{ paddingTop: spacing.sm }} size="small" color={colors.primary} />
+            ) : (
               <Pressable style={styles.addMemberRow} onPress={startEditing}>
                 <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
                 <Text style={styles.addMemberText}>Add / Remove Team Member</Text>
               </Pressable>
-            )
+            ))
           )}
           {!canEditParticipants && canManage && isTeamManager && !isEditing && (
             <Text style={styles.lockedNote}>Participants are locked once the session starts.</Text>
@@ -294,7 +307,13 @@ export function ManageBookingScreen() {
           </Pressable>
           {canEditParticipants && (
             <View style={{ flex: 1 }}>
-              <Button title="Update Participants" iconLeft="create-outline" onPress={startEditing} />
+              <Button
+                title="Update Participants"
+                iconLeft="create-outline"
+                onPress={startEditing}
+                loading={participantsPending}
+                disabled={participantsPending}
+              />
             </View>
           )}
         </View>
