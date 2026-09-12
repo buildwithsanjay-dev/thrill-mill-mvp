@@ -10,13 +10,22 @@ import { supabase } from '@/lib/supabase';
 // on native, needed for web.
 WebBrowser.maybeCompleteAuthSession();
 
-// No `scheme`/`useProxy` options: in Expo Go this resolves to an exp://
-// address routable back into the running dev session; in a custom dev
-// client / standalone build it resolves to the app's own URL scheme. Both
-// must be present in Supabase Dashboard -> Authentication -> URL
-// Configuration -> Redirect URLs (wildcards like exp://** are fine for the
-// Expo Go dev case, since that address changes with the dev machine's IP).
-const redirectTo = makeRedirectUri();
+// `path: 'auth'` deliberately keeps this from ever resolving to a bare
+// `thrillmillclub://` with nothing after the scheme — confirmed in
+// production that Supabase's wildcard matching against a registered
+// `thrillmillclub://**` entry can fail to match a completely empty suffix
+// (a real, reproduced bug: worked for an account with an already-cached
+// session, silently fell through to Supabase's Site URL — the classic
+// http://localhost:3000 dead end — for a genuinely fresh OAuth round-trip,
+// since the bare scheme never matched the wildcard). A non-empty path
+// segment is unambiguous under any reasonable glob implementation. In Expo
+// Go this resolves to an exp:// address routable back into the running dev
+// session; in a custom dev client / standalone build it resolves to the
+// app's own URL scheme. Both shapes must be present in Supabase Dashboard ->
+// Authentication -> URL Configuration -> Redirect URLs (wildcards like
+// exp://** are fine for the Expo Go dev case, since that address changes
+// with the dev machine's IP).
+const redirectTo = makeRedirectUri({ path: 'auth' });
 if (__DEV__) {
   // If Google sign-in ever exits the app to a broken URL (classically
   // Supabase's default Site URL, http://localhost:3000, which it falls
