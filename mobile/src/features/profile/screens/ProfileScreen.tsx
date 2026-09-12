@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import * as Linking from 'expo-linking';
+import * as Notifications from 'expo-notifications';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,6 +17,7 @@ import { signOut } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import type { LeaderboardPeriod } from '@/features/leaderboard/api';
 import { useMyCreditUsageLog } from '@/features/leaderboard/useLeaderboard';
+import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
@@ -186,6 +189,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
         <View style={styles.divider} />
 
+        <NotificationPermissionRow />
+
+        <View style={styles.divider} />
+
         <Pressable style={styles.signOutRow} onPress={handleSignOut} disabled={isSigningOut}>
           {isSigningOut ? (
             <ActivityIndicator size="small" color={colors.danger} />
@@ -198,6 +205,66 @@ function ProfileForm({ profile }: { profile: Profile }) {
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+type NotifPermState = 'checking' | 'granted' | 'denied-can-ask' | 'denied-permanent';
+
+// The onboarding Permissions screen only ever appears once, for users who
+// aren't onboarded yet — anyone already past that (or who tapped "Skip for
+// now" there) has no other way to grant notification permission. Also
+// covers Android's real platform behavior: once a user denies the OS
+// permission dialog, a second requestPermissionsAsync() call is a silent
+// no-op — canAskAgain becomes false, and the only way forward is the OS's
+// own per-app settings page (Linking.openSettings()), never another
+// in-app prompt.
+function NotificationPermissionRow() {
+  const [state, setState] = useState<NotifPermState>('checking');
+
+  const refresh = async () => {
+    const status = await Notifications.getPermissionsAsync();
+    if (status.granted) setState('granted');
+    else setState(status.canAskAgain ? 'denied-can-ask' : 'denied-permanent');
+  };
+
+  useEffect(() => {
+    (async () => {
+      await refresh();
+    })();
+  }, []);
+
+  const handlePress = async () => {
+    if (state === 'denied-can-ask') {
+      await registerForPushNotificationsAsync();
+      await refresh();
+    } else if (state === 'denied-permanent') {
+      await Linking.openSettings();
+      // No listener for "returned from Settings" — refreshing next time
+      // this screen is opened is enough; not required for correctness.
+    }
+  };
+
+  if (state === 'checking') return null;
+
+  return (
+    <Pressable
+      style={styles.settingsRow}
+      onPress={state === 'granted' ? undefined : handlePress}
+      disabled={state === 'granted'}
+    >
+      <Ionicons name="notifications-outline" size={20} color={colors.text} />
+      <Text style={styles.settingsRowText}>Push Notifications</Text>
+      {state === 'granted' ? (
+        <View style={styles.grantedPill}>
+          <Ionicons name="checkmark" size={12} color={colors.white} />
+          <Text style={styles.grantedPillText}>Enabled</Text>
+        </View>
+      ) : (
+        <Text style={styles.settingsRowAction}>
+          {state === 'denied-permanent' ? 'Open Settings' : 'Enable'}
+        </Text>
+      )}
+    </Pressable>
   );
 }
 
@@ -307,6 +374,20 @@ const styles = StyleSheet.create({
   divider: { width: '100%', height: 1, backgroundColor: colors.border, marginTop: spacing.xl, marginBottom: spacing.lg },
   signOutRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, alignSelf: 'flex-start' },
   signOutText: { fontSize: 15, fontWeight: '700', color: colors.danger },
+
+  settingsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, width: '100%' },
+  settingsRowText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
+  settingsRowAction: { fontSize: 13, fontWeight: '700', color: colors.primary },
+  grantedPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primary,
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  grantedPillText: { fontSize: 10, fontWeight: '700', color: colors.white },
 
   usageSection: { width: '100%' },
   usageHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

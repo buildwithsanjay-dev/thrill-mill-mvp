@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { colors, spacing } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
+import { useHasUnreadNotifications } from '@/features/notifications/useNotifications';
 import { Avatar } from './Avatar';
 
 // Shared across every (app) tab: tapping the avatar opens the Profile
@@ -13,6 +14,7 @@ import { Avatar } from './Avatar';
 export function AppHeader({ children }: PropsWithChildren) {
   const router = useRouter();
   const { data: profile } = useProfile();
+  const hasUnread = useHasUnreadNotifications();
 
   return (
     <View style={styles.row}>
@@ -21,7 +23,10 @@ export function AppHeader({ children }: PropsWithChildren) {
       </Pressable>
       <View style={styles.content}>{children}</View>
       <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8}>
-        <Ionicons name="notifications-outline" size={22} color={colors.text} />
+        <View>
+          <Ionicons name="notifications-outline" size={22} color={colors.text} />
+          {hasUnread && <View style={styles.notificationDot} />}
+        </View>
       </Pressable>
     </View>
   );
@@ -36,5 +41,16 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginHorizontal: spacing.sm,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#DC2626',
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
   },
 });
