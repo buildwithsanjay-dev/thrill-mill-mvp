@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing } from '@/constants/theme';
+import { resolveNotificationRoute } from '../api';
 import { useMarkNotificationRead, useMyNotifications } from '../useNotifications';
 
 export function NotificationsScreen() {
@@ -36,7 +37,11 @@ export function NotificationsScreen() {
             <Pressable
               key={n.id}
               style={[styles.card, !n.read_at && styles.cardUnread]}
-              onPress={() => !n.read_at && markRead(n.id)}
+              onPress={() => {
+                if (!n.read_at) markRead(n.id);
+                const route = resolveNotificationRoute(n.data);
+                if (route) router.push(route);
+              }}
             >
               {!n.read_at && <View style={styles.unreadDot} />}
               <Text style={styles.cardTitle}>{n.title}</Text>
