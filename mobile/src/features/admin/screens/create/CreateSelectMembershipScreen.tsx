@@ -115,20 +115,20 @@ function PlanCard({ plan, selected, onSelect }: { plan: MembershipPlan; selected
         </View>
       </View>
       <Text style={styles.planName}>₹{plan.price_inr.toLocaleString()} Membership</Text>
+      <Text style={styles.creditsLine}>{plan.credits_allocated.toLocaleString()} credits on activation</Text>
       <View style={styles.rateRow}>
-        <View style={styles.rateBox}>
-          <Text style={styles.rateLabel}>Standard Turf Price</Text>
-          <Text style={styles.rateStrike}>₹{plan.standard_day_rate_per_hour}/hr</Text>
-        </View>
-        <View style={styles.rateBox}>
-          <Text style={styles.rateLabel}>Membership Price</Text>
-          <Text style={styles.rateValue}>₹{plan.membership_day_rate_per_hour}/hr</Text>
-        </View>
+        {plan.sport_rates.map((rate) => (
+          <View key={rate.sport} style={styles.rateBox}>
+            <Text style={styles.rateLabel}>{rate.sport === 'TURF' ? 'Football/Turf' : 'Pickleball'}</Text>
+            <Text style={styles.rateValue}>₹{rate.membership_day_rate_per_hour}/hr day</Text>
+            <Text style={styles.rateValue}>₹{rate.membership_night_rate_per_hour}/hr night</Text>
+          </View>
+        ))}
       </View>
       <Text style={styles.planFooter}>
         {isPremium
-          ? 'No 3-hour limitation. Unlimited access to membership pricing on all eligible Turfs.'
-          : `Up to ${plan.discounted_hours_cap_per_24h} playing hours at membership pricing per 24h. Additional hours at normal price.`}
+          ? 'No 3-hour limitation. Unlimited access to membership pricing on all eligible Turfs and Courts.'
+          : `Up to ${plan.discounted_hours_cap_per_24h} playing hours at membership pricing per 24h, tracked separately for Turf and Pickleball. Additional hours at standard price.`}
       </Text>
     </Pressable>
   );
@@ -165,11 +165,11 @@ const styles = StyleSheet.create({
   radioSelected: { borderColor: colors.primary },
   radioDot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.primary },
   planName: { fontSize: 20, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
+  creditsLine: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   rateRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   rateBox: { flex: 1 },
-  rateLabel: { fontSize: 11, color: colors.textMuted },
-  rateStrike: { fontSize: 14, fontWeight: '700', color: colors.textMuted, textDecorationLine: 'line-through', marginTop: 2 },
-  rateValue: { fontSize: 14, fontWeight: '800', color: colors.primary, marginTop: 2 },
+  rateLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
+  rateValue: { fontSize: 13, fontWeight: '800', color: colors.primary, marginTop: 2 },
   planFooter: { fontSize: 11, color: colors.textMuted, marginTop: spacing.md, lineHeight: 16 },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },

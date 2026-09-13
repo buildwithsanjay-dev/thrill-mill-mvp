@@ -108,20 +108,18 @@ export function ActivateMembershipScreen() {
             <Text style={styles.planName}>₹{plan.price_inr.toLocaleString()} Membership</Text>
           </View>
           <View style={styles.rateRow}>
-            <View style={styles.rateBox}>
-              <Text style={styles.rateLabel}>MEMBERSHIP PRICE</Text>
-              <Text style={styles.rateValue}>₹{plan.membership_day_rate_per_hour}/hr</Text>
-            </View>
-            <View style={styles.rateBox}>
-              <Text style={styles.rateLabel}>STANDARD PRICE</Text>
-              <Text style={styles.rateValueStrike}>₹{plan.standard_day_rate_per_hour}/hr</Text>
-            </View>
+            {plan.sport_rates.map((rate) => (
+              <View key={rate.sport} style={styles.rateBox}>
+                <Text style={styles.rateLabel}>{rate.sport === 'TURF' ? 'FOOTBALL/TURF RATE' : 'PICKLEBALL RATE'}</Text>
+                <Text style={styles.rateValue}>₹{rate.membership_day_rate_per_hour}/hr</Text>
+              </View>
+            ))}
           </View>
           <View style={styles.ruleBox}>
             <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} />
             <Text style={styles.ruleText}>
               {plan.discounted_hours_cap_per_24h
-                ? `Rule: First ${plan.discounted_hours_cap_per_24h} playing hours within a rolling 24-hour window receive membership pricing. Additional booked hours use standard pricing.`
+                ? `Rule: First ${plan.discounted_hours_cap_per_24h} playing hours within a rolling 24-hour window receive membership pricing — tracked separately for Turf and Pickleball. Additional booked hours use standard pricing.`
                 : 'Rule: No rolling 24-hour limit — every hour is charged at the membership rate.'}
             </Text>
           </View>
@@ -231,7 +229,6 @@ const styles = StyleSheet.create({
   rateBox: { flex: 1, backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md },
   rateLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   rateValue: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 4 },
-  rateValueStrike: { fontSize: 15, fontWeight: '800', color: colors.textMuted, marginTop: 4, textDecorationLine: 'line-through' },
 
   ruleBox: { flexDirection: 'row', gap: spacing.xs, backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.md },
   ruleText: { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },

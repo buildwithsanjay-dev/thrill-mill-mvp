@@ -214,19 +214,27 @@ function PlanCard({
         </View>
       </View>
 
-      <PlanFeature text={`All Days 5AM–5PM: ₹${plan.membership_day_rate_per_hour}/hr`} />
-      <PlanFeature text={`All Days 5PM–Midnight: ₹${plan.membership_night_rate_per_hour}/hr`} />
+      <PlanFeature text={`${plan.credits_allocated.toLocaleString()} credits loaded on activation`} />
       <PlanFeature text="Credits shared across Turf & Pickleball" />
-      <PlanFeature
-        muted
-        text={`Standard price: 5AM–5PM ₹${plan.standard_day_rate_per_hour}/hr · Weekday 5PM–Mid ₹${plan.standard_night_weekday_rate_per_hour}/hr · Weekend 5PM–Mid ₹${plan.standard_night_weekend_rate_per_hour}/hr`}
-      />
+
+      {plan.sport_rates.map((rate) => (
+        <View key={rate.sport} style={styles.sportRateBlock}>
+          <Text style={styles.sportRateLabel}>{rate.sport === 'TURF' ? 'Football / Turf' : 'Pickleball'}</Text>
+          <PlanFeature text={`All Days 5AM–5PM: ₹${rate.membership_day_rate_per_hour}/hr`} />
+          <PlanFeature text={`All Days 5PM–Midnight: ₹${rate.membership_night_rate_per_hour}/hr`} />
+          <PlanFeature
+            muted
+            text={`Standard price: 5AM–5PM ₹${rate.standard_day_rate_per_hour}/hr · Weekday 5PM–Mid ₹${rate.standard_night_weekday_rate_per_hour}/hr · Weekend 5PM–Mid ₹${rate.standard_night_weekend_rate_per_hour}/hr`}
+          />
+        </View>
+      ))}
+
       {plan.discounted_hours_cap_per_24h ? (
         <>
           <PlanFeature
-            text={`Membership price for first ${plan.discounted_hours_cap_per_24h} hours in a rolling 24h window`}
+            text={`Membership price for first ${plan.discounted_hours_cap_per_24h} hours in a rolling 24h window — tracked separately for Turf and Pickleball`}
           />
-          <PlanFeature muted text="Standard price applies after that" />
+          <PlanFeature muted text="Standard price applies after that, for that sport" />
         </>
       ) : (
         <PlanFeature text="No rolling 24-hour limit — every hour at membership rate" />
@@ -320,6 +328,14 @@ const styles = StyleSheet.create({
   featureRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, marginTop: spacing.sm },
   featureText: { flex: 1, fontSize: 12.5, color: darkColors.text, lineHeight: 18 },
   featureTextMuted: { color: darkColors.textMuted },
+
+  sportRateBlock: {
+    marginTop: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: darkColors.border,
+  },
+  sportRateLabel: { fontSize: 11, fontWeight: '800', color: darkColors.primaryLight, letterSpacing: 0.4 },
 
   infoCard: {
     flexDirection: 'row',

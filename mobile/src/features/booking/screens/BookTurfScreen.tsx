@@ -17,7 +17,7 @@ import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, isSlotIn
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
 import { mapBookingError } from '../errors';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
-import type { MembershipPlan, TurfSlot } from '@/types/db';
+import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 
 const DATE_WINDOW = 14;
 
@@ -53,14 +53,17 @@ type BookingPreview = { totalCredits: number; totalHours: number; lines: Preview
 function computeBookingPreview(
   sortedSlots: TurfSlot[],
   plan: MembershipPlan | undefined,
+  sport: Sport,
   isoDate: string
 ): BookingPreview | null {
   if (!plan || sortedSlots.length === 0) return null;
+  const rates = plan.sport_rates.find((r) => r.sport === sport);
+  if (!rates) return null;
 
   const isWeekend = [0, 6].includes(new Date(`${isoDate}T00:00:00`).getDay());
   const standardNightRate = isWeekend
-    ? plan.standard_night_weekend_rate_per_hour
-    : plan.standard_night_weekday_rate_per_hour;
+    ? rates.standard_night_weekend_rate_per_hour
+    : rates.standard_night_weekday_rate_per_hour;
 
   let discountRemaining = plan.discounted_hours_cap_per_24h ?? Infinity;
   let totalCredits = 0;
@@ -83,9 +86,9 @@ function computeBookingPreview(
       const isDay = hour >= 5 && hour < 17;
       if (discountRemaining > 0) {
         discountRemaining -= 1;
-        addHour(isDay ? 'Membership Day' : 'Membership Night', isDay ? plan.membership_day_rate_per_hour : plan.membership_night_rate_per_hour);
+        addHour(isDay ? 'Membership Day' : 'Membership Night', isDay ? rates.membership_day_rate_per_hour : rates.membership_night_rate_per_hour);
       } else {
-        addHour(isDay ? 'Standard Day' : 'Standard Night', isDay ? plan.standard_day_rate_per_hour : standardNightRate);
+        addHour(isDay ? 'Standard Day' : 'Standard Night', isDay ? rates.standard_day_rate_per_hour : standardNightRate);
       }
     }
   }
@@ -160,8 +163,8 @@ export function BookTurfScreen() {
   );
 
   const preview = useMemo(
-    () => computeBookingPreview(sortedHeldSlots.map((h) => h.slot), plan, selectedDate),
-    [sortedHeldSlots, plan, selectedDate]
+    () => computeBookingPreview(sortedHeldSlots.map((h) => h.slot), plan, selectedSport, selectedDate),
+    [sortedHeldSlots, plan, selectedSport, selectedDate]
   );
 
   // Shared "earliest expiring" countdown across every currently-held slot —

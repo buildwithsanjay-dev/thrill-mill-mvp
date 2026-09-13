@@ -324,7 +324,7 @@ export async function getTeamDetails(teamId: string): Promise<TeamDetails> {
       supabase.from('team_wallets').select('*').eq('team_id', teamId).maybeSingle(),
       supabase
         .from('team_memberships')
-        .select('*, plan:membership_plans(*)')
+        .select('*, plan:membership_plans(*, sport_rates:membership_plan_sport_rates(*))')
         .eq('team_id', teamId)
         .order('created_at', { ascending: false })
         .limit(1)

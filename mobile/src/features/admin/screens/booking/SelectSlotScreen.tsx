@@ -13,7 +13,7 @@ import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/f
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { addDaysIso, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
-import type { MembershipPlan, TurfSlot } from '@/types/db';
+import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 
 const DATE_WINDOW = 14;
 
@@ -136,8 +136,8 @@ export function SelectSlotScreen() {
   }, [slots, selectedHolds]);
 
   const preview = useMemo(
-    () => computeBookingPreview(selectedSlots, plan, selectedDate),
-    [selectedSlots, plan, selectedDate]
+    () => computeBookingPreview(selectedSlots, plan, selectedSport, selectedDate),
+    [selectedSlots, plan, selectedSport, selectedDate]
   );
 
   const walletBefore = teamDetails?.wallet?.available_credits ?? walletCredits;
@@ -525,16 +525,18 @@ type BookingPreview = {
 function computeBookingPreview(
   sortedSlots: TurfSlot[],
   plan: MembershipPlan | undefined,
+  sport: Sport,
   isoDate: string
 ): BookingPreview {
-  if (!plan || sortedSlots.length === 0) {
+  const rates = plan?.sport_rates.find((r) => r.sport === sport);
+  if (!plan || !rates || sortedSlots.length === 0) {
     return { groups: [], totalCredits: 0, rangeLabel: '' };
   }
 
   const isWeekend = [0, 6].includes(new Date(`${isoDate}T00:00:00`).getDay());
   const standardNightRate = isWeekend
-    ? plan.standard_night_weekend_rate_per_hour
-    : plan.standard_night_weekday_rate_per_hour;
+    ? rates.standard_night_weekend_rate_per_hour
+    : rates.standard_night_weekday_rate_per_hour;
 
   let remaining = plan.discounted_hours_cap_per_24h ?? Number.POSITIVE_INFINITY;
   const groups = new Map<string, PreviewGroup>();
@@ -548,10 +550,10 @@ function computeBookingPreview(
     const rateType: 'membership' | 'standard' = useMembershipRate ? 'membership' : 'standard';
     const rate = useMembershipRate
       ? isDay
-        ? plan.membership_day_rate_per_hour
-        : plan.membership_night_rate_per_hour
+        ? rates.membership_day_rate_per_hour
+        : rates.membership_night_rate_per_hour
       : isDay
-        ? plan.standard_day_rate_per_hour
+        ? rates.standard_day_rate_per_hour
         : standardNightRate;
 
     totalCredits += rate;

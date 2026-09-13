@@ -52,6 +52,19 @@ export type TeamMember = {
   profile?: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
 };
 
+// Rates now live per (plan, sport) — Turf/Football and Pickleball have
+// genuinely different rates (see supabase/migrations/
+// 20260913120000_sport_specific_pricing.sql), so a plan alone no longer
+// determines a rate; the sport being booked does too.
+export type MembershipPlanSportRate = {
+  sport: Sport;
+  membership_day_rate_per_hour: number;
+  membership_night_rate_per_hour: number;
+  standard_day_rate_per_hour: number;
+  standard_night_weekday_rate_per_hour: number;
+  standard_night_weekend_rate_per_hour: number;
+};
+
 export type MembershipPlan = {
   id: string;
   code: string;
@@ -59,12 +72,8 @@ export type MembershipPlan = {
   price_inr: number;
   credits_allocated: number;
   discounted_hours_cap_per_24h: number | null;
-  membership_day_rate_per_hour: number;
-  membership_night_rate_per_hour: number;
-  standard_day_rate_per_hour: number;
-  standard_night_weekday_rate_per_hour: number;
-  standard_night_weekend_rate_per_hour: number;
   is_active: boolean;
+  sport_rates: MembershipPlanSportRate[];
 };
 
 export type TeamMembership = {

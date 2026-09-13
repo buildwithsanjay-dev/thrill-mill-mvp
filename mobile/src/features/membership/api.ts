@@ -4,7 +4,7 @@ import type { MembershipPlan } from '@/types/db';
 export async function getMembershipPlans(): Promise<MembershipPlan[]> {
   const { data, error } = await supabase
     .from('membership_plans')
-    .select('*')
+    .select('*, sport_rates:membership_plan_sport_rates(*)')
     .eq('is_active', true)
     .order('price_inr', { ascending: true });
   if (error) throw error;

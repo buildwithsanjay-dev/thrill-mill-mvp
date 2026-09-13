@@ -120,16 +120,21 @@ export function TeamCreatedScreen() {
               <Text style={styles.planCaption}>Exclusive Team Rates</Text>
             </View>
             <View style={styles.rowBetween}>
-              <Text style={styles.rowLabel}>Team Rate</Text>
-              <Text style={styles.rowValue}>₹{plan.membership_day_rate_per_hour}/hr</Text>
+              <Text style={styles.rowLabel}>Credits Allocated</Text>
+              <Text style={styles.rowValue}>{plan.credits_allocated.toLocaleString()}</Text>
             </View>
-            <View style={styles.rowBetween}>
-              <Text style={styles.rowLabel}>Standard Rate</Text>
-              <Text style={styles.rowValueStrike}>₹{plan.standard_day_rate_per_hour}/hr</Text>
-            </View>
+            {plan.sport_rates.map((rate) => (
+              <View key={rate.sport} style={styles.rowBetween}>
+                <Text style={styles.rowLabel}>{rate.sport === 'TURF' ? 'Football/Turf Rate' : 'Pickleball Rate'}</Text>
+                <Text style={styles.rowValue}>₹{rate.membership_day_rate_per_hour}/hr</Text>
+              </View>
+            ))}
             {plan.discounted_hours_cap_per_24h && (
               <View style={styles.limitBox}>
-                <Text style={styles.limitText}>Limit: {plan.discounted_hours_cap_per_24h}-hour rolling per 24-hour period.</Text>
+                <Text style={styles.limitText}>
+                  Limit: {plan.discounted_hours_cap_per_24h}-hour rolling per 24-hour period, tracked
+                  separately for Turf and Pickleball.
+                </Text>
               </View>
             )}
           </View>
@@ -203,7 +208,6 @@ const styles = StyleSheet.create({
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
   rowLabel: { fontSize: 13, color: colors.textMuted },
   rowValue: { fontSize: 13, fontWeight: '700', color: colors.text },
-  rowValueStrike: { fontSize: 13, fontWeight: '700', color: colors.textMuted, textDecorationLine: 'line-through' },
 
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
