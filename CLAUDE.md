@@ -49,26 +49,32 @@ underlying engine/rules as a Host/Co-host would.
 - **Two membership plans**, prices, credits, and discount rule are fixed unless the user
   explicitly changes them:
   - ₹10,000 plan → **15,000 credits allocated on activation** (not equal to amount paid).
-    Capped at **3 discounted playing hours per rolling 24-hour window** (hours, not
-    bookings/day/members) — the 4th+ hour in that window falls to the standard rate.
+    Capped at **3 discounted playing hours per rolling 24-hour window, tracked SEPARATELY per
+    sport** (3 Turf/Football hours + 3 Pickleball hours, two independent rolling windows —
+    a Pickleball hour never consumes Turf's allowance or vice versa) — the 4th+ hour in a
+    sport's own window falls to that sport's standard rate.
   - ₹25,000 plan → **40,000 credits allocated on activation**. No discount-hour cap — every
     booked hour is charged at the membership rate.
-  - **Both plans share the same time-banded rates** (Turf and Pickleball both operate
-    5AM–midnight only; every slot is whole-hour aligned so no slot straddles a band boundary).
-    Rates are **identical for both sports — no sport-specific pricing** — and both plans' credits
-    are spendable on either sport interchangeably from the same Team wallet:
-    | Band | Membership rate | Standard rate |
-    |---|---|---|
-    | 5AM–5PM (day), all days | ₹350/hr | ₹400/hr |
-    | 5PM–midnight, weekdays | ₹650/hr | ₹700/hr |
-    | 5PM–midnight, weekends | ₹650/hr | ₹800/hr |
+  - **Turf/Football and Pickleball have genuinely different rate tables** (reversed from an
+    earlier rule — confirmed by the project owner 2026-09-13). Both plans use the same rate
+    bands (they differ only in discount cap / credits allocated, not rates), and both plans'
+    credits are still spendable on either sport interchangeably from the same Team wallet — only
+    the *rate looked up* and the *discount-cap counting* are sport-aware, not the wallet itself.
+    Turf and Pickleball both operate 5AM–midnight only; every slot is whole-hour aligned so no
+    slot straddles a band boundary.
+    | Band | Turf/Football member | Turf/Football standard | Pickleball member | Pickleball standard |
+    |---|---|---|---|---|
+    | 5AM–5PM (day), all days | ₹450/hr | ₹500/hr | ₹350/hr | ₹400/hr |
+    | 5PM–midnight, weekdays | ₹800/hr | ₹1000/hr | ₹650/hr | ₹700/hr |
+    | 5PM–midnight, weekends | ₹800/hr | ₹1000/hr (same as weekday) | ₹650/hr | ₹800/hr |
   - Membership day/night rates do **not** vary by weekday/weekend. The standard (non-member)
-    night rate **does** vary by weekday/weekend; the standard day rate does not.
-  - A booking spanning both bands is priced hour-by-hour; the rolling-24h discount allowance
-    is consumed in booking order regardless of band, **shared across both sports** (a Pickleball
-    hour and a Turf hour draw from the same rolling-24h allowance for a Team), then remaining
-    hours bill at the standard rate for their own band. The ₹10,000 plan's 3-discounted-hour cap
-    stays in force under the new rates; the ₹25,000 plan remains uncapped.
+    night rate **does** vary by weekday/weekend for Pickleball; Turf's standard night rate is the
+    same on weekdays and weekends. Neither sport's standard day rate varies by weekday/weekend.
+  - A booking spanning both bands is priced hour-by-hour; the rolling-24h discount allowance is
+    consumed in booking order within that booking's own sport, then remaining hours bill at the
+    standard rate for their own band. Rates and rate tables live in
+    `membership_plan_sport_rates` (keyed by plan + sport), not on `membership_plans` directly —
+    see `supabase/migrations/20260913120000_sport_specific_pricing.sql`.
 - **Credits do not expire** under the current rule — never implement auto-expiry.
 - **Cancellation:** ≥24 hours before session → full refund + restore discounted-hour usage; <24
   hours → no refund. Eligibility is decided by **server time**, never device time.
@@ -265,11 +271,14 @@ bundle.
 
 ## Things That Must Not Be Changed Without Explicit Approval
 
-- The two membership plans' pricing, credits allocated, day/night rate bands (₹350/650 member,
-  ₹400/700-weekday-night/₹800-weekend-night standard), and the ₹10,000 plan's 3-hour/
-  rolling-24-hour discount cap.
-- Rates being identical for Turf and Pickleball (no sport-specific pricing) and the rolling-24h
-  discount-hour cap being shared across both sports, not tracked per sport.
+- The two membership plans' pricing and credits allocated (₹10,000 → 15,000 credits,
+  ₹25,000 → 40,000 credits).
+- The per-sport day/night rate bands (Turf/Football: ₹450/800 member, ₹500/1000 standard;
+  Pickleball: ₹350/650 member, ₹400/700-weekday-night/₹800-weekend-night standard) and the
+  ₹10,000 plan's 3-hour/rolling-24-hour discount cap, **tracked separately per sport** (as of
+  2026-09-13 — see `membership_plan_sport_rates`). Turf and Pickleball having different rates,
+  and the discount cap being tracked per sport rather than shared, are themselves now the
+  locked rule — reverting to identical/shared again needs the same kind of explicit approval.
 - The Team-owns-credits model (no individual wallets, no member-to-member transfers) — this
   now explicitly includes credits being shared across both sports from the same Team wallet.
 - The external-payment + Admin-verification model (no payment gateway).
