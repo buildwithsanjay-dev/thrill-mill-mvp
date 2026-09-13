@@ -12,7 +12,7 @@ import { darkColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
-import { createTeam, getTeamJoinCode } from '../api';
+import { abandonTeamCreation, createTeam, getTeamJoinCode } from '../api';
 import { useInvalidateTeamQueries } from '../useTeams';
 
 export function CreateTeamStepScreen() {
@@ -20,12 +20,24 @@ export function CreateTeamStepScreen() {
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const invalidate = useInvalidateTeamQueries();
-  const { teamName, setTeamName, setTeamId, setTeamJoinCode, reset } = useCreateTeamWizard();
+  const { teamName, teamId: existingTeamId, setTeamName, setTeamId, setTeamJoinCode, reset } = useCreateTeamWizard();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleContinue = async () => {
     if (!teamName.trim()) {
       Alert.alert('Team name required', 'Give your Team a name to continue.');
+      return;
+    }
+    // Re-entering Step 1 (e.g. via the back button from Add Members)
+    // already has a real, server-created Team from an earlier Continue
+    // press in this same wizard session — call createTeam() again here and
+    // that Team is silently orphaned while a duplicate is created next to
+    // it. The eventual fix for "an incomplete Team must not persist" is
+    // fn_cleanup_abandoned_team_creations (see supabase/migrations/
+    // 20260913150000_abandon_incomplete_team_creation.sql), but not
+    // creating the duplicate in the first place is strictly better.
+    if (existingTeamId) {
+      router.push('/(app)/team/create-members');
       return;
     }
     setIsCreating(true);
@@ -43,6 +55,14 @@ export function CreateTeamStepScreen() {
   };
 
   const handleBack = () => {
+    // Only reachable here once a Team already exists if the user went
+    // forward past Step 1 and then backed all the way out — a genuine
+    // abandon, not just "editing the name before continuing." Fire-and-
+    // forget: fn_cleanup_abandoned_team_creations is the real guarantee
+    // either way (see abandonTeamCreation's own comment).
+    if (existingTeamId) {
+      abandonTeamCreation(existingTeamId).catch(() => undefined);
+    }
     reset();
     router.back();
   };

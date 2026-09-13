@@ -145,6 +145,20 @@ export async function createTeam(name: string): Promise<string> {
   return data as string;
 }
 
+// Discards a still-in-progress Team creation (wizard Step 1 committed a real
+// Team row, but the user backed all the way out before Step 3's membership
+// request) — a hard delete, not the ARCHIVED soft state fn_admin_archive_team
+// uses, because nothing financial/auditable can exist yet at this stage. See
+// supabase/migrations/20260913150000_abandon_incomplete_team_creation.sql.
+// Errors are swallowed by every call site here — this is best-effort
+// tidiness on the way out of a screen the user is already leaving, and
+// fn_cleanup_abandoned_team_creations (the same migration) is the real
+// guarantee regardless of whether this call ever fires or succeeds.
+export async function abandonTeamCreation(teamId: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_abandon_team_creation', { p_team_id: teamId });
+  if (error) throw error;
+}
+
 export async function getTeamJoinCode(teamId: string): Promise<string> {
   const { data, error } = await supabase.from('teams').select('join_code').eq('id', teamId).single();
   if (error) throw error;

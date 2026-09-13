@@ -11,17 +11,23 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminCreateTeam } from '../../api';
 import { useInvalidateAdminQueries } from '../../useAdmin';
-import { getTeamJoinCode } from '@/features/team/api';
+import { abandonTeamCreation, getTeamJoinCode } from '@/features/team/api';
 
 const STEPS = ['DETAILS', 'MEMBERS', 'ROLES', 'MEMBERSHIP', 'REVIEW'];
 
 export function CreateTeamDetailsScreen() {
   const router = useRouter();
   const invalidateAdmin = useInvalidateAdminQueries();
-  const { teamName, setTeamName, setTeamId, setTeamJoinCode, reset } = useAdminTeamWizard();
+  const { teamName, teamId: existingTeamId, setTeamName, setTeamId, setTeamJoinCode, reset } = useAdminTeamWizard();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleBack = () => {
+    // See CreateTeamStepScreen.tsx's identical handleBack for why this only
+    // fires a real abandon when re-entering Step 1 with an already-created
+    // Team, and why errors here are non-fatal.
+    if (existingTeamId) {
+      abandonTeamCreation(existingTeamId).catch(() => undefined);
+    }
     reset();
     router.back();
   };
@@ -29,6 +35,17 @@ export function CreateTeamDetailsScreen() {
   const handleContinue = async () => {
     if (!teamName.trim()) {
       Alert.alert('Team name required', 'Give this Team a name to continue.');
+      return;
+    }
+    // Re-entering Step 1 (e.g. via the back button from Add Members)
+    // already has a real, server-created Team from an earlier Continue in
+    // this same wizard session — calling adminCreateTeam() again here would
+    // silently orphan it and create a duplicate. See mobile/src/features/
+    // team/screens/CreateTeamStepScreen.tsx's identical fix for the member
+    // wizard, and supabase/migrations/20260913150000_abandon_incomplete_
+    // team_creation.sql for the eventual server-side cleanup guarantee.
+    if (existingTeamId) {
+      router.push('/(admin)/team/create-members');
       return;
     }
     setIsCreating(true);

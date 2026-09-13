@@ -6,9 +6,14 @@ import type { LookupUserResult } from '@/features/team/api';
 // Members -> Membership). Nothing here is authoritative: the team isn't
 // created until step 1's Continue, members aren't invited until step 2's
 // Continue, and the membership request isn't submitted until step 3's
-// Confirm — each step calls its real RPC immediately rather than batching
-// everything to the end, so a user who backs out partway still has a real,
-// server-recorded Team rather than losing everything silently.
+// Confirm — each step still calls its real RPC immediately rather than
+// batching everything to the end (restructuring Add Members to defer real
+// invites would be a much larger change). What DOES happen now, reversing
+// an earlier version of this comment: a Team that never reaches Step 3's
+// membership request does not survive — see CreateTeamStepScreen.tsx's
+// handleBack (abandonTeamCreation) and, as the actual unconditional
+// guarantee, fn_cleanup_abandoned_team_creations in supabase/migrations/
+// 20260913150000_abandon_incomplete_team_creation.sql.
 type WizardMember = LookupUserResult & { teamMemberId: string };
 
 type CreateTeamWizardState = {
