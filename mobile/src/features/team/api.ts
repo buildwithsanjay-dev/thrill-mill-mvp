@@ -52,7 +52,12 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
     .eq('status', 'ACTIVE');
   if (memberError) throw memberError;
 
-  const rows = (memberships ?? []).filter((m) => m.team) as unknown as {
+  // An archived Team (see fn_admin_archive_team) is a dead end — hide it
+  // from "My Teams" the same way it's already hidden from join-code lookup,
+  // rather than showing a Team the member can no longer act on.
+  const rows = (memberships ?? []).filter(
+    (m) => m.team && (m.team as unknown as Team).status !== 'ARCHIVED'
+  ) as unknown as {
     team_role: TeamRole;
     team: Team;
   }[];

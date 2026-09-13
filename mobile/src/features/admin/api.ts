@@ -202,6 +202,19 @@ export async function adminUnblockSlot(slotId: string): Promise<void> {
   if (error) throw error;
 }
 
+// Soft-state archive (teams.status -> 'ARCHIVED'), never a hard delete — per
+// CLAUDE.md's "use soft states ... not deletion" rule. The Team's wallet,
+// bookings, and membership history all stay intact and queryable; an
+// archived Team just becomes un-joinable (see fn_lookup_team_by_join_code)
+// and un-bookable (fn_create_slot_hold now rejects it with TEAM_ARCHIVED).
+export async function adminArchiveTeam(teamId: string, reason?: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_admin_archive_team', {
+    p_team_id: teamId,
+    p_reason: reason ?? null,
+  });
+  if (error) throw error;
+}
+
 // -- Cancel a booking (Admin) -------------------------------------------------
 
 // Same fn_cancel_booking RPC the Host/Co-host cancel flow uses

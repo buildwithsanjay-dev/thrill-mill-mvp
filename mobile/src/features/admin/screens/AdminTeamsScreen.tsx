@@ -138,6 +138,7 @@ export function AdminTeamsScreen() {
 
 function TeamRow({ row, onPress }: { row: AdminTeamRow; onPress: () => void }) {
   const isPending = row.membership && row.membership.status !== 'ACTIVE';
+  const isArchived = row.team.status === 'ARCHIVED';
   return (
     <Pressable style={styles.teamCard} onPress={onPress}>
       <View style={styles.teamIcon}>
@@ -146,7 +147,10 @@ function TeamRow({ row, onPress }: { row: AdminTeamRow; onPress: () => void }) {
       <View style={{ flex: 1, marginLeft: spacing.sm }}>
         <View style={styles.teamNameRow}>
           <Text style={styles.teamName}>{row.team.name}</Text>
-          <Badge label={isPending ? 'PENDING' : row.team.status} tone={isPending ? 'pending' : 'active'} />
+          <Badge
+            label={isPending ? 'PENDING' : row.team.status}
+            tone={isArchived ? 'danger' : isPending ? 'pending' : 'active'}
+          />
         </View>
         <Text style={styles.teamId}>ID: {row.team.join_code}</Text>
         <View style={styles.teamMetaRow}>

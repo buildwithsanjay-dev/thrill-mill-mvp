@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,9 +9,11 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useTeamBookings } from '@/features/booking/useBooking';
-import { useTeamBookingCounts, useTeamDetails } from '@/features/team/useTeams';
+import { mapBookingError } from '@/features/booking/errors';
+import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '@/features/team/useTeams';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
-import { useAdminAuditLogFeed } from '../useAdmin';
+import { adminArchiveTeam } from '../api';
+import { useAdminAuditLogFeed, useInvalidateAdminQueries } from '../useAdmin';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
 const BOOKING_STATUS_TONE = {
@@ -26,9 +29,12 @@ const BOOKING_STATUS_TONE = {
 export function AdminTeamDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { data, isPending } = useTeamDetails(id);
+  const { data, isPending, refetch } = useTeamDetails(id);
   const { data: bookings } = useTeamBookings(id);
   const { data: bookingCounts } = useTeamBookingCounts(id);
+  const invalidateAdmin = useInvalidateAdminQueries();
+  const invalidateTeam = useInvalidateTeamQueries();
+  const [isArchiving, setIsArchiving] = useState(false);
   // This Team's own slice of the Admin audit trail (membership approvals,
   // credit adjustments, role changes, booking overrides made for it) —
   // fn_admin_audit_log_feed's p_team_id filter resolves this across every
@@ -46,12 +52,44 @@ export function AdminTeamDetailsScreen() {
   const { team, members, wallet, membership } = data;
   const activeMembers = members.filter((m) => m.status === 'ACTIVE');
   const isPendingActivation = membership && membership.status !== 'ACTIVE';
+  const isArchived = team.status === 'ARCHIVED';
   const upcomingBooking = bookings?.find(
     (b) => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS'
   );
 
   const goToUpcoming = () => {
     if (upcomingBooking) router.push(`/(app)/booking/${upcomingBooking.id}`);
+  };
+
+  // Soft archive, never a hard delete — CLAUDE.md's "use soft states, not
+  // deletion" rule. Confirmed via AskUserQuestion with the project owner:
+  // the Team's wallet, bookings, and membership history all stay intact;
+  // it just becomes un-joinable and un-bookable going forward.
+  const handleArchive = () => {
+    Alert.alert(
+      'Archive this Team?',
+      `${team.name} will no longer be joinable or able to make new bookings. Its history, wallet, and past bookings are kept — this can be reviewed again later, it does not delete anything.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Archive Team',
+          style: 'destructive',
+          onPress: async () => {
+            setIsArchiving(true);
+            try {
+              await adminArchiveTeam(team.id);
+              invalidateAdmin();
+              invalidateTeam(team.id);
+              refetch();
+            } catch (error) {
+              Alert.alert('Could not archive Team', mapBookingError(error));
+            } finally {
+              setIsArchiving(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -72,8 +110,8 @@ export function AdminTeamDetailsScreen() {
           <Text style={styles.teamName}>{team.name}</Text>
           <Text style={styles.teamId}>{team.join_code}</Text>
           <Badge
-            label={isPendingActivation ? 'PENDING ACTIVATION' : team.status}
-            tone={isPendingActivation ? 'pending' : 'active'}
+            label={isArchived ? 'ARCHIVED' : isPendingActivation ? 'PENDING ACTIVATION' : team.status}
+            tone={isArchived ? 'danger' : isPendingActivation ? 'pending' : 'active'}
           />
           <Text style={styles.memberCount}>{activeMembers.length} Members</Text>
         </View>
@@ -220,6 +258,23 @@ export function AdminTeamDetailsScreen() {
             ))}
           </View>
         )}
+
+        <Text style={styles.sectionTitle}>Danger Zone</Text>
+        <View style={styles.dangerCard}>
+          {isArchived ? (
+            <Text style={styles.dangerBody}>This Team is archived. It can no longer be joined or make new bookings.</Text>
+          ) : (
+            <>
+              <Text style={styles.dangerBody}>
+                Archiving a Team removes it from active use without deleting any of its history,
+                wallet, or bookings.
+              </Text>
+              <View style={{ marginTop: spacing.md }}>
+                <Button title="Archive Team" variant="danger" onPress={handleArchive} loading={isArchiving} />
+              </View>
+            </>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -351,6 +406,16 @@ const styles = StyleSheet.create({
   emptyBody: { fontSize: 12, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
 
   sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.md, marginBottom: spacing.sm },
+
+  dangerCard: {
+    backgroundColor: '#FEF2F2',
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    marginBottom: spacing.md,
+  },
+  dangerBody: { fontSize: 12, color: '#7F1D1D', lineHeight: 17 },
 
   bookingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   bookingRowDivider: { borderTopWidth: 1, borderTopColor: colors.border },
