@@ -171,9 +171,12 @@ function ProfileForm({ profile }: { profile: Profile }) {
   };
 
   const handleDeleteAccount = () => {
+    const isAdmin = profile.platform_role === 'ADMIN';
     showAlert(
-      'Delete your account?',
-      'This signs you out everywhere and removes your name, phone number, photo and chat messages. Your team keeps its bookings and wallet history, shown under "Deleted user". This cannot be undone.',
+      isAdmin ? 'Delete this Admin account?' : 'Delete your account?',
+      isAdmin
+        ? 'This removes your Admin access immediately and signs you out everywhere. The club\'s bookings, wallets and audit history are kept, and your past Admin actions will show as "Deleted user". If you are the only Admin left, deletion is blocked. This cannot be undone.'
+        : 'This signs you out everywhere and removes your name, phone number, photo and chat messages. Your team keeps its bookings and wallet history, shown under "Deleted user". This cannot be undone.',
       [
         { text: 'Keep my account', style: 'cancel' },
         {
@@ -337,20 +340,16 @@ function ProfileForm({ profile }: { profile: Profile }) {
           )}
         </Pressable>
 
-        {/* An Admin is a platform operator account, not a member account, so
-            self-service deletion is not offered (the server refuses it too). */}
-        {profile.platform_role !== 'ADMIN' && (
-          <Pressable style={styles.deleteRow} onPress={handleDeleteAccount} disabled={isDeleting}>
-            {isDeleting ? (
-              <ActivityIndicator size="small" color={colors.danger} />
-            ) : (
-              <>
-                <Ionicons name="trash-outline" size={18} color={colors.danger} />
-                <Text style={styles.deleteText}>Delete account</Text>
-              </>
-            )}
-          </Pressable>
-        )}
+        <Pressable style={styles.deleteRow} onPress={handleDeleteAccount} disabled={isDeleting}>
+          {isDeleting ? (
+            <ActivityIndicator size="small" color={colors.danger} />
+          ) : (
+            <>
+              <Ionicons name="trash-outline" size={18} color={colors.danger} />
+              <Text style={styles.deleteText}>Delete account</Text>
+            </>
+          )}
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );

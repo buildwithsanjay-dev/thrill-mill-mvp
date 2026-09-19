@@ -46,6 +46,7 @@ const RULES: [RegExp, string][] = [
   [/MEMBER_ALREADY_ON_TEAM/, 'This person is already on the team or has a pending invite.'],
   [/MEMBERSHIP_ALREADY_ACTIVE/, 'This membership is already active, so it can no longer be flagged.'],
   [/TEAM_ALREADY_FINALIZED/, 'This team has already been submitted, so it can no longer be discarded.'],
+  [/LAST_ADMIN/, "You're the only Admin left. Add or promote another Admin before deleting this account, otherwise nobody could run the club."],
   [/HOST_MUST_TRANSFER/, "You're the Host of an active team. Hand the Host role to another member (or ask the Admin to archive the team) before deleting your account."],
 
   // Polls / chat
