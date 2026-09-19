@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { PaginationDots } from '@/components/PaginationDots';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 import { GradientButton } from '../components/GradientButton';
 import { showAlert } from '@/components/AppDialog';
@@ -173,7 +173,7 @@ function PermissionCard({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   content: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     gap: spacing.md,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: radii.md,
-    backgroundColor: '#EAF5F3',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -229,4 +229,4 @@ const styles = StyleSheet.create({
   grantedPillText: { fontSize: 10, fontWeight: '700', color: colors.white },
   footer: { gap: spacing.md, alignItems: 'center', paddingBottom: spacing.lg },
   skipLink: { fontSize: 13, fontWeight: '600', color: colors.textMuted, textDecorationLine: 'underline' },
-});
+}));

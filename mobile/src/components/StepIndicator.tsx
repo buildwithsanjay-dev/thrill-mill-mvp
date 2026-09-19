@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { screenColors, spacing } from '@/constants/theme';
+import { screenColors, spacing, themedStyles } from '@/constants/theme';
 
 export function StepIndicator({ steps, activeIndex }: { steps: string[]; activeIndex: number }) {
   return (
@@ -41,7 +41,7 @@ export function StepIndicator({ steps, activeIndex }: { steps: string[]; activeI
 
 const DOT = 32;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   labelActive: {
     color: screenColors.text,
   },
-});
+}));

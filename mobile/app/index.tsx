@@ -1,9 +1,9 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { Redirect } from 'expo-router';
 
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 
 // Redirect gate: routes to (auth)/welcome, (auth)/profile-setup, or (app)
 // based on session + onboarding state. This only decides *navigation* — it
@@ -43,11 +43,11 @@ export default function Index() {
   return <Redirect href="/(app)" />;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   loading: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.background,
   },
-});
+}));

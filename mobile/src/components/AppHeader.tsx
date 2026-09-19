@@ -1,9 +1,9 @@
 import type { PropsWithChildren } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, themedStyles } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
 import { useHasUnreadNotifications } from '@/features/notifications/useNotifications';
 import { Avatar } from './Avatar';
@@ -32,7 +32,7 @@ export function AppHeader({ children }: PropsWithChildren) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
-});
+}));

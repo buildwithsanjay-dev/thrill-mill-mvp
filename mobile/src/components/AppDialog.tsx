@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 // App-wide replacement for React Native's `Alert.alert` (the plain Android
 // system dialog the owner flagged). Same call shape on purpose —
@@ -87,12 +87,20 @@ function getSnapshot() {
   return queue;
 }
 
-const VARIANT_STYLE: Record<DialogVariant, { icon: keyof typeof Ionicons.glyphMap; tint: string; soft: string }> = {
-  success: { icon: 'checkmark', tint: '#16A34A', soft: '#DCFCE7' },
-  error: { icon: 'close', tint: '#DC2626', soft: '#FEE2E2' },
-  warning: { icon: 'alert', tint: '#D97706', soft: '#FEF3C7' },
-  info: { icon: 'information', tint: colors.primary, soft: '#DCEEE8' },
-};
+// Calm, brand-consistent tints (no neon): success is a muted green, info uses
+// the brand teal. Built per render so it follows light/dark.
+function variantStyle(variant: DialogVariant): { icon: keyof typeof Ionicons.glyphMap; tint: string; soft: string } {
+  switch (variant) {
+    case 'success':
+      return { icon: 'checkmark', tint: colors.success, soft: colors.successSoft };
+    case 'error':
+      return { icon: 'close', tint: colors.danger, soft: colors.dangerSoft };
+    case 'warning':
+      return { icon: 'alert', tint: colors.warning, soft: colors.warningSoft };
+    default:
+      return { icon: 'information', tint: colors.primary, soft: colors.primarySoft };
+  }
+}
 
 // Mounted once in the root layout. Renders the head of the queue so two
 // dialogs fired back-to-back show one after the other instead of stacking.
@@ -109,7 +117,7 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
   const [wiggle] = useState(() => new Animated.Value(0));
   const [ring] = useState(() => new Animated.Value(0));
 
-  const style = VARIANT_STYLE[dialog.variant];
+  const style = variantStyle(dialog.variant);
 
   useEffect(() => {
     Animated.parallel([
@@ -218,10 +226,10 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(15,23,42,0.55)',
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
@@ -229,7 +237,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg + 6,
@@ -257,8 +265,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   buttonFlex: { flex: 1 },
-  buttonGhost: { backgroundColor: '#F1F5F9' },
+  buttonGhost: { backgroundColor: colors.surfaceAlt },
   buttonDanger: { backgroundColor: colors.danger },
   buttonText: { fontSize: 15, fontWeight: '700', color: '#FFFFFF' },
   buttonTextGhost: { color: colors.text },
-});
+}));

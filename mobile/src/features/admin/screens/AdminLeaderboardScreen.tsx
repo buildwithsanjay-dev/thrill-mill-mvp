@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/AppHeader';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminAuditLogFeed, useAdminTeamLeaderboard } from '../useAdmin';
 import type { AuditLogFeedRow } from '../api';
 
@@ -228,8 +228,8 @@ export function AdminLeaderboardScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   title: { fontSize: 19, fontWeight: '800', color: colors.text },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: -spacing.sm, marginBottom: spacing.md },
@@ -247,14 +247,14 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     marginRight: spacing.xs,
   },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
   chipTextActive: { color: colors.white },
 
-  leaderboardCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
+  leaderboardCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' },
   leaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -264,10 +264,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  leaderRankBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
-  leaderRankBadgeTop: { backgroundColor: '#FEF3C7' },
+  leaderRankBadge: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  leaderRankBadgeTop: { backgroundColor: colors.warningSoft },
   leaderRankText: { fontSize: 12, fontWeight: '800', color: colors.textMuted },
-  leaderRankTextTop: { color: '#92400E' },
+  leaderRankTextTop: { color: colors.warningText },
   leaderName: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
   leaderValue: { fontSize: 13, fontWeight: '700', color: colors.primary },
 
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   exportButtonDisabled: { opacity: 0.4 },
   exportButtonText: { fontSize: 12, fontWeight: '700', color: colors.white },
 
-  logsCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
+  logsCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
   logRow: { paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },
   logTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   logAction: { fontSize: 13, fontWeight: '800', color: colors.text, textTransform: 'capitalize' },
@@ -293,4 +293,4 @@ const styles = StyleSheet.create({
   logMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   logMetaStrong: { color: colors.text, fontWeight: '700' },
   logReason: { fontSize: 12, color: colors.textMuted, marginTop: 2, fontStyle: 'italic' },
-});
+}));

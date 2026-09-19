@@ -1,7 +1,7 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 
@@ -46,6 +46,6 @@ export default function AdminLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-});
+}));

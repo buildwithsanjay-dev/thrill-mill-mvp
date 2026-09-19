@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { useActiveTeamStore } from '@/stores/activeTeam';
@@ -217,7 +217,7 @@ export function TeamDetailsScreen() {
             <Image source={{ uri: team.banner_url }} style={styles.bannerImage} contentFit="cover" />
           ) : (
             <View style={styles.bannerPlaceholder}>
-              <Ionicons name="image-outline" size={22} color="#94A3B8" />
+              <Ionicons name="image-outline" size={22} color={colors.textFaint} />
               {isHost && <Text style={styles.bannerPlaceholderText}>Add a Team banner</Text>}
             </View>
           )}
@@ -403,9 +403,9 @@ function StatBox({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -424,12 +424,12 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: radii.lg,
     overflow: 'hidden',
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     marginBottom: spacing.md,
   },
   bannerImage: { width: '100%', height: '100%' },
   bannerPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
-  bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: '#94A3B8' },
+  bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: colors.textFaint },
   bannerEditBadge: {
     position: 'absolute',
     right: spacing.sm,
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   },
 
   summaryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
@@ -454,12 +454,12 @@ const styles = StyleSheet.create({
   idRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
   idText: { fontSize: 11, color: colors.textMuted },
   avatarStack: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.md },
-  stackAvatar: { borderWidth: 2, borderColor: '#FFFFFF', borderRadius: 16 },
+  stackAvatar: { borderWidth: 2, borderColor: colors.surface, borderRadius: 16 },
   stackMore: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -471,14 +471,14 @@ const styles = StyleSheet.create({
   planText: { fontSize: 13, fontWeight: '600', color: colors.text },
 
   walletCard: {
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
   },
-  walletLabel: { fontSize: 12, color: '#A7F3D0', fontWeight: '700' },
+  walletLabel: { fontSize: 12, color: colors.primaryBorder, fontWeight: '700' },
   walletValue: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
-  walletCaption: { fontSize: 12, color: '#94A3B8' },
+  walletCaption: { fontSize: 12, color: colors.textFaint },
   walletSub: { fontSize: 11, color: '#64748B', marginTop: spacing.sm, lineHeight: 16 },
   walletCta: {
     flexDirection: 'row',
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
   statBox: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -507,12 +507,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
-  statIconHighlight: { backgroundColor: '#ECFDF5' },
+  statIconHighlight: { backgroundColor: colors.primarySoft },
   statValue: { fontSize: 16, fontWeight: '800', color: colors.text },
   statLabel: { fontSize: 9, fontWeight: '700', color: colors.textMuted, marginTop: 2, letterSpacing: 0.3 },
 
@@ -530,15 +530,15 @@ const styles = StyleSheet.create({
   },
   addMembersLabel: { fontSize: 12, fontWeight: '800', color: colors.primary },
 
-  upcomingCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg },
+  upcomingCard: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg },
   upcomingTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  upcomingMeta: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
-  upcomingLink: { fontSize: 12, fontWeight: '700', color: '#5EEAD4', marginTop: spacing.sm },
+  upcomingMeta: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
+  upcomingLink: { fontSize: 12, fontWeight: '700', color: colors.heroAccent, marginTop: spacing.sm },
 
   requestRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.sm,
     marginBottom: spacing.sm,
@@ -563,10 +563,10 @@ const styles = StyleSheet.create({
 
   membersGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   memberTile: { width: 72, alignItems: 'center' },
-  memberAvatarHostRing: { borderWidth: 2, borderColor: '#B45309', borderRadius: 28, padding: 2 },
+  memberAvatarHostRing: { borderWidth: 2, borderColor: colors.warning, borderRadius: 28, padding: 2 },
   memberTileName: { fontSize: 11, fontWeight: '600', color: colors.text, marginTop: 4 },
 
   invitedWrap: { marginTop: spacing.lg },
   invitedLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted, marginBottom: spacing.xs },
   invitedName: { fontSize: 12, color: colors.textMuted, marginBottom: 2 },
-});
+}));

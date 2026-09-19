@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { PaginationDots } from '@/components/PaginationDots';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { GradientButton } from '../components/GradientButton';
 
@@ -60,7 +60,7 @@ export function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: {
     flex: 1,
     backgroundColor: colors.primaryDark,
@@ -119,4 +119,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.lg,
   },
-});
+}));

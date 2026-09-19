@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 const MAX_OPTIONS = 6;
 
@@ -127,10 +127,10 @@ export function CreatePollSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   backdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(15,23,42,0.5)' },
   sheet: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
     padding: spacing.lg,
@@ -150,10 +150,10 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surfaceAlt,
   },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { fontSize: 12, fontWeight: '700', color: colors.text },
   chipTextActive: { color: colors.white },
   error: { marginTop: spacing.md, fontSize: 12, fontWeight: '700', color: colors.danger },
-});
+}));

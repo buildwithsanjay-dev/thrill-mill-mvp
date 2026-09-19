@@ -1,22 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { showAlert } from '@/components/AppDialog';
 import { Avatar } from '@/components/Avatar';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { friendlyError } from '@/lib/errors';
@@ -335,8 +325,8 @@ export function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -346,7 +336,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 11, color: colors.textMuted, marginTop: 1 },
@@ -359,7 +349,7 @@ const styles = StyleSheet.create({
   senderName: { fontSize: 11, fontWeight: '700', color: colors.textMuted, marginBottom: 2, marginLeft: 4 },
 
   bubble: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
@@ -375,7 +365,7 @@ const styles = StyleSheet.create({
 
   reactionRow: { flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' },
   reactionBadge: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
@@ -388,7 +378,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: spacing.sm,
     marginTop: 6,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
@@ -401,13 +391,13 @@ const styles = StyleSheet.create({
   composerWrap: {
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
   },
   chipRow: { paddingHorizontal: spacing.lg, flexGrow: 0, marginBottom: spacing.sm },
   presetChip: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radii.pill,
     paddingVertical: 7,
     paddingHorizontal: spacing.md,
@@ -419,7 +409,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: '#E6F2EF',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -435,7 +425,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     fontSize: 14,
     color: colors.text,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surfaceAlt,
   },
   sendButton: {
     width: 42,
@@ -446,4 +436,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sendButtonDisabled: { opacity: 0.45 },
-});
+}));

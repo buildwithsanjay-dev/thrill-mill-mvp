@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import type { RevenueAnalytics } from '../api';
 import {
@@ -63,7 +63,7 @@ export function AdminHomeScreen() {
             <View style={styles.statsRow}>
               <StatCard
                 icon="git-network"
-                iconBg="#ECFDF5"
+                iconBg={colors.primarySoft}
                 label="ACTIVE"
                 value={stats?.activeTeams ?? 0}
                 caption="Teams"
@@ -74,13 +74,13 @@ export function AdminHomeScreen() {
                 label="ACTION REQ"
                 value={stats?.pendingRequests ?? 0}
                 caption="Pending Requests"
-                labelColor="#C2410C"
+                labelColor={colors.accentText}
               />
             </View>
             <View style={styles.wideStatCard}>
               <View style={styles.wideStatTop}>
                 <View style={styles.wideStatIcon}>
-                  <Ionicons name="calendar" size={18} color="#1D4ED8" />
+                  <Ionicons name="calendar" size={18} color={colors.info} />
                 </View>
                 <Badge label="UPCOMING" tone="neutral" />
               </View>
@@ -117,7 +117,7 @@ export function AdminHomeScreen() {
         {firstPending && (
           <>
             <View style={styles.sectionHeaderRow}>
-              <Ionicons name="alert-circle" size={16} color="#C2410C" />
+              <Ionicons name="alert-circle" size={16} color={colors.accentText} />
               <Text style={styles.sectionTitle}>Action Required</Text>
             </View>
             <Pressable
@@ -269,8 +269,8 @@ function RevenueAnalyticsSection({ analytics, rangeLabel }: { analytics: Revenue
       <View style={styles.statsRow}>
         <View style={styles.revenueCard}>
           <View style={styles.revenueTopRow}>
-            <View style={[styles.statIcon, { backgroundColor: '#ECFDF5' }]}>
-              <Ionicons name="cash" size={16} color="#15803D" />
+            <View style={[styles.statIcon, { backgroundColor: colors.primarySoft }]}>
+              <Ionicons name="cash" size={16} color={colors.success} />
             </View>
             <Text style={styles.statLabel}>REVENUE</Text>
           </View>
@@ -279,8 +279,8 @@ function RevenueAnalyticsSection({ analytics, rangeLabel }: { analytics: Revenue
         </View>
         <View style={styles.revenueCard}>
           <View style={styles.revenueTopRow}>
-            <View style={[styles.statIcon, { backgroundColor: '#EFF6FF' }]}>
-              <Ionicons name="flash" size={16} color="#1D4ED8" />
+            <View style={[styles.statIcon, { backgroundColor: colors.infoSoft }]}>
+              <Ionicons name="flash" size={16} color={colors.info} />
             </View>
             <Text style={styles.statLabel}>CREDITS USED</Text>
           </View>
@@ -307,9 +307,9 @@ function RevenueAnalyticsSection({ analytics, rangeLabel }: { analytics: Revenue
                 <Ionicons
                   name={weekDelta > 0 ? 'arrow-up' : 'arrow-down'}
                   size={10}
-                  color={weekDelta > 0 ? '#15803D' : colors.danger}
+                  color={weekDelta > 0 ? colors.success : colors.danger}
                 />
-                <Text style={[styles.deltaText, { color: weekDelta > 0 ? '#15803D' : colors.danger }]}>
+                <Text style={[styles.deltaText, { color: weekDelta > 0 ? colors.success : colors.danger }]}>
                   {Math.abs(weekDelta)} vs last week
                 </Text>
               </View>
@@ -380,8 +380,8 @@ function QuickAction({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   greetingLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.4 },
   greetingName: { fontSize: 18, fontWeight: '800', color: colors.text },
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: spacing.md },
   statCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     borderWidth: 1,
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
 
   revenueCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     borderWidth: 1,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
   analyticsMetaRow: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.md },
   analyticsMetaCard: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     borderWidth: 1,
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   deltaText: { fontSize: 11, fontWeight: '700' },
 
   trendCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginTop: spacing.md,
@@ -457,14 +457,14 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   rangeChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   rangeChipText: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
   rangeChipTextActive: { color: colors.white },
 
   wideStatCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginTop: spacing.md,
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   wideStatTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  wideStatIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#EFF6FF', alignItems: 'center', justifyContent: 'center' },
+  wideStatIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.infoSoft, alignItems: 'center', justifyContent: 'center' },
   wideStatValue: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   wideStatCaption: { fontSize: 12, color: colors.textMuted },
 
@@ -483,22 +483,22 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 12, fontWeight: '700', color: colors.primary },
 
   actionCard: {
-    backgroundColor: '#FFF7ED',
+    backgroundColor: colors.accentSoft,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderLeftWidth: 4,
-    borderLeftColor: '#F97316',
+    borderLeftColor: colors.accent,
   },
   actionCardTitle: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   actionCardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   actionCardRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.md },
   actionCardLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   actionCardValue: { fontSize: 13, fontWeight: '700', color: colors.text, marginTop: 2 },
-  actionCardValueMuted: { fontSize: 12, fontWeight: '700', color: '#C2410C', marginTop: 2 },
+  actionCardValueMuted: { fontSize: 12, fontWeight: '700', color: colors.accentText, marginTop: 2 },
 
   emptyText: { fontSize: 13, color: colors.textMuted },
 
-  bookingCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  bookingCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   bookingTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   bookingMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   bookingMeta: { fontSize: 12, color: colors.textMuted },
@@ -507,18 +507,18 @@ const styles = StyleSheet.create({
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
   quickAction: {
     width: '47%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     paddingVertical: spacing.lg,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
   },
-  quickBadge: { position: 'absolute', top: spacing.sm, right: spacing.sm, width: 8, height: 8, borderRadius: 4, backgroundColor: '#F97316' },
-  quickIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#ECFDF5', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
+  quickBadge: { position: 'absolute', top: spacing.sm, right: spacing.sm, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
+  quickIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
   quickLabel: { fontSize: 13, fontWeight: '600', color: colors.text, textAlign: 'center' },
 
-  activityCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  activityCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   activityRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm, marginBottom: spacing.md },
   activityDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border, marginTop: 5 },
   activityDotActive: { backgroundColor: colors.primary },
@@ -526,4 +526,4 @@ const styles = StyleSheet.create({
   activityActor: { fontSize: 11, color: colors.primary, fontWeight: '600', marginTop: 1 },
   activityReason: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   activityTime: { fontSize: 11, color: colors.textMuted },
-});
+}));

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminSetTeamRole } from '../../api';
 import { showAlert } from '@/components/AppDialog';
@@ -135,8 +135,8 @@ export function CreateAssignRolesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 12, color: colors.textMuted, textAlign: 'center' },
@@ -146,12 +146,12 @@ const styles = StyleSheet.create({
   stepRow: { paddingHorizontal: spacing.lg, marginTop: spacing.sm },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  teamCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  teamIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#0C5C54', alignItems: 'center', justifyContent: 'center' },
+  teamCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  teamIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   teamName: { fontSize: 14, fontWeight: '800', color: colors.text },
   teamMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
 
-  infoCard: { flexDirection: 'row', backgroundColor: '#F8FAFC', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
+  infoCard: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
   infoBody: { fontSize: 12, color: colors.textMuted, lineHeight: 17 },
 
   gridHeaderRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.xl, marginBottom: spacing.sm },
@@ -159,10 +159,10 @@ const styles = StyleSheet.create({
   gridHeaderCol: { width: 44, fontSize: 10, fontWeight: '700', color: colors.textMuted, textAlign: 'center' },
 
   emptyText: { fontSize: 13, color: colors.textMuted },
-  memberRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.md, padding: spacing.sm, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
+  memberRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.sm, marginBottom: spacing.sm, borderWidth: 1, borderColor: colors.border },
   memberName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text, marginLeft: spacing.sm },
   radioCol: { width: 44, alignItems: 'center' },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
   footerWarning: { fontSize: 11, color: colors.danger, textAlign: 'center', marginTop: spacing.sm },
-});
+}));

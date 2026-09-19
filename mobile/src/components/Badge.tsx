@@ -1,21 +1,24 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 type BadgeTone = 'host' | 'coHost' | 'member' | 'active' | 'pending' | 'danger' | 'neutral';
 
-const TONE_STYLES: Record<BadgeTone, { bg: string; fg: string }> = {
-  host: { bg: '#7C2D12', fg: '#FDBA74' },
-  coHost: { bg: '#7C2D12', fg: '#FDBA74' },
-  member: { bg: '#1E293B', fg: '#CBD5E1' },
-  active: { bg: '#D1FAE5', fg: '#047857' },
-  pending: { bg: '#FEF3C7', fg: '#92400E' },
-  danger: { bg: '#FEE2E2', fg: '#B91C1C' },
-  neutral: { bg: colors.border, fg: colors.text },
-};
+// Built per render (not a module constant) so the tones follow light/dark.
+function toneStyles(): Record<BadgeTone, { bg: string; fg: string }> {
+  return {
+    host: { bg: colors.hero, fg: colors.heroText },
+    coHost: { bg: colors.primarySoft, fg: colors.primary },
+    member: { bg: colors.surfaceAlt, fg: colors.textMuted },
+    active: { bg: colors.successSoft, fg: colors.success },
+    pending: { bg: colors.warningSoft, fg: colors.warningText },
+    danger: { bg: colors.dangerSoft, fg: colors.danger },
+    neutral: { bg: colors.border, fg: colors.text },
+  };
+}
 
 export function Badge({ label, tone = 'neutral' }: { label: string; tone?: BadgeTone }) {
-  const toneStyle = TONE_STYLES[tone];
+  const toneStyle = toneStyles()[tone];
   return (
     <View style={[styles.badge, { backgroundColor: toneStyle.bg }]}>
       <Text style={[styles.label, { color: toneStyle.fg }]}>{label}</Text>
@@ -23,7 +26,7 @@ export function Badge({ label, tone = 'neutral' }: { label: string; tone?: Badge
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   badge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
@@ -35,4 +38,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
-});
+}));

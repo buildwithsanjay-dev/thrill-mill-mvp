@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 import { useTeamMembers } from '@/features/team/useTeams';
@@ -193,7 +193,7 @@ export function ManageBookingScreen() {
           </View>
           <Text style={styles.heroTitle}>{booking.turf?.name ?? 'Football Turf'}</Text>
           <Text style={styles.heroLocation}>
-            <Ionicons name="location-outline" size={12} color="#94A3B8" /> Thrill Mill Arena
+            <Ionicons name="location-outline" size={12} color={colors.textFaint} /> Thrill Mill Arena
           </Text>
         </View>
 
@@ -296,7 +296,7 @@ export function ManageBookingScreen() {
               <Text style={styles.walletLabel}>TOTAL COST</Text>
               <Text style={styles.walletValue}>{Math.round(booking.total_credits)} Credits</Text>
             </View>
-            <Ionicons name="card-outline" size={22} color="#5EEAD4" />
+            <Ionicons name="card-outline" size={22} color={colors.heroAccent} />
           </View>
           <Text style={styles.walletNote}>
             Cost is deducted from the shared wallet. Individual usage is calculated and attributed
@@ -306,7 +306,7 @@ export function ManageBookingScreen() {
 
         {canManage && (
           <View style={styles.policyCard}>
-            <Ionicons name="alert-circle" size={16} color="#B91C1C" />
+            <Ionicons name="alert-circle" size={16} color={colors.danger} />
             <Text style={styles.policyText}>
               Cancellation Policy: Full refund if cancelled 24 hours or more before the slot.
               Cancellations within 24 hours receive no refund.
@@ -350,9 +350,9 @@ function DetailItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -363,22 +363,22 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  heroCard: { height: 130, borderRadius: radii.lg, backgroundColor: '#14532D', padding: spacing.lg, justifyContent: 'flex-end' },
+  heroCard: { height: 130, borderRadius: radii.lg, backgroundColor: colors.success, padding: spacing.lg, justifyContent: 'flex-end' },
   heroBadge: { position: 'absolute', top: spacing.md, right: spacing.md },
   heroTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
-  heroLocation: { fontSize: 12, color: '#A7F3D0', marginTop: 4 },
+  heroLocation: { fontSize: 12, color: colors.primaryBorder, marginTop: 4 },
 
   sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xl },
   counter: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
 
-  detailsCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.md },
+  detailsCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border, gap: spacing.md },
   detailsRow: { flexDirection: 'row', justifyContent: 'space-between' },
   detailItem: {},
   detailLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   detailValue: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 4 },
 
-  participantsCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  participantsCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   participantRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   participantName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
   },
   memberToggleAdd: { backgroundColor: colors.primary },
-  memberToggleRemove: { backgroundColor: '#DC2626' },
+  memberToggleRemove: { backgroundColor: colors.danger },
   memberToggleText: { fontSize: 11, fontWeight: '700', color: '#FFFFFF' },
 
   participantsErrorRow: {
@@ -413,16 +413,16 @@ const styles = StyleSheet.create({
   saveEditButton: { flex: 1, backgroundColor: colors.primary, borderRadius: radii.pill, alignItems: 'center', paddingVertical: spacing.sm },
   saveEditText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
 
-  walletCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg },
+  walletCard: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg },
   walletTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  walletLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },
+  walletLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.3 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
-  walletNote: { fontSize: 11, color: '#94A3B8', marginTop: spacing.md, lineHeight: 16 },
+  walletNote: { fontSize: 11, color: colors.textFaint, marginTop: spacing.md, lineHeight: 16 },
 
   policyCard: {
     flexDirection: 'row',
     gap: spacing.sm,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: colors.dangerSoft,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.lg,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   cancelBookingButton: {
     borderWidth: 1.5,
@@ -448,4 +448,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelBookingText: { fontSize: 14, fontWeight: '700', color: colors.text },
-});
+}));

@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import type { MyTeamSummary } from '../api';
 import { PendingInvites } from '../components/PendingInvites';
@@ -16,7 +16,6 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
 const ROLE_LABEL = { HOST: 'HOST', CO_HOST: 'CO-HOST', MEMBER: 'MEMBER' } as const;
-const HERO_COLORS = ['#0C5C54', '#0C4A45', '#0B7A6E', '#094943', '#0F766E'];
 
 // Membership request status -> at-a-glance label for the Teams list, shown
 // only while a Team's membership isn't ACTIVE yet (no badge once it is).
@@ -28,10 +27,10 @@ const MEMBERSHIP_STATUS_LABEL: Record<string, string> = {
   PAYMENT_VERIFIED: 'PAYMENT VERIFIED',
 };
 
-function heroColorFor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return HERO_COLORS[Math.abs(hash) % HERO_COLORS.length];
+function heroColorFor(_id: string): string {
+  // One consistent card colour for every team (it used to rotate through five,
+  // which made the list look inconsistent).
+  return colors.hero;
 }
 
 export function MyTeamsScreen() {
@@ -131,7 +130,7 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
       <View style={styles.cardBody}>
         {!isMembershipActive && (
           <View style={styles.membershipNotice}>
-            <Ionicons name="alert-circle" size={14} color="#92400E" />
+            <Ionicons name="alert-circle" size={14} color={colors.warningText} />
             <Text style={styles.membershipNoticeText}>
               {membershipStatus ? (MEMBERSHIP_STATUS_LABEL[membershipStatus] ?? membershipStatus) : 'No membership requested yet'}
             </Text>
@@ -171,9 +170,9 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   title: { fontSize: 19, fontWeight: '800', color: colors.text },
   subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
@@ -181,7 +180,7 @@ const styles = StyleSheet.create({
   statsBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     paddingVertical: spacing.md,
     marginTop: spacing.lg,
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, marginTop: 2, letterSpacing: 0.4 },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     overflow: 'hidden',
     marginBottom: spacing.md,
@@ -220,13 +219,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.warningSoft,
     borderRadius: radii.sm,
     paddingVertical: 6,
     paddingHorizontal: spacing.sm,
     marginBottom: spacing.sm,
   },
-  membershipNoticeText: { flex: 1, fontSize: 11, fontWeight: '700', color: '#92400E' },
+  membershipNoticeText: { flex: 1, fontSize: 11, fontWeight: '700', color: colors.warningText },
   cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardCreditsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   cardCredits: { fontSize: 13, fontWeight: '700', color: colors.primary },
@@ -250,4 +249,4 @@ const styles = StyleSheet.create({
   createButtonLabel: { fontSize: 14, fontWeight: '700', color: colors.text },
   joinLink: { alignItems: 'center', marginTop: spacing.md },
   joinLinkLabel: { fontSize: 13, fontWeight: '600', color: colors.primary },
-});
+}));

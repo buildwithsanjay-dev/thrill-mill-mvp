@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { teamDetailsQueryKey } from '@/features/team/useTeams';
 import { formatBookingDate, formatSlotTime, todayIso } from '@/utils/datetime';
 import { adminCancelBooking, type AdminBookingRow } from '../api';
@@ -192,13 +192,13 @@ export function AdminBookingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: 100 },
   title: { fontSize: 19, fontWeight: '800', color: colors.text },
 
   statsRow: { flexDirection: 'row', gap: spacing.sm },
-  statChip: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: radii.md, padding: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  statChip: { flex: 1, backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.md, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   statChipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   statChipLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted },
   statChipLabelActive: { color: '#FFFFFF' },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     paddingHorizontal: spacing.md,
     height: 44,
@@ -219,15 +219,15 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontSize: 13, color: colors.text },
 
   filterRow: { flexDirection: 'row', marginTop: spacing.md },
-  filterChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radii.pill, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: colors.border, marginRight: spacing.sm },
+  filterChip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radii.pill, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginRight: spacing.sm },
   filterChipActive: { backgroundColor: colors.text, borderColor: colors.text },
   filterChipLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
   filterChipLabelActive: { color: '#FFFFFF' },
 
   sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
 
-  card: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, marginBottom: spacing.sm, borderLeftWidth: 4, borderLeftColor: colors.primary, borderWidth: 1, borderColor: colors.border },
-  cardCancelled: { backgroundColor: '#FEF2F2', borderLeftColor: colors.danger },
+  card: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, marginBottom: spacing.sm, borderLeftWidth: 4, borderLeftColor: colors.primary, borderWidth: 1, borderColor: colors.border },
+  cardCancelled: { backgroundColor: colors.dangerSoft, borderLeftColor: colors.danger },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between' },
   cardTeam: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   strike: { textDecorationLine: 'line-through', color: colors.textMuted },
@@ -244,8 +244,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radii.pill,
     borderWidth: 1,
-    borderColor: '#FECACA',
-    backgroundColor: '#FEF2F2',
+    borderColor: colors.dangerBorder,
+    backgroundColor: colors.dangerSoft,
   },
   cancelButtonText: { fontSize: 12, fontWeight: '700', color: colors.danger },
 
@@ -263,4 +263,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   fabLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
-});
+}));

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Animated, Easing, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 
 // Big animated tick for full-screen success states: the badge springs in, a
 // halo pulses outward, then the tick pops. Purely visual.
@@ -46,7 +46,7 @@ export function AnimatedSuccess({ size = 112 }: { size?: number }) {
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: '#DCFCE7',
+          backgroundColor: colors.successSoft,
           alignItems: 'center',
           justifyContent: 'center',
           transform: [{ scale: badge }],
@@ -57,7 +57,7 @@ export function AnimatedSuccess({ size = 112 }: { size?: number }) {
             width: inner,
             height: inner,
             borderRadius: inner / 2,
-            backgroundColor: '#16A34A',
+            backgroundColor: colors.success,
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -71,6 +71,6 @@ export function AnimatedSuccess({ size = 112 }: { size?: number }) {
   );
 }
 
-const styles = StyleSheet.create({
-  halo: { position: 'absolute', backgroundColor: '#16A34A' },
-});
+const styles = themedStyles(() => ({
+  halo: { position: 'absolute', backgroundColor: colors.success },
+}));

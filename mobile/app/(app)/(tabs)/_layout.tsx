@@ -19,7 +19,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarBadgeStyle: { backgroundColor: '#DC2626' },
+        tabBarBadgeStyle: { backgroundColor: colors.danger },
       }}
     >
       <Tabs.Screen

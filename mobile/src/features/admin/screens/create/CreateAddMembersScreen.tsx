@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminAddTeamMember, adminSearchMembers, type AdminMemberSearchResult } from '../../api';
 import { showAlert } from '@/components/AppDialog';
@@ -158,8 +158,8 @@ export function CreateAddMembersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   stepRow: { paddingHorizontal: spacing.lg, marginTop: spacing.sm },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  creatingCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  creatingIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#0C5C54', alignItems: 'center', justifyContent: 'center' },
+  creatingCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  creatingIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   creatingLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   creatingName: { fontSize: 14, fontWeight: '800', color: colors.text, marginTop: 2 },
 
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   },
   selectedName: { fontSize: 11, fontWeight: '600', color: colors.text, marginTop: 4 },
 
-  resultRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.md, padding: spacing.sm, marginTop: spacing.sm, borderWidth: 1, borderColor: colors.border },
+  resultRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.md, padding: spacing.sm, marginTop: spacing.sm, borderWidth: 1, borderColor: colors.border },
   resultName: { fontSize: 14, fontWeight: '700', color: colors.text },
   resultMeta: { fontSize: 11, color: colors.primary, marginTop: 2 },
   addButton: {
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
   footerHint: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: spacing.md },
-});
+}));

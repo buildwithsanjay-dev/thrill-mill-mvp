@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { mapBookingError } from '@/features/booking/errors';
 import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '@/features/team/useTeams';
@@ -319,9 +319,9 @@ function StatBox({
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   memberCount: { fontSize: 12, color: colors.textMuted, marginTop: spacing.sm },
 
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
@@ -358,16 +358,16 @@ const styles = StyleSheet.create({
   cardLabelDark: { fontSize: 15, fontWeight: '800', color: colors.text },
   cardTitle: { fontSize: 17, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
   cardMuted: { fontSize: 13, color: colors.textMuted },
-  ruleBox: { flexDirection: 'row', gap: spacing.xs, backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.md },
+  ruleBox: { flexDirection: 'row', gap: spacing.xs, backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.md },
   ruleText: { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },
 
   activateCard: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginBottom: spacing.md,
   },
-  activateIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
+  activateIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
   activateTitle: { fontSize: 15, fontWeight: '800', color: colors.text },
   activateBody: { fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 17 },
 
@@ -375,15 +375,15 @@ const styles = StyleSheet.create({
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   memberName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
-  walletCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
-  walletLabel: { fontSize: 11, fontWeight: '700', color: '#5EEAD4', letterSpacing: 0.4 },
+  walletCard: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
+  walletLabel: { fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.4 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
-  walletCaption: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
+  walletCaption: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
 
   statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   statBox: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -394,12 +394,12 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
   },
-  statIconHighlight: { backgroundColor: '#ECFDF5' },
+  statIconHighlight: { backgroundColor: colors.primarySoft },
   statValue: { fontSize: 16, fontWeight: '800', color: colors.text },
   statLabel: { fontSize: 9, fontWeight: '700', color: colors.textMuted, marginTop: 2, letterSpacing: 0.3 },
 
@@ -414,11 +414,11 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.md, marginBottom: spacing.sm },
 
   dangerCard: {
-    backgroundColor: '#FEF2F2',
+    backgroundColor: colors.dangerSoft,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: colors.dangerBorder,
     marginBottom: spacing.md,
   },
   dangerBody: { fontSize: 12, color: '#7F1D1D', lineHeight: 17 },
@@ -434,4 +434,4 @@ const styles = StyleSheet.create({
   logTime: { fontSize: 11, color: colors.textMuted },
   logMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
   logReason: { fontSize: 12, color: colors.textMuted, marginTop: 2, fontStyle: 'italic' },
-});
+}));

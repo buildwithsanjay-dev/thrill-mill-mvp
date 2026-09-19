@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { PaginationDots } from '@/components/PaginationDots';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { GradientButton } from '../components/GradientButton';
 
@@ -32,7 +32,7 @@ export function ReadyToPlayScreen() {
           <View style={styles.badgeWrap}>
             <LogoBadge size={104} ring />
             <LinearGradient
-              colors={[colors.primary, '#1BB6A6']}
+              colors={[colors.primary, colors.primary]}
               style={styles.checkBadge}
             >
               <Ionicons name="checkmark" size={16} color="#FFFFFF" />
@@ -56,7 +56,7 @@ export function ReadyToPlayScreen() {
 
 const RING_COLOR = 'rgba(12, 92, 84, 0.08)';
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
   ringField: {
     position: 'absolute',
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.surface,
   },
   title: {
     marginTop: spacing.xl,
@@ -104,4 +104,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   footer: { gap: spacing.lg, paddingBottom: spacing.lg },
-});
+}));

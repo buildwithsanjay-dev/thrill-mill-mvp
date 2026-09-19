@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
@@ -12,7 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { signOut } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
 import type { LeaderboardPeriod } from '@/features/leaderboard/api';
@@ -483,7 +483,7 @@ function CreditUsageSection() {
 
 const AVATAR_SIZE = 96;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   removePhoto: { alignSelf: 'center', marginTop: spacing.sm, padding: spacing.xs },
   removePhotoText: { fontSize: 13, fontWeight: '700', color: colors.danger },
   deleteRow: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     borderRadius: AVATAR_SIZE / 2,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.surface,
   },
   adminBadgeWrap: { marginTop: spacing.sm },
 
@@ -562,11 +562,11 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.md,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
   },
   usageHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   usageTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
-  usagePeriodTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 3 },
+  usagePeriodTabs: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.pill, padding: 3 },
   usagePeriodTab: { paddingVertical: 6, paddingHorizontal: spacing.md, borderRadius: radii.pill },
   usagePeriodTabActive: { backgroundColor: colors.primary },
   usagePeriodLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   usageRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.sm,
@@ -585,4 +585,4 @@ const styles = StyleSheet.create({
   usageTeam: { fontSize: 13, fontWeight: '700', color: colors.text },
   usageMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   usageCredits: { fontSize: 14, fontWeight: '800', color: colors.primary, marginLeft: spacing.sm },
-});
+}));

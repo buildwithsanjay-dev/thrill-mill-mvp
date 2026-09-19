@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { screenColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing, themedStyles } from '@/constants/theme';
 import { requestTeamMembership } from '@/features/membership/api';
 import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import type { Profile } from '@/features/profile/api';
@@ -266,7 +266,7 @@ function PlanFeature({ text, muted }: { text: string; muted?: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: screenColors.background, paddingHorizontal: spacing.lg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: screenColors.text },
@@ -367,4 +367,4 @@ const styles = StyleSheet.create({
 
   footer: { paddingBottom: spacing.lg, paddingTop: spacing.sm },
   footerHint: { fontSize: 11, color: screenColors.textMuted, textAlign: 'center', marginTop: spacing.sm },
-});
+}));

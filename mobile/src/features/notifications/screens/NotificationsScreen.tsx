@@ -1,30 +1,42 @@
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { resolveNotificationRoute } from '../api';
 import { useMarkNotificationRead, useMyNotifications } from '../useNotifications';
 
-type TypeStyle = { icon: keyof typeof Ionicons.glyphMap; tint: string; bg: string };
+type Kind = 'success' | 'brand' | 'danger' | 'warning';
 
-const TYPE_STYLES: Record<string, TypeStyle> = {
-  BOOKING_CONFIRMED: { icon: 'calendar', tint: '#16A34A', bg: '#DCFCE7' },
-  SLOT_BOOKED: { icon: 'football', tint: '#0C5C54', bg: '#DCEEE8' },
-  ADDED_TO_BOOKING: { icon: 'person-add', tint: '#0C5C54', bg: '#DCEEE8' },
-  BOOKING_CANCELLED: { icon: 'close-circle', tint: '#DC2626', bg: '#FEE2E2' },
-  GAME_REMINDER: { icon: 'alarm', tint: '#D97706', bg: '#FEF3C7' },
-  MEMBERSHIP_APPROVED: { icon: 'ribbon', tint: '#16A34A', bg: '#DCFCE7' },
-  MEMBERSHIP_REQUESTED: { icon: 'document-text', tint: '#0C5C54', bg: '#DCEEE8' },
-  MEMBERSHIP_NEEDS_ATTENTION: { icon: 'alert-circle', tint: '#D97706', bg: '#FEF3C7' },
-  JOIN_REQUEST_APPROVED: { icon: 'checkmark-circle', tint: '#16A34A', bg: '#DCFCE7' },
-  JOIN_REQUEST_REJECTED: { icon: 'close-circle', tint: '#DC2626', bg: '#FEE2E2' },
-  TEAM_INVITE: { icon: 'mail', tint: '#0C5C54', bg: '#DCEEE8' },
-  TEAM_POLL: { icon: 'bar-chart', tint: '#0C5C54', bg: '#DCEEE8' },
+const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; kind: Kind }> = {
+  BOOKING_CONFIRMED: { icon: 'calendar', kind: 'success' },
+  SLOT_BOOKED: { icon: 'football', kind: 'brand' },
+  ADDED_TO_BOOKING: { icon: 'person-add', kind: 'brand' },
+  BOOKING_CANCELLED: { icon: 'close-circle', kind: 'danger' },
+  GAME_REMINDER: { icon: 'alarm', kind: 'warning' },
+  MEMBERSHIP_APPROVED: { icon: 'ribbon', kind: 'success' },
+  MEMBERSHIP_REQUESTED: { icon: 'document-text', kind: 'brand' },
+  MEMBERSHIP_NEEDS_ATTENTION: { icon: 'alert-circle', kind: 'warning' },
+  JOIN_REQUEST_APPROVED: { icon: 'checkmark-circle', kind: 'success' },
+  JOIN_REQUEST_REJECTED: { icon: 'close-circle', kind: 'danger' },
+  TEAM_INVITE: { icon: 'mail', kind: 'brand' },
+  TEAM_POLL: { icon: 'bar-chart', kind: 'brand' },
 };
-const DEFAULT_STYLE: TypeStyle = { icon: 'notifications', tint: '#0C5C54', bg: '#DCEEE8' };
+
+// One consistent set of tints for the whole list (built per render so it
+// follows light/dark): success / brand teal / danger / warning only.
+function typeStyle(type: string): { icon: keyof typeof Ionicons.glyphMap; tint: string; bg: string } {
+  const meta = TYPE_META[type] ?? { icon: 'notifications' as const, kind: 'brand' as const };
+  const tones: Record<Kind, { tint: string; bg: string }> = {
+    success: { tint: colors.success, bg: colors.successSoft },
+    brand: { tint: colors.primary, bg: colors.primarySoft },
+    danger: { tint: colors.danger, bg: colors.dangerSoft },
+    warning: { tint: colors.warning, bg: colors.warningSoft },
+  };
+  return { icon: meta.icon, ...tones[meta.kind] };
+}
 
 export function NotificationsScreen() {
   const router = useRouter();
@@ -62,8 +74,8 @@ export function NotificationsScreen() {
               }}
             >
               {!n.read_at && <View style={styles.unreadDot} />}
-              <View style={[styles.typeIcon, { backgroundColor: (TYPE_STYLES[n.type] ?? DEFAULT_STYLE).bg }]}>
-                <Ionicons name={(TYPE_STYLES[n.type] ?? DEFAULT_STYLE).icon} size={20} color={(TYPE_STYLES[n.type] ?? DEFAULT_STYLE).tint} />
+              <View style={[styles.typeIcon, { backgroundColor: typeStyle(n.type).bg }]}>
+                <Ionicons name={typeStyle(n.type).icon} size={20} color={typeStyle(n.type).tint} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.cardTitle}>{n.title}</Text>
@@ -85,8 +97,8 @@ export function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -100,7 +112,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     gap: spacing.md,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
@@ -121,4 +133,4 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 14, fontWeight: '700', color: colors.text, paddingRight: spacing.md },
   cardBody: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
   cardDate: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm },
-});
+}));

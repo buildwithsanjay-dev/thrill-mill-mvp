@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, themedStyles } from '@/constants/theme';
 
 type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -26,7 +26,7 @@ export function EmptyState({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
@@ -53,4 +53,4 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
   },
-});
+}));

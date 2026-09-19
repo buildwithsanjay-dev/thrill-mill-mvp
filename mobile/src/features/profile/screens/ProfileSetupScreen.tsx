@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
-import { colors, spacing } from '@/constants/theme';
+import { colors, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { cleanPhoneDigits, validateFullName, validatePhone } from '@/lib/validation';
 import { isPhoneAvailable, updateMyProfile, uploadAvatar, type Profile } from '../api';
@@ -181,7 +181,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
 const AVATAR_SIZE = 108;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     borderStyle: 'dashed',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.white,
+    borderColor: colors.surface,
   },
   removePhoto: { alignSelf: 'center', marginTop: spacing.sm, padding: spacing.xs },
   removePhotoText: { fontSize: 13, fontWeight: '700', color: colors.danger },
@@ -250,4 +250,4 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     gap: spacing.lg,
   },
-});
+}));

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '@/features/booking/api';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/features/booking/useBooking';
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
@@ -589,8 +589,8 @@ function computeBookingPreview(
   return { groups: Array.from(groups.values()), totalCredits, rangeLabel };
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
   progressFillFull: { width: '100%', height: '100%', backgroundColor: colors.primary },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  teamCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  teamCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   teamTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   teamName: { fontSize: 16, fontWeight: '800', color: colors.text },
   changeLink: { fontSize: 12, fontWeight: '700', color: colors.primary },
@@ -613,41 +613,41 @@ const styles = StyleSheet.create({
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   counter: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
   dateRow: { flexDirection: 'row' },
-  dateChip: { width: 56, height: 60, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, backgroundColor: '#FFFFFF' },
+  dateChip: { width: 56, height: 60, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, backgroundColor: colors.surface },
   dateChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   dateWeekday: { fontSize: 10, fontWeight: '700', color: colors.textMuted },
   dateDay: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 2 },
   dateTextSelected: { color: '#FFFFFF' },
 
-  hoursBadge: { backgroundColor: '#ECFDF5', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
+  hoursBadge: { backgroundColor: colors.primarySoft, borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   hoursBadgeText: { fontSize: 11, fontWeight: '800', color: colors.primary },
   hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: spacing.sm },
 
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
-  slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: '#FFFFFF' },
+  slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: colors.surface },
   slotChipSelected: { backgroundColor: colors.text, borderColor: colors.text },
-  slotChipDisabled: { backgroundColor: '#F1F5F9', borderColor: '#F1F5F9' },
+  slotChipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
   slotText: { fontSize: 13, fontWeight: '700', color: colors.text },
   slotTextSelected: { color: '#FFFFFF' },
   slotStatusText: { fontSize: 10, color: colors.textMuted, marginTop: 2 },
-  slotStatusTextSelected: { color: '#A7F3D0' },
+  slotStatusTextSelected: { color: colors.primaryBorder },
   slotStatusTextBooked: { color: colors.danger },
 
   expiryNote: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic' },
 
-  participantsCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border, marginTop: spacing.sm },
+  participantsCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border, marginTop: spacing.sm },
   participantRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   participantName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
   emptyText: { fontSize: 13, color: colors.textMuted, paddingVertical: spacing.sm },
 
-  summaryCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl, borderWidth: 1, borderColor: colors.border },
+  summaryCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl, borderWidth: 1, borderColor: colors.border },
   summaryTitle: { fontSize: 14, fontWeight: '800', color: colors.text, marginBottom: spacing.sm },
   summaryTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   summaryDate: { fontSize: 12, fontWeight: '700', color: colors.text },
   summaryRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 },
   summaryText: { fontSize: 12, color: colors.textMuted },
 
-  breakdownBox: { backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.md },
+  breakdownBox: { backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.md },
   breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
   breakdownLabel: { fontSize: 12, color: colors.textMuted },
   breakdownValue: { fontSize: 12, fontWeight: '700', color: colors.text },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
   totalDebitLabel: { fontSize: 13, fontWeight: '800', color: colors.text },
   totalDebitValue: { fontSize: 13, fontWeight: '800', color: colors.text },
 
-  walletFlowBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.sm },
+  walletFlowBox: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.sm },
   walletFlowItem: { flex: 1, alignItems: 'center' },
   walletFlowLabel: { fontSize: 9, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3, textAlign: 'center' },
   walletFlowValue: { fontSize: 13, fontWeight: '800', color: colors.text, marginTop: 2 },
@@ -674,11 +674,11 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
   sportChipTextSelected: { color: '#FFFFFF' },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

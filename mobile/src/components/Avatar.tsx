@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 
 type AvatarProps = {
   uri?: string | null;
@@ -9,7 +9,8 @@ type AvatarProps = {
   size?: number;
 };
 
-const PALETTE = ['#0C5C54', '#1D4ED8', '#B45309', '#7C3AED', '#BE123C', '#0369A1'];
+// Brand-derived fills; white initials stay readable on every one, in both themes.
+const PALETTE = ['#0E7C86', '#0B2545', '#EA5F14', '#2B6CB0', '#8A5A12', '#6B4EA0'];
 
 function initials(name?: string | null): string {
   if (!name) return '?';
@@ -38,7 +39,7 @@ export function Avatar({ uri, name, size = 40 }: AvatarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -47,4 +48,4 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
   },
-});
+}));

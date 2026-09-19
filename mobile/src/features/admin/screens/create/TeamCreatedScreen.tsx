@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { requestTeamMembership } from '@/features/membership/api';
 import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
@@ -75,7 +75,7 @@ export function TeamCreatedScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.checkIcon}>
-          <Ionicons name="checkmark" size={32} color="#065F46" />
+          <Ionicons name="checkmark" size={32} color={colors.success} />
         </View>
         <Text style={styles.title}>TEAM CREATED{'\n'}SUCCESSFULLY</Text>
         <Text style={styles.subtitle}>The team has been created and is ready for membership activation.</Text>
@@ -142,7 +142,7 @@ export function TeamCreatedScreen() {
         )}
 
         <View style={styles.pendingBanner}>
-          <Ionicons name="time" size={16} color="#92400E" />
+          <Ionicons name="time" size={16} color={colors.warningText} />
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
             <Text style={styles.pendingTitle}>PENDING ACTIVATION</Text>
             <Text style={styles.pendingBody}>Membership benefits are not active yet. Admin verification required.</Text>
@@ -188,19 +188,19 @@ function TimelineStep({ label, done, last }: { label: string; done?: boolean; la
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA', padding: spacing.xl },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background, padding: spacing.xl },
   loadingText: { fontSize: 13, color: colors.textMuted, marginTop: spacing.md, textAlign: 'center' },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl, alignItems: 'center' },
 
-  checkIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: '#A7F3D0', alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg },
+  checkIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primaryBorder, alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg },
   title: { fontSize: 22, fontWeight: '800', color: colors.text, textAlign: 'center', marginTop: spacing.lg },
   subtitle: { fontSize: 13, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, paddingHorizontal: spacing.lg },
 
-  card: { width: '100%', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  card: { width: '100%', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.border },
   cardTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  premiumTag: { backgroundColor: '#ECFDF5', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
+  premiumTag: { backgroundColor: colors.primarySoft, borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
   premiumTagText: { fontSize: 10, fontWeight: '800', color: colors.primary },
   teamName: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   idRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 },
@@ -212,15 +212,15 @@ const styles = StyleSheet.create({
 
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
-  planBox: { backgroundColor: '#0C5C54', borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
+  planBox: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
   planName: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
-  planCaption: { fontSize: 11, color: '#94A3B8', marginTop: 2 },
-  limitBox: { backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.sm },
+  planCaption: { fontSize: 11, color: colors.textFaint, marginTop: 2 },
+  limitBox: { backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.sm },
   limitText: { fontSize: 11, color: colors.textMuted },
 
-  pendingBanner: { flexDirection: 'row', width: '100%', backgroundColor: '#FEF3C7', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
-  pendingTitle: { fontSize: 12, fontWeight: '800', color: '#92400E' },
-  pendingBody: { fontSize: 11, color: '#92400E', marginTop: 2, lineHeight: 16 },
+  pendingBanner: { flexDirection: 'row', width: '100%', backgroundColor: colors.warningSoft, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
+  pendingTitle: { fontSize: 12, fontWeight: '800', color: colors.warningText },
+  pendingBody: { fontSize: 11, color: colors.warningText, marginTop: 2, lineHeight: 16 },
 
   sectionTitle: { alignSelf: 'flex-start', fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   timeline: { width: '100%' },
@@ -232,4 +232,4 @@ const styles = StyleSheet.create({
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
   backLink: { textAlign: 'center', fontSize: 13, fontWeight: '600', color: colors.textMuted },
-});
+}));

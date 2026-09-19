@@ -1,8 +1,8 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import type { ComponentProps } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -71,7 +71,7 @@ export function Button({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   base: {
     height: 52,
     borderRadius: radii.pill,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   outline: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1.5,
     borderColor: colors.text,
   },
@@ -117,4 +117,4 @@ const styles = StyleSheet.create({
   iconRight: {
     marginLeft: spacing.sm,
   },
-});
+}));

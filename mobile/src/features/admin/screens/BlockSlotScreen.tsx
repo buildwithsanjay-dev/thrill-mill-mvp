@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useTurfResources, useTurfSlots } from '@/features/booking/useBooking';
 import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
 import { adminBlockSlot, adminUnblockSlot } from '../api';
@@ -219,8 +219,8 @@ export function BlockSlotScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
@@ -236,32 +236,32 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
   sportChipTextSelected: { color: '#FFFFFF' },
   hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic', marginTop: spacing.sm },
   dateRow: { flexDirection: 'row' },
-  dateChip: { width: 56, height: 60, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, backgroundColor: '#FFFFFF' },
+  dateChip: { width: 56, height: 60, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginRight: spacing.sm, backgroundColor: colors.surface },
   dateChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   dateWeekday: { fontSize: 10, fontWeight: '700', color: colors.textMuted },
   dateDay: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 2 },
   dateTextSelected: { color: '#FFFFFF' },
 
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: '#FFFFFF' },
+  slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: colors.surface },
   slotChipSelected: { backgroundColor: colors.danger, borderColor: colors.danger },
-  slotChipBlocked: { backgroundColor: '#FEE2E2', borderColor: '#FECACA' },
-  slotChipDisabled: { backgroundColor: '#F1F5F9', borderColor: '#F1F5F9' },
+  slotChipBlocked: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder },
+  slotChipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
   slotText: { fontSize: 13, fontWeight: '700', color: colors.text },
   slotTextSelected: { color: '#FFFFFF' },
-  slotTextBlocked: { color: '#B91C1C' },
+  slotTextBlocked: { color: colors.danger },
   slotTextDisabled: { color: colors.textMuted },
-  slotSubText: { fontSize: 9, color: '#B91C1C', marginTop: 2 },
+  slotSubText: { fontSize: 9, color: colors.danger, marginTop: 2 },
 
-  reasonCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl, borderWidth: 1, borderColor: colors.border },
+  reasonCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl, borderWidth: 1, borderColor: colors.border },
   reasonTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

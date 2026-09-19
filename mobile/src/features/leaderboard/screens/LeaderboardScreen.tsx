@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/AppHeader';
 import { Avatar } from '@/components/Avatar';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { LeaderboardPeriod } from '../api';
 import { useLeaderboard } from '../useLeaderboard';
 import type { LiveLeaderboardRow } from '@/types/db';
@@ -34,7 +34,7 @@ export function LeaderboardScreen() {
         </AppHeader>
         <View style={styles.titleRow}>
           <Text style={styles.subtitle}>Leaderboard</Text>
-          <Ionicons name="trophy" size={18} color="#F59E0B" />
+          <Ionicons name="trophy" size={18} color={colors.warning} />
         </View>
         <Text style={styles.tagline}>Compete. Play. Climb.</Text>
 
@@ -133,7 +133,7 @@ function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: numbe
 
   return (
     <View style={styles.podiumSlot}>
-      {rank === 1 && <Ionicons name="trophy" size={16} color="#F59E0B" style={{ marginBottom: 4 }} />}
+      {rank === 1 && <Ionicons name="trophy" size={16} color={colors.warning} style={{ marginBottom: 4 }} />}
       <Avatar uri={scope === 'MEMBER' ? row.avatar_url : undefined} name={name} size={rank === 1 ? 52 : 44} />
       <Text style={styles.podiumName} numberOfLines={1}>
         {name}
@@ -150,8 +150,8 @@ function formatShort(iso: string): string {
   return new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
@@ -161,13 +161,13 @@ const styles = StyleSheet.create({
 
   periodTabs: {
     flexDirection: 'row',
-    backgroundColor: '#EEF1F5',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radii.pill,
     padding: 4,
     marginTop: spacing.lg,
   },
   periodTab: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: radii.pill },
-  periodTabActive: { backgroundColor: '#0C5C54' },
+  periodTabActive: { backgroundColor: colors.primary },
   periodTabLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
   periodTabLabelActive: { color: '#FFFFFF' },
 
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
     borderRadius: radii.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   weekChipText: { fontSize: 11, fontWeight: '800', color: colors.primary },
   weekChipDate: { fontSize: 11, color: colors.textMuted, marginLeft: 4 },
 
-  scopeTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 4, marginTop: spacing.md },
+  scopeTabs: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.pill, padding: 4, marginTop: spacing.md },
   scopeTab: { flex: 1, alignItems: 'center', paddingVertical: spacing.sm, borderRadius: radii.pill },
   scopeTabActive: { backgroundColor: colors.primary },
   scopeTabLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.sm,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   listRank: { width: 28, fontSize: 13, fontWeight: '800', color: colors.textMuted },
-  listIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
+  listIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   listName: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
   listValue: { fontSize: 14, fontWeight: '800', color: colors.primary },
-});
+}));

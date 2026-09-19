@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminCreateTeam } from '../../api';
 import { useInvalidateAdminQueries } from '../../useAdmin';
@@ -149,8 +149,8 @@ export function CreateTeamDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   stepMeta: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: spacing.lg, marginTop: spacing.lg },
@@ -159,8 +159,8 @@ const styles = StyleSheet.create({
   stepRow: { paddingHorizontal: spacing.lg, marginTop: spacing.sm },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  infoCard: { flexDirection: 'row', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
-  infoIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
+  infoCard: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  infoIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.infoSoft, alignItems: 'center', justifyContent: 'center' },
   infoTitle: { fontSize: 14, fontWeight: '800', color: colors.text },
   infoBody: { fontSize: 12, color: colors.textMuted, marginTop: 2, lineHeight: 17 },
 
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignSelf: 'center',
     marginTop: spacing.lg,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   imageLabel: { fontSize: 13, fontWeight: '700', color: colors.text, textAlign: 'center', marginTop: spacing.sm },
   imageOptional: { fontSize: 12, color: colors.textMuted, textAlign: 'center' },
@@ -188,9 +188,9 @@ const styles = StyleSheet.create({
   idLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
   idValue: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
 
-  assistCard: { flexDirection: 'row', backgroundColor: '#ECFDF5', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
+  assistCard: { flexDirection: 'row', backgroundColor: colors.primarySoft, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
   assistTitle: { fontSize: 13, fontWeight: '800', color: colors.text },
-  assistBody: { fontSize: 12, color: '#065F46', marginTop: 2, lineHeight: 17 },
+  assistBody: { fontSize: 12, color: colors.success, marginTop: 2, lineHeight: 17 },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

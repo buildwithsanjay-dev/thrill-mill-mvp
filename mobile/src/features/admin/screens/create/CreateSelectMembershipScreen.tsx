@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import type { MembershipPlan } from '@/types/db';
@@ -134,8 +134,8 @@ function PlanCard({ plan, selected, onSelect }: { plan: MembershipPlan; selected
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   sectionTitle: { fontSize: 17, fontWeight: '800', color: colors.text, paddingHorizontal: spacing.lg, marginTop: spacing.md },
@@ -146,20 +146,20 @@ const styles = StyleSheet.create({
   stepRow: { paddingHorizontal: spacing.lg, marginTop: spacing.sm },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  teamCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
+  teamCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   teamName: { fontSize: 14, fontWeight: '800', color: colors.text },
   teamMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
 
   chooseTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.xl },
-  infoCard: { flexDirection: 'row', gap: spacing.sm, backgroundColor: '#EFF6FF', borderRadius: radii.md, padding: spacing.md, marginTop: spacing.sm },
-  infoBody: { flex: 1, fontSize: 12, color: '#1E3A8A', lineHeight: 17 },
+  infoCard: { flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.infoSoft, borderRadius: radii.md, padding: spacing.md, marginTop: spacing.sm },
+  infoBody: { flex: 1, fontSize: 12, color: colors.infoText, lineHeight: 17 },
 
-  planCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1.5, borderColor: colors.border, overflow: 'hidden' },
-  planCardSelected: { borderColor: colors.primary, backgroundColor: '#ECFDF5' },
+  planCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1.5, borderColor: colors.border, overflow: 'hidden' },
+  planCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   premiumBadge: { position: 'absolute', top: 0, right: 0, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#78350F', paddingHorizontal: spacing.sm, paddingVertical: 4, borderBottomLeftRadius: radii.sm },
-  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: '#FDE68A' },
+  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: colors.warningSoft },
   planTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  tagChip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F0FDFA', paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radii.pill },
+  tagChip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.primarySoft, paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radii.pill },
   tagChipText: { fontSize: 9, fontWeight: '800', color: colors.primary },
   radio: { width: 22, height: 22, borderRadius: 11, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   radioSelected: { borderColor: colors.primary },
@@ -173,4 +173,4 @@ const styles = StyleSheet.create({
   planFooter: { fontSize: 11, color: colors.textMuted, marginTop: spacing.md, lineHeight: 16 },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

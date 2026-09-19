@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Linking from 'expo-linking';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 import { createSessionFromUrl } from '@/features/auth/api';
 
 // Google sign-in's redirectTo is `thrillmillclub://auth` (see auth/api.ts) —
@@ -42,6 +42,6 @@ export default function AuthCallback() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-});
+}));

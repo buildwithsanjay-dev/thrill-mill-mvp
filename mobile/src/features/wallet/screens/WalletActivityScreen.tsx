@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
-import { screenColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing, themedStyles, colors } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { useTeamWallet, useWalletLedger } from '../useWallet';
 import type { WalletLedgerEntry } from '@/types/db';
@@ -17,7 +17,7 @@ const ENTRY_META: Record<
   { icon: keyof typeof Ionicons.glyphMap; color: string; sign: '+' | '-' }
 > = {
   MEMBERSHIP_CREDIT: { icon: 'add-circle', color: screenColors.success, sign: '+' },
-  BOOKING_CONSUME: { icon: 'football', color: '#F97316', sign: '-' },
+  BOOKING_CONSUME: { icon: 'football', color: colors.accent, sign: '-' },
   BOOKING_REFUND: { icon: 'refresh-circle', color: screenColors.primaryLight, sign: '+' },
   ADMIN_ADJUSTMENT: { icon: 'construct', color: '#A78BFA', sign: '+' },
 };
@@ -113,7 +113,7 @@ export function WalletActivityScreen() {
                   <View style={styles.timelineCard}>
                     <View style={styles.timelineTopRow}>
                       <Text style={styles.timelineTitle}>{ENTRY_TITLE[entry.entry_type]}</Text>
-                      <Text style={[styles.timelineAmount, { color: entry.amount >= 0 ? screenColors.primaryLight : '#F97316' }]}>
+                      <Text style={[styles.timelineAmount, { color: entry.amount >= 0 ? screenColors.primaryLight : colors.accent }]}>
                         {entry.amount >= 0 ? '+' : ''}
                         {Math.round(entry.amount)} Credits
                       </Text>
@@ -137,7 +137,7 @@ export function WalletActivityScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: screenColors.background },
   header: {
     flexDirection: 'row',
@@ -197,4 +197,4 @@ const styles = StyleSheet.create({
   timelineAmount: { fontSize: 13, fontWeight: '800' },
   timelineReason: { fontSize: 12, color: screenColors.textMuted, marginTop: 4 },
   timelineDate: { fontSize: 11, color: screenColors.textMuted, marginTop: spacing.sm },
-});
+}));

@@ -1,6 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 
 type PaginationDotsProps = {
   count: number;
@@ -17,7 +17,7 @@ export function PaginationDots({ count, activeIndex }: PaginationDotsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -36,4 +36,4 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
-});
+}));

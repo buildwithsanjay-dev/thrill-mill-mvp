@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
 import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -209,11 +209,11 @@ function DashboardContent({
 
       {summary.pendingRequestCount > 0 && (
         <Pressable style={styles.actionNeededBanner} onPress={() => router.push(`/(app)/team/${team.id}`)}>
-          <Ionicons name="alert-circle" size={16} color="#B45309" />
+          <Ionicons name="alert-circle" size={16} color={colors.warning} />
           <Text style={styles.actionNeededText}>
             {summary.pendingRequestCount} join request{summary.pendingRequestCount === 1 ? '' : 's'} waiting on your review
           </Text>
-          <Ionicons name="chevron-forward" size={14} color="#B45309" />
+          <Ionicons name="chevron-forward" size={14} color={colors.warning} />
         </Pressable>
       )}
 
@@ -292,7 +292,7 @@ function DashboardContent({
                 {new Date(entry.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
               </Text>
             </View>
-            <Text style={[styles.activityAmount, { color: entry.amount >= 0 ? colors.primary : '#DC2626' }]}>
+            <Text style={[styles.activityAmount, { color: entry.amount >= 0 ? colors.primary : colors.danger }]}>
               {entry.amount >= 0 ? '+' : ''}
               {Math.round(entry.amount)}
             </Text>
@@ -411,7 +411,7 @@ function UpcomingEventCard({ booking, onPress }: { booking: UpcomingTeamBooking;
   return (
     <Pressable style={styles.upcomingCard} onPress={onPress}>
       <View style={styles.upcomingCardTeamRow}>
-        <Ionicons name="shield" size={12} color="#A7F3D0" />
+        <Ionicons name="shield" size={12} color={colors.primaryBorder} />
         <Text style={styles.upcomingCardTeam} numberOfLines={1}>
           {booking.team?.name ?? 'Team'}
         </Text>
@@ -427,9 +427,9 @@ function UpcomingEventCard({ booking, onPress }: { booking: UpcomingTeamBooking;
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
@@ -439,18 +439,18 @@ const styles = StyleSheet.create({
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
   newMemberCard: {
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
   newMemberTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', lineHeight: 28 },
-  newMemberSubtitle: { fontSize: 13, color: '#94A3B8', marginTop: spacing.sm, lineHeight: 19 },
+  newMemberSubtitle: { fontSize: 13, color: colors.textFaint, marginTop: spacing.sm, lineHeight: 19 },
 
   teamSwitcher: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     borderWidth: 1,
@@ -465,23 +465,23 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#DC2626',
+    backgroundColor: colors.danger,
     borderWidth: 1,
-    borderColor: '#FFFFFF',
+    borderColor: colors.surface,
   },
 
   actionNeededBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: '#FFFBEB',
+    backgroundColor: colors.warningSoft,
     borderWidth: 1,
-    borderColor: '#FDE68A',
+    borderColor: colors.warningSoft,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.sm,
   },
-  actionNeededText: { flex: 1, fontSize: 12.5, fontWeight: '700', color: '#92400E' },
+  actionNeededText: { flex: 1, fontSize: 12.5, fontWeight: '700', color: colors.warningText },
 
   creditsCard: {
     backgroundColor: colors.primaryDark,
@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   creditsCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  creditsLabel: { fontSize: 11, fontWeight: '700', color: '#A7F3D0', letterSpacing: 0.5 },
+  creditsLabel: { fontSize: 11, fontWeight: '700', color: colors.primaryBorder, letterSpacing: 0.5 },
   creditsValue: { fontSize: 34, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.xs },
 
   sectionHeader: {
@@ -504,15 +504,15 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 12, fontWeight: '700', color: colors.primary },
 
   bookingCard: {
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
   bookingTitle: { fontSize: 17, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  bookingMeta: { fontSize: 13, color: '#94A3B8', marginTop: 4 },
+  bookingMeta: { fontSize: 13, color: colors.textFaint, marginTop: 4 },
 
   noBookingCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   },
   quickAction: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: 4,
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
@@ -568,20 +568,20 @@ const styles = StyleSheet.create({
   },
   upcomingCard: {
     width: 168,
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     borderRadius: radii.lg,
     padding: spacing.md,
   },
   upcomingCardTeamRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  upcomingCardTeam: { flex: 1, fontSize: 11, fontWeight: '700', color: '#A7F3D0', letterSpacing: 0.3 },
+  upcomingCardTeam: { flex: 1, fontSize: 11, fontWeight: '700', color: colors.primaryBorder, letterSpacing: 0.3 },
   upcomingCardTurf: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  upcomingCardDate: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
-  upcomingCardTime: { fontSize: 12, color: '#94A3B8', marginTop: 2 },
+  upcomingCardDate: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
+  upcomingCardTime: { fontSize: 12, color: colors.textFaint, marginTop: 2 },
 
   activityRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
 
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(15, 23, 41, 0.5)', justifyContent: 'flex-end' },
   modalSheet: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
     paddingTop: spacing.sm,
@@ -624,10 +624,10 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalRowLabel: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
-  modalRowActionNeeded: { fontSize: 11, fontWeight: '700', color: '#B45309', marginRight: spacing.xs },
-});
+  modalRowActionNeeded: { fontSize: 11, fontWeight: '700', color: colors.warning, marginRight: spacing.xs },
+}));

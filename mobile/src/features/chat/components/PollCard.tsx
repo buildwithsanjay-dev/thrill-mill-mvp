@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { ChatPoll, ChatPollResult } from '@/types/db';
 
 function closesLabel(closesAt: string | null, now: number): string {
@@ -91,9 +91,9 @@ export function PollCard({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   card: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: radii.md,
     overflow: 'hidden',
-    backgroundColor: '#F8FAFC',
+    backgroundColor: colors.surfaceAlt,
   },
   optionMine: { borderColor: colors.primary },
   fill: { position: 'absolute', top: 0, bottom: 0, left: 0, backgroundColor: '#E2E8F0' },
@@ -119,4 +119,4 @@ const styles = StyleSheet.create({
   count: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
   voters: { fontSize: 11, color: colors.textMuted, marginTop: 4, marginLeft: spacing.sm },
   footer: { marginTop: spacing.sm, fontSize: 11, color: colors.textMuted },
-});
+}));

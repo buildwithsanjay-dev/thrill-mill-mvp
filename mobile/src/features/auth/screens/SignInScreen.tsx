@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,7 +9,7 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
 import { FadeSlideIn } from '@/components/FadeSlideIn';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { signInWithGoogle, signInWithUsername } from '../api';
 import { showAlert } from '@/components/AppDialog';
@@ -169,7 +169,7 @@ export function SignInScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   adminForm: {
     width: '100%',
     marginTop: spacing.sm,
-    backgroundColor: '#FAFBFC',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radii.lg,
     borderWidth: 1,
     borderColor: colors.border,
@@ -251,4 +251,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: spacing.lg,
   },
-});
+}));

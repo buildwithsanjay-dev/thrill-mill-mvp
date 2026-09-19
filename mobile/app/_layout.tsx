@@ -6,6 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DialogHost } from '../src/components/AppDialog';
+import { AppThemeProvider, ThemedTree, useAppearance } from '../src/components/ThemeProvider';
 import { ExitOnDoubleBack } from '../src/components/ExitOnDoubleBack';
 import { queryClient, registerQueryClientFocusManager } from '../src/lib/queryClient';
 import { AuthProvider } from '../src/features/auth/AuthProvider';
@@ -50,6 +51,14 @@ function useNotificationTapNavigation() {
   }, [router]);
 }
 
+// Status-bar icons must contrast with the active theme (dark icons on the light
+// theme, light icons on the dark one) — including when the user forced a theme
+// from Profile -> Appearance, which the system-following "auto" would miss.
+function ThemedStatusBar() {
+  const { scheme } = useAppearance();
+  return <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+}
+
 export default function RootLayout() {
   // Registered once at app startup: without this, TanStack Query's
   // `focusManager` never learns the app went to background/foreground on
@@ -61,15 +70,20 @@ export default function RootLayout() {
   useNotificationTapNavigation();
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <StatusBar style="auto" />
-          <ExitOnDoubleBack />
-          <Stack screenOptions={{ headerShown: false }} />
-          <DialogHost />
-        </QueryClientProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <AppThemeProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClient}>
+            {/* Remounted when the theme flips so every screen rebuilds its styles. */}
+            <ThemedTree>
+              <ThemedStatusBar />
+              <ExitOnDoubleBack />
+              <Stack screenOptions={{ headerShown: false }} />
+              <DialogHost />
+            </ThemedTree>
+          </QueryClientProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </AppThemeProvider>
   );
 }

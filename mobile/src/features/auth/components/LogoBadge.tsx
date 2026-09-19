@@ -1,8 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors } from '@/constants/theme';
+import { colors, themedStyles } from '@/constants/theme';
 
 const LOGO = require('../../../../assets/logo.jpeg');
 
@@ -28,7 +28,7 @@ export function LogoBadge({ size = 92, ring = false }: { size?: number; ring?: b
   const ringSize = size + 8;
   return (
     <LinearGradient
-      colors={[colors.primary, '#1BB6A6', colors.primary]}
+      colors={[colors.primary, colors.primary, colors.primary]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.ring, { width: ringSize, height: ringSize, borderRadius: ringSize / 2 }]}
@@ -38,7 +38,7 @@ export function LogoBadge({ size = 92, ring = false }: { size?: number; ring?: b
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   ring: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   badge: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden',
@@ -63,4 +63,4 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-});
+}));

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { activateMembership, flagMembershipIssue } from '../api';
 import { useInvalidateAdminQueries } from '../useAdmin';
@@ -208,7 +208,7 @@ export function ActivateMembershipScreen() {
         </View>
 
         <View style={styles.warningCard}>
-          <Ionicons name="warning" size={16} color="#C2410C" />
+          <Ionicons name="warning" size={16} color={colors.accentText} />
           <Text style={styles.warningText}>
             Membership activation and credit loading affect the Team wallet. Please review before confirming.
           </Text>
@@ -235,42 +235,42 @@ export function ActivateMembershipScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 10, color: colors.textMuted, marginTop: 2 },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  summaryCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  summaryCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
   summaryTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   summaryId: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   summaryMeta: { fontSize: 12, color: colors.textMuted, marginTop: spacing.sm },
 
   sectionLabel: { fontSize: 13, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   contactRow: { flexDirection: 'row', gap: spacing.sm },
-  contactChip: { backgroundColor: '#FFFFFF', borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: colors.border },
+  contactChip: { backgroundColor: colors.surface, borderRadius: radii.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderWidth: 1, borderColor: colors.border },
   contactText: { fontSize: 13, fontWeight: '600', color: colors.text },
 
-  card: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  card: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1, borderColor: colors.border },
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.md },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
 
-  planBox: { backgroundColor: '#0C5C54', borderRadius: radii.md, padding: spacing.md },
-  planLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },
+  planBox: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.md },
+  planLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.3 },
   planName: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginTop: 2 },
 
   rateRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-  rateBox: { flex: 1, backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md },
+  rateBox: { flex: 1, backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.md },
   rateLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   rateValue: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: 4 },
 
-  ruleBox: { flexDirection: 'row', gap: spacing.xs, backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.md },
+  ruleBox: { flexDirection: 'row', gap: spacing.xs, backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.md },
   ruleText: { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },
 
   verifyBody: { fontSize: 12, color: colors.textMuted, marginBottom: spacing.md },
-  checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: '#F8FAFC', borderRadius: radii.md, padding: spacing.md },
+  checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.surfaceAlt, borderRadius: radii.md, padding: spacing.md },
   checkboxTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
   checkboxBody: { fontSize: 11, color: colors.textMuted, marginTop: 2, lineHeight: 16 },
 
@@ -280,15 +280,15 @@ const styles = StyleSheet.create({
   loadValueEmphasis: { fontSize: 16, fontWeight: '800', color: colors.primary },
   loadHint: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic' },
 
-  summaryDark: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
+  summaryDark: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
   summaryDarkTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', marginBottom: spacing.sm },
   summaryDarkRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
-  summaryDarkLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },
+  summaryDarkLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.3 },
   summaryDarkValue: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
-  summaryDarkValueGreen: { fontSize: 13, fontWeight: '700', color: '#5EEAD4' },
+  summaryDarkValueGreen: { fontSize: 13, fontWeight: '700', color: colors.heroAccent },
 
-  warningCard: { flexDirection: 'row', gap: spacing.sm, backgroundColor: '#FFF7ED', borderRadius: radii.md, padding: spacing.md, marginTop: spacing.lg },
-  warningText: { flex: 1, fontSize: 11, color: '#9A3412', lineHeight: 16 },
+  warningCard: { flexDirection: 'row', gap: spacing.sm, backgroundColor: colors.accentSoft, borderRadius: radii.md, padding: spacing.md, marginTop: spacing.lg },
+  warningText: { flex: 1, fontSize: 11, color: colors.accentText, lineHeight: 16 },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

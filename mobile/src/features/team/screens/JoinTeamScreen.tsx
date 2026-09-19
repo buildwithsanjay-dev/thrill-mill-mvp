@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { requestJoinTeam } from '../api';
 import { useInvalidateTeamQueries } from '../useTeams';
 import { showAlert } from '@/components/AppDialog';
@@ -81,7 +81,7 @@ export function JoinTeamScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
   backButton: { marginTop: spacing.sm, alignSelf: 'flex-start' },
   content: { flex: 1, alignItems: 'center', paddingTop: spacing.xl },
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: radii.lg,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
@@ -105,4 +105,4 @@ const styles = StyleSheet.create({
   },
   form: { width: '100%', marginTop: spacing.xl },
   footer: { width: '100%', marginTop: spacing.xl },
-});
+}));

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useMyTeams, useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useActiveTeamStore } from '@/stores/activeTeam';
@@ -596,7 +596,7 @@ export function BookTurfScreen() {
               </Text>
             </View>
             <Text style={styles.confirmTimer}>
-              <Ionicons name="time-outline" size={14} color="#FBBF24" /> {secondsLeft}s
+              <Ionicons name="time-outline" size={14} color={colors.warning} /> {secondsLeft}s
             </Text>
           </View>
           <Button
@@ -611,9 +611,9 @@ export function BookTurfScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   title: { fontSize: 19, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   teamPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     borderWidth: 1,
@@ -633,15 +633,15 @@ const styles = StyleSheet.create({
   heroCard: {
     height: 130,
     borderRadius: radii.lg,
-    backgroundColor: '#0C4A45',
+    backgroundColor: colors.primaryDark,
     marginTop: spacing.md,
     padding: spacing.lg,
     justifyContent: 'flex-end',
   },
   heroTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF' },
   heroBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  heroDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#5EEAD4' },
-  heroBadgeText: { fontSize: 12, color: '#A7F3D0', fontWeight: '600' },
+  heroDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.heroAccent },
+  heroBadgeText: { fontSize: 12, color: colors.primaryBorder, fontWeight: '600' },
 
   sectionLabel: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
@@ -655,7 +655,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   sportChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   sportChipText: { fontSize: 13, fontWeight: '700', color: colors.text },
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   dateChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
   dateWeekday: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
@@ -685,10 +685,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   slotChipSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
-  slotChipDisabled: { backgroundColor: '#F1F5F9', borderColor: '#F1F5F9' },
+  slotChipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
   slotText: { fontSize: 13, fontWeight: '700', color: colors.text },
   slotTextSelected: { color: '#FFFFFF' },
   slotTextDisabled: { color: colors.textMuted },
@@ -697,7 +697,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     padding: spacing.sm,
     marginBottom: spacing.sm,
@@ -707,7 +707,7 @@ const styles = StyleSheet.create({
   playerName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
   summaryCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.xl,
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
   rateLine: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
   rateLineText: { fontSize: 12, color: colors.textMuted, flex: 1 },
   rateLineValue: { fontSize: 12, fontWeight: '700', color: colors.text },
-  totalBox: { backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.sm },
+  totalBox: { backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.md, marginTop: spacing.sm },
   totalLabel: { fontSize: 10, color: colors.textMuted },
   totalValue: { fontSize: 18, fontWeight: '800', color: colors.text, marginTop: 2 },
   walletPreviewBox: { marginTop: spacing.sm, gap: 4 },
@@ -730,13 +730,13 @@ const styles = StyleSheet.create({
   walletPreviewValue: { fontSize: 12, fontWeight: '700', color: colors.text },
 
   confirmBar: {
-    backgroundColor: '#0C5C54',
+    backgroundColor: colors.primary,
     padding: spacing.lg,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
   },
   confirmTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  confirmLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.4 },
+  confirmLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.4 },
   confirmMeta: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
-  confirmTimer: { fontSize: 13, fontWeight: '700', color: '#FBBF24' },
-});
+  confirmTimer: { fontSize: 13, fontWeight: '700', color: colors.warning },
+}));

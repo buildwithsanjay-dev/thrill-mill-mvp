@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { respondToInvite } from '../api';
 import { useInvalidateTeamQueries, useMyInvites } from '../useTeams';
 import { showAlert } from '@/components/AppDialog';
@@ -66,17 +66,17 @@ export function PendingInvites() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   wrap: { marginBottom: spacing.lg },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   title: { fontSize: 14, fontWeight: '800', color: colors.text },
   card: {
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
+    borderColor: colors.primaryBorder,
   },
   teamName: { fontSize: 15, fontWeight: '800', color: colors.text },
   subtitle: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     alignItems: 'center',
     paddingVertical: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
   },
   declineText: { fontSize: 13, fontWeight: '700', color: colors.text },
   acceptButton: {
@@ -99,4 +99,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   acceptText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
-});
+}));

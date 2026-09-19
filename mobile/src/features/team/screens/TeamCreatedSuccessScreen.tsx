@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { BackHandler, Share, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Share, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedSuccess } from '@/components/AnimatedSuccess';
 import { Button } from '@/components/Button';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import { buildInviteMessage } from '../invite';
 
@@ -81,7 +81,7 @@ export function TeamCreatedSuccessScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: spacing.md },
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     alignSelf: 'stretch',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    backgroundColor: colors.surfaceAlt,
     borderRadius: radii.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -106,4 +106,4 @@ const styles = StyleSheet.create({
   codeValue: { fontSize: 24, fontWeight: '800', color: colors.primary, letterSpacing: 2, marginTop: 4 },
   footer: { gap: spacing.sm, paddingBottom: spacing.lg },
   link: { textAlign: 'center', fontSize: 13, fontWeight: '700', color: colors.textMuted, paddingVertical: spacing.sm },
-});
+}));

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { findTeamByJoinCodeOrName } from '../../api';
 import type { Team, TeamWallet } from '@/types/db';
@@ -134,8 +134,8 @@ export function SelectTeamScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   headerSubtitle: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
@@ -149,23 +149,23 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 20, fontWeight: '800', color: colors.text },
   sectionSubtitle: { fontSize: 13, color: colors.textMuted, marginTop: spacing.xs, marginBottom: spacing.md, lineHeight: 19 },
 
-  resultCard: { backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.md, borderWidth: 1.5, borderColor: colors.border },
-  resultCardSelected: { borderColor: colors.primary, backgroundColor: '#ECFDF5' },
+  resultCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.md, borderWidth: 1.5, borderColor: colors.border },
+  resultCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   resultTopRow: { flexDirection: 'row', alignItems: 'center' },
-  resultIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
+  resultIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   resultName: { fontSize: 15, fontWeight: '800', color: colors.text },
   resultId: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
   resultBottomRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.md },
-  activePlanChip: { backgroundColor: '#FFEDD5', borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
-  activePlanChipText: { fontSize: 10, fontWeight: '800', color: '#9A3412' },
+  activePlanChip: { backgroundColor: colors.accentSoft, borderRadius: radii.pill, paddingHorizontal: spacing.sm, paddingVertical: 4 },
+  activePlanChipText: { fontSize: 10, fontWeight: '800', color: colors.accentText },
   walletLabel: { fontSize: 10, color: colors.textMuted, textAlign: 'right' },
   walletValue: { fontSize: 16, fontWeight: '800', color: colors.text, textAlign: 'right' },
 
   emptyText: { fontSize: 13, color: colors.textMuted, marginTop: spacing.md },
 
-  infoCard: { flexDirection: 'row', backgroundColor: '#F8FAFC', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
+  infoCard: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl },
   infoTitle: { fontSize: 11, fontWeight: '800', color: colors.text, letterSpacing: 0.3 },
   infoBody: { fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 17 },
 
   footer: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

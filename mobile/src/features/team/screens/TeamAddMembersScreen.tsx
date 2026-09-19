@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Share, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { showAlert } from '@/components/AppDialog';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { TextField } from '@/components/TextField';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { friendlyError } from '@/lib/errors';
 import { inviteTeamMember, searchMembers, type LookupUserResult } from '../api';
 import { buildInviteMessage } from '../invite';
@@ -181,8 +181,8 @@ export function TeamAddMembersScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
@@ -230,6 +230,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     padding: spacing.md,
     borderRadius: radii.md,
-    backgroundColor: '#ECFDF5',
+    backgroundColor: colors.primarySoft,
   },
-});
+}));

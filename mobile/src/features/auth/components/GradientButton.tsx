@@ -1,9 +1,9 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import type { ComponentProps } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -57,7 +57,7 @@ export function GradientButton({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   wrap: {
     borderRadius: radii.pill,
     shadowColor: colors.primaryDark,
@@ -96,4 +96,4 @@ const styles = StyleSheet.create({
   iconRight: {
     marginLeft: spacing.sm,
   },
-});
+}));

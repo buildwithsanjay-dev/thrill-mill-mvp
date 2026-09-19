@@ -1,6 +1,6 @@
-import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
+import { Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 type TextFieldProps = TextInputProps & {
   label?: string;
@@ -35,7 +35,7 @@ export function TextField({ label, prefix, labelColor, error, style, ...inputPro
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   inputError: { borderColor: colors.danger },
   errorText: { marginTop: spacing.xs, fontSize: 12, fontWeight: '600', color: colors.danger },
   container: {
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
   inputWithPrefix: {
     flex: 1,
   },
-});
+}));

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { screenColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
@@ -164,7 +164,7 @@ export function CreateTeamStepScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: screenColors.background, paddingHorizontal: spacing.lg },
   header: {
     flexDirection: 'row',
@@ -229,4 +229,4 @@ const styles = StyleSheet.create({
   hostYou: { color: screenColors.primaryLight, fontWeight: '600' },
 
   footer: { paddingBottom: spacing.lg, paddingTop: spacing.sm },
-});
+}));

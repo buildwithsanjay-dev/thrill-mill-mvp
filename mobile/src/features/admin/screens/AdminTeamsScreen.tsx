@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
-import { colors, radii, spacing } from '@/constants/theme';
+import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAllTeams } from '../useAdmin';
 import type { AdminTeamRow } from '../api';
 
@@ -97,7 +97,7 @@ export function AdminTeamsScreen() {
             {pendingRow && filter === 'ALL' && (
               <>
                 <View style={styles.sectionHeaderRow}>
-                  <Ionicons name="alert-circle" size={15} color="#C2410C" />
+                  <Ionicons name="alert-circle" size={15} color={colors.accentText} />
                   <Text style={styles.sectionTitle}>Needs Your Attention</Text>
                 </View>
                 <Pressable
@@ -165,30 +165,30 @@ function TeamRow({ row, onPress }: { row: AdminTeamRow; onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F7F8FA' },
+const styles = themedStyles(() => ({
+  container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: 100 },
   title: { fontSize: 19, fontWeight: '800', color: colors.text },
 
   statCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  statCardWarn: { backgroundColor: '#FFF7ED', borderColor: '#FED7AA' },
+  statCardWarn: { backgroundColor: colors.accentSoft, borderColor: colors.accentBorder },
   statLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
-  statLabelWarn: { fontSize: 11, fontWeight: '700', color: '#C2410C', letterSpacing: 0.3 },
+  statLabelWarn: { fontSize: 11, fontWeight: '700', color: colors.accentText, letterSpacing: 0.3 },
   statValue: { fontSize: 24, fontWeight: '800', color: colors.text, marginTop: 4 },
-  statValueWarn: { fontSize: 24, fontWeight: '800', color: '#C2410C', marginTop: 4 },
+  statValueWarn: { fontSize: 24, fontWeight: '800', color: colors.accentText, marginTop: 4 },
 
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.md,
     paddingHorizontal: spacing.md,
     height: 44,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radii.pill,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: spacing.sm,
@@ -217,11 +217,11 @@ const styles = StyleSheet.create({
   sectionTitle2: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
 
   attentionCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1.5,
-    borderColor: '#F97316',
+    borderColor: colors.accent,
   },
   attentionId: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm },
   attentionName: { fontSize: 17, fontWeight: '800', color: colors.text, marginTop: 2 },
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#F97316',
+    backgroundColor: colors.accent,
     borderRadius: radii.pill,
     paddingVertical: spacing.sm,
     marginTop: spacing.md,
@@ -241,14 +241,14 @@ const styles = StyleSheet.create({
   teamCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginBottom: spacing.sm,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  teamIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#F1F5F9', alignItems: 'center', justifyContent: 'center' },
+  teamIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   teamNameRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   teamName: { fontSize: 14, fontWeight: '700', color: colors.text },
   teamId: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
@@ -269,4 +269,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   fabLabel: { fontSize: 14, fontWeight: '700', color: '#FFFFFF' },
-});
+}));
