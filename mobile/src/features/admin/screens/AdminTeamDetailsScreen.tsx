@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   memberName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
-  walletCard: { backgroundColor: '#0F1729', borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
+  walletCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
   walletLabel: { fontSize: 11, fontWeight: '700', color: '#5EEAD4', letterSpacing: 0.4 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
   walletCaption: { fontSize: 12, color: '#94A3B8', marginTop: 4 },

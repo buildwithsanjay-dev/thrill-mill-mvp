@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.md },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
 
-  planBox: { backgroundColor: '#0F1729', borderRadius: radii.md, padding: spacing.md },
+  planBox: { backgroundColor: '#0C5C54', borderRadius: radii.md, padding: spacing.md },
   planLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },
   planName: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginTop: 2 },
 
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   loadValueEmphasis: { fontSize: 16, fontWeight: '800', color: colors.primary },
   loadHint: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic' },
 
-  summaryDark: { backgroundColor: '#0F1729', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
+  summaryDark: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
   summaryDarkTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', marginBottom: spacing.sm },
   summaryDarkRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
   summaryDarkLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },

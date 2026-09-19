@@ -16,7 +16,7 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
 const ROLE_LABEL = { HOST: 'HOST', CO_HOST: 'CO-HOST', MEMBER: 'MEMBER' } as const;
-const HERO_COLORS = ['#0F1729', '#0C4A45', '#1E293B', '#4C1D24', '#1D3557'];
+const HERO_COLORS = ['#0C5C54', '#0C4A45', '#0B7A6E', '#094943', '#0F766E'];
 
 // Membership request status -> at-a-glance label for the Teams list, shown
 // only while a Team's membership isn't ACTIVE yet (no badge once it is).

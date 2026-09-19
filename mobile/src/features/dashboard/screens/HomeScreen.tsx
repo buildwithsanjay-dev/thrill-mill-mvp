@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
   newMemberCard: {
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
   seeAll: { fontSize: 12, fontWeight: '700', color: colors.primary },
 
   bookingCard: {
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
   },
   upcomingCard: {
     width: 168,
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     borderRadius: radii.lg,
     padding: spacing.md,
   },

@@ -9,7 +9,7 @@ import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { darkColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import { inviteTeamMember, searchMembers, type LookupUserResult } from '../api';
@@ -106,7 +106,7 @@ export function AddMembersScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={22} color={darkColors.text} />
+          <Ionicons name="arrow-back" size={22} color={screenColors.text} />
         </Pressable>
         <View style={{ alignItems: 'center' }}>
           <Text style={styles.headerTitle}>Add Members</Text>
@@ -133,10 +133,10 @@ export function AddMembersScreen() {
               value={query}
               onChangeText={setQuery}
               style={styles.searchInput}
-              placeholderTextColor={darkColors.textMuted}
+              placeholderTextColor={screenColors.textMuted}
             />
           </View>
-          {isSearching && <ActivityIndicator size="small" color={darkColors.text} style={styles.searchSpinner} />}
+          {isSearching && <ActivityIndicator size="small" color={screenColors.text} style={styles.searchSpinner} />}
         </View>
 
         {results.map((user) => (
@@ -148,10 +148,10 @@ export function AddMembersScreen() {
             </View>
             <Pressable style={styles.addChip} onPress={() => handleInvite(user)} disabled={invitingId === user.id}>
               {invitingId === user.id ? (
-                <ActivityIndicator size="small" color={darkColors.primaryLight} />
+                <ActivityIndicator size="small" color={screenColors.primaryLight} />
               ) : (
                 <>
-                  <Ionicons name="add" size={14} color={darkColors.primaryLight} />
+                  <Ionicons name="add" size={14} color={screenColors.primaryLight} />
                   <Text style={styles.addChipLabel}>ADD</Text>
                 </>
               )}
@@ -163,7 +163,7 @@ export function AddMembersScreen() {
           <View style={styles.inviteRow}>
             <Text style={styles.notFound}>No Thrill Mill member found matching &quot;{query.trim()}&quot;.</Text>
             <Pressable style={styles.inviteChip} onPress={handleInviteByShare}>
-              <Ionicons name="paper-plane-outline" size={14} color={darkColors.primaryLight} />
+              <Ionicons name="paper-plane-outline" size={14} color={screenColors.primaryLight} />
               <Text style={styles.inviteChipLabel}>Invite them to Thrill Mill</Text>
             </Pressable>
           </View>
@@ -195,7 +195,7 @@ export function AddMembersScreen() {
               <Text style={styles.memberStatus}>Invited — awaiting acceptance</Text>
             </View>
             <Pressable onPress={() => removeMember(member.id)} hitSlop={8}>
-              <Ionicons name="close" size={18} color={darkColors.textMuted} />
+              <Ionicons name="close" size={18} color={screenColors.textMuted} />
             </Pressable>
           </View>
         ))}
@@ -222,41 +222,41 @@ export function AddMembersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: darkColors.background, paddingHorizontal: spacing.lg },
+  container: { flex: 1, backgroundColor: screenColors.background, paddingHorizontal: spacing.lg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: darkColors.text },
-  headerSubtitle: { fontSize: 11, color: darkColors.textMuted, marginTop: 2 },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: screenColors.text },
+  headerSubtitle: { fontSize: 11, color: screenColors.textMuted, marginTop: 2 },
   stepRow: { alignItems: 'center', marginTop: spacing.lg },
   scroll: { paddingTop: spacing.lg, paddingBottom: spacing.lg },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: darkColors.text },
-  sectionSubtitle: { fontSize: 13, color: darkColors.textMuted, marginTop: spacing.xs, lineHeight: 19 },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: screenColors.text },
+  sectionSubtitle: { fontSize: 13, color: screenColors.textMuted, marginTop: spacing.xs, lineHeight: 19 },
 
   searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.lg },
-  searchInput: { backgroundColor: darkColors.surface, borderColor: darkColors.border, color: darkColors.text },
+  searchInput: { backgroundColor: screenColors.surface, borderColor: screenColors.border, color: screenColors.text },
   searchSpinner: { marginLeft: spacing.xs },
-  notFound: { fontSize: 12, color: darkColors.danger, marginTop: spacing.sm },
+  notFound: { fontSize: 12, color: screenColors.danger, marginTop: spacing.sm },
 
   resultRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.sm,
   },
-  resultName: { fontSize: 14, fontWeight: '700', color: darkColors.text },
-  resultMeta: { fontSize: 11, color: darkColors.textMuted, marginTop: 2 },
+  resultName: { fontSize: 14, fontWeight: '700', color: screenColors.text },
+  resultMeta: { fontSize: 11, color: screenColors.textMuted, marginTop: 2 },
   addChip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     borderWidth: 1,
-    borderColor: darkColors.primaryLight,
+    borderColor: screenColors.primaryLight,
     borderRadius: radii.pill,
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
   },
-  addChipLabel: { fontSize: 11, fontWeight: '800', color: darkColors.primaryLight },
+  addChipLabel: { fontSize: 11, fontWeight: '800', color: screenColors.primaryLight },
 
   inviteRow: { marginTop: spacing.sm },
   inviteChip: {
@@ -266,12 +266,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: spacing.sm,
     borderWidth: 1,
-    borderColor: darkColors.primaryLight,
+    borderColor: screenColors.primaryLight,
     borderRadius: radii.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },
-  inviteChipLabel: { fontSize: 12, fontWeight: '700', color: darkColors.primaryLight },
+  inviteChipLabel: { fontSize: 12, fontWeight: '700', color: screenColors.primaryLight },
 
   sectionHeaderRow: {
     flexDirection: 'row',
@@ -279,32 +279,32 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
-  subheading: { fontSize: 11, fontWeight: '700', color: darkColors.textMuted, letterSpacing: 0.4 },
-  counter: { fontSize: 11, fontWeight: '700', color: darkColors.primaryLight },
+  subheading: { fontSize: 11, fontWeight: '700', color: screenColors.textMuted, letterSpacing: 0.4 },
+  counter: { fontSize: 11, fontWeight: '700', color: screenColors.primaryLight },
 
   memberRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
-  memberName: { fontSize: 14, fontWeight: '700', color: darkColors.text },
-  memberStatus: { fontSize: 11, color: darkColors.primaryLight, marginTop: 2 },
+  memberName: { fontSize: 14, fontWeight: '700', color: screenColors.text },
+  memberStatus: { fontSize: 11, color: screenColors.primaryLight, marginTop: 2 },
 
   summaryCard: {
-    backgroundColor: darkColors.surfaceAlt,
+    backgroundColor: screenColors.surfaceAlt,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.lg,
     borderWidth: 1,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
   },
-  summaryLabel: { fontSize: 10, fontWeight: '700', color: darkColors.textMuted, letterSpacing: 0.4 },
-  summaryTeam: { fontSize: 15, fontWeight: '800', color: darkColors.text, marginTop: 4 },
-  summaryMeta: { fontSize: 12, color: darkColors.textMuted, marginTop: 4 },
+  summaryLabel: { fontSize: 10, fontWeight: '700', color: screenColors.textMuted, letterSpacing: 0.4 },
+  summaryTeam: { fontSize: 15, fontWeight: '800', color: screenColors.text, marginTop: 4 },
+  summaryMeta: { fontSize: 12, color: screenColors.textMuted, marginTop: 4 },
 
   footer: { paddingBottom: spacing.lg, paddingTop: spacing.sm },
-  footerHint: { fontSize: 11, color: darkColors.textMuted, textAlign: 'center', marginTop: spacing.sm },
+  footerHint: { fontSize: 11, color: screenColors.textMuted, textAlign: 'center', marginTop: spacing.sm },
 });

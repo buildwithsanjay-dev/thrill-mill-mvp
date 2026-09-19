@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   periodTab: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: radii.pill },
-  periodTabActive: { backgroundColor: '#0F1729' },
+  periodTabActive: { backgroundColor: '#0C5C54' },
   periodTabLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
   periodTabLabelActive: { color: '#FFFFFF' },
 

@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
   walletPreviewValue: { fontSize: 12, fontWeight: '700', color: colors.text },
 
   confirmBar: {
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     padding: spacing.lg,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,

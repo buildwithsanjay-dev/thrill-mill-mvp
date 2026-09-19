@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: radii.lg,
     overflow: 'hidden',
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     marginBottom: spacing.md,
   },
   bannerImage: { width: '100%', height: '100%' },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   planText: { fontSize: 13, fontWeight: '600', color: colors.text },
 
   walletCard: {
-    backgroundColor: '#0F1729',
+    backgroundColor: '#0C5C54',
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
-  upcomingCard: { backgroundColor: '#0F1729', borderRadius: radii.lg, padding: spacing.lg },
+  upcomingCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg },
   upcomingTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
   upcomingMeta: { fontSize: 12, color: '#94A3B8', marginTop: 4 },
   upcomingLink: { fontSize: 12, fontWeight: '700', color: '#5EEAD4', marginTop: spacing.sm },

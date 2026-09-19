@@ -8,7 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { darkColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
@@ -73,7 +73,7 @@ export function CreateTeamStepScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Pressable onPress={handleBack} hitSlop={12}>
-          <Ionicons name="arrow-back" size={22} color={darkColors.text} />
+          <Ionicons name="arrow-back" size={22} color={screenColors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>Create Team</Text>
         <View style={{ width: 22 }} />
@@ -92,7 +92,7 @@ export function CreateTeamStepScreen() {
 
         <View style={styles.card}>
           <View style={styles.cardLabelRow}>
-            <Ionicons name="ellipse-outline" size={16} color={darkColors.primaryLight} />
+            <Ionicons name="ellipse-outline" size={16} color={screenColors.primaryLight} />
             <Text style={styles.cardLabel}>Team Name</Text>
           </View>
           <TextField
@@ -101,7 +101,7 @@ export function CreateTeamStepScreen() {
             value={teamName}
             onChangeText={setTeamName}
             style={styles.input}
-            placeholderTextColor={darkColors.textMuted}
+            placeholderTextColor={screenColors.textMuted}
           />
           <Text style={styles.hint}>Choose a name your team will easily recognize.</Text>
 
@@ -117,7 +117,7 @@ export function CreateTeamStepScreen() {
         </View>
 
         <View style={styles.infoCard}>
-          <Ionicons name="information-circle" size={18} color={darkColors.primaryLight} />
+          <Ionicons name="information-circle" size={18} color={screenColors.primaryLight} />
           <View style={{ flex: 1, marginLeft: spacing.sm }}>
             <Text style={styles.infoTitle}>Build Your Playing Team</Text>
             <Text style={styles.infoBody}>
@@ -135,7 +135,7 @@ export function CreateTeamStepScreen() {
               {profile?.full_name ?? session?.user.email} <Text style={styles.hostYou}>(You)</Text>
             </Text>
           </View>
-          <Ionicons name="shield-checkmark" size={18} color={darkColors.primaryLight} />
+          <Ionicons name="shield-checkmark" size={18} color={screenColors.primaryLight} />
         </View>
       </ScrollView>
 
@@ -152,68 +152,68 @@ export function CreateTeamStepScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: darkColors.background, paddingHorizontal: spacing.lg },
+  container: { flex: 1, backgroundColor: screenColors.background, paddingHorizontal: spacing.lg },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: spacing.sm,
   },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: darkColors.text },
-  headerSubtitle: { fontSize: 13, color: darkColors.textMuted, marginTop: spacing.xs, textAlign: 'center' },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: screenColors.text },
+  headerSubtitle: { fontSize: 13, color: screenColors.textMuted, marginTop: spacing.xs, textAlign: 'center' },
   stepRow: { alignItems: 'center', marginTop: spacing.lg },
   scroll: { paddingTop: spacing.lg, paddingBottom: spacing.lg },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: darkColors.text },
-  sectionSubtitle: { fontSize: 13, color: darkColors.textMuted, marginTop: spacing.xs, lineHeight: 19 },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: screenColors.text },
+  sectionSubtitle: { fontSize: 13, color: screenColors.textMuted, marginTop: spacing.xs, lineHeight: 19 },
 
   card: {
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
     borderWidth: 1,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
   },
   cardLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.sm },
-  cardLabel: { fontSize: 13, fontWeight: '700', color: darkColors.text },
+  cardLabel: { fontSize: 13, fontWeight: '700', color: screenColors.text },
   input: {
-    backgroundColor: darkColors.surfaceAlt,
-    borderColor: darkColors.border,
-    color: darkColors.text,
+    backgroundColor: screenColors.surfaceAlt,
+    borderColor: screenColors.border,
+    color: screenColors.text,
   },
-  hint: { fontSize: 12, color: darkColors.textMuted, marginTop: spacing.sm },
+  hint: { fontSize: 12, color: screenColors.textMuted, marginTop: spacing.sm },
   previewRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surfaceAlt,
+    backgroundColor: screenColors.surfaceAlt,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  previewName: { fontSize: 14, fontWeight: '700', color: darkColors.text },
-  previewMeta: { fontSize: 12, color: darkColors.primaryLight, marginTop: 2 },
+  previewName: { fontSize: 14, fontWeight: '700', color: screenColors.text },
+  previewMeta: { fontSize: 12, color: screenColors.primaryLight, marginTop: 2 },
 
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
   },
-  infoTitle: { fontSize: 14, fontWeight: '700', color: darkColors.text },
-  infoBody: { fontSize: 12, color: darkColors.textMuted, marginTop: 4, lineHeight: 18 },
+  infoTitle: { fontSize: 14, fontWeight: '700', color: screenColors.text },
+  infoBody: { fontSize: 12, color: screenColors.textMuted, marginTop: 4, lineHeight: 18 },
 
   hostRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
   },
-  hostLabel: { fontSize: 10, fontWeight: '700', color: darkColors.textMuted, letterSpacing: 0.4 },
-  hostName: { fontSize: 14, fontWeight: '700', color: darkColors.text, marginTop: 2 },
-  hostYou: { color: darkColors.primaryLight, fontWeight: '600' },
+  hostLabel: { fontSize: 10, fontWeight: '700', color: screenColors.textMuted, letterSpacing: 0.4 },
+  hostName: { fontSize: 14, fontWeight: '700', color: screenColors.text, marginTop: 2 },
+  hostYou: { color: screenColors.primaryLight, fontWeight: '600' },
 
   footer: { paddingBottom: spacing.lg, paddingTop: spacing.sm },
 });

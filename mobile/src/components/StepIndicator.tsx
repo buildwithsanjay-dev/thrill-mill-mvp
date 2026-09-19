@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { darkColors, spacing } from '@/constants/theme';
+import { screenColors, spacing } from '@/constants/theme';
 
 export function StepIndicator({ steps, activeIndex }: { steps: string[]; activeIndex: number }) {
   return (
@@ -12,7 +12,7 @@ export function StepIndicator({ steps, activeIndex }: { steps: string[]; activeI
             <View
               style={[
                 styles.connector,
-                { backgroundColor: index <= activeIndex ? darkColors.primaryLight : darkColors.border },
+                { backgroundColor: index <= activeIndex ? screenColors.primaryLight : screenColors.border },
               ]}
             />
           )}
@@ -69,31 +69,31 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   dotDone: {
-    backgroundColor: darkColors.primaryLight,
+    backgroundColor: screenColors.primaryLight,
   },
   dotActive: {
     borderWidth: 2,
-    borderColor: darkColors.primaryLight,
-    backgroundColor: darkColors.surface,
+    borderColor: screenColors.primaryLight,
+    backgroundColor: screenColors.surface,
   },
   dotActiveInner: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: darkColors.primaryLight,
+    backgroundColor: screenColors.primaryLight,
   },
   dotPending: {
-    backgroundColor: darkColors.surfaceAlt,
+    backgroundColor: screenColors.surfaceAlt,
     borderWidth: 1,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
   },
   label: {
     fontSize: 11,
     fontWeight: '600',
-    color: darkColors.textMuted,
+    color: screenColors.textMuted,
     letterSpacing: 0.4,
   },
   labelActive: {
-    color: darkColors.text,
+    color: screenColors.text,
   },
 });

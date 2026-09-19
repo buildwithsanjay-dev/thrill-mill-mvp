@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   creatingCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  creatingIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#0F1729', alignItems: 'center', justifyContent: 'center' },
+  creatingIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#0C5C54', alignItems: 'center', justifyContent: 'center' },
   creatingLabel: { fontSize: 10, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.3 },
   creatingName: { fontSize: 14, fontWeight: '800', color: colors.text, marginTop: 2 },
 

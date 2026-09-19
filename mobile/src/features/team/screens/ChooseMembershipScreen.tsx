@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TextField } from '@/components/TextField';
-import { darkColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing } from '@/constants/theme';
 import { requestTeamMembership } from '@/features/membership/api';
 import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import type { Profile } from '@/features/profile/api';
@@ -32,7 +32,7 @@ export function ChooseMembershipScreen() {
   if (profileLoading || plansLoading || !profile || !plans) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <ActivityIndicator style={{ marginTop: spacing.xl }} color={darkColors.primaryLight} />
+        <ActivityIndicator style={{ marginTop: spacing.xl }} color={screenColors.primaryLight} />
       </SafeAreaView>
     );
   }
@@ -99,7 +99,7 @@ function MembershipForm({
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={22} color={darkColors.text} />
+          <Ionicons name="arrow-back" size={22} color={screenColors.text} />
         </Pressable>
         <Text style={styles.headerTitle}>Choose Membership</Text>
         <View style={{ width: 22 }} />
@@ -117,7 +117,7 @@ function MembershipForm({
 
           <View style={styles.teamCard}>
             <View style={styles.teamIcon}>
-              <Ionicons name="people" size={18} color={darkColors.text} />
+              <Ionicons name="people" size={18} color={screenColors.text} />
             </View>
             <View style={{ marginLeft: spacing.sm }}>
               <Text style={styles.teamName}>{teamName}</Text>
@@ -137,7 +137,7 @@ function MembershipForm({
           ))}
 
           <View style={styles.infoCard}>
-            <Ionicons name="information-circle" size={18} color={darkColors.primaryLight} />
+            <Ionicons name="information-circle" size={18} color={screenColors.primaryLight} />
             <View style={{ flex: 1, marginLeft: spacing.sm }}>
               <Text style={styles.infoTitle}>HOW MEMBERSHIP WORKS</Text>
               <Text style={styles.infoBody}>
@@ -151,26 +151,26 @@ function MembershipForm({
             <Text style={styles.contactLabel}>Contact numbers for Admin verification</Text>
             <TextField
               label="Host phone"
-              labelColor={darkColors.text}
+              labelColor={screenColors.text}
               prefix="+91"
               placeholder="00000 00000"
               keyboardType="phone-pad"
               value={hostPhone}
               onChangeText={setHostPhone}
               style={styles.input}
-              placeholderTextColor={darkColors.textMuted}
+              placeholderTextColor={screenColors.textMuted}
             />
             <View style={{ height: spacing.sm }} />
             <TextField
               label="Co-host phone (optional)"
-              labelColor={darkColors.text}
+              labelColor={screenColors.text}
               prefix="+91"
               placeholder="00000 00000"
               keyboardType="phone-pad"
               value={coHostPhone}
               onChangeText={setCoHostPhone}
               style={styles.input}
-              placeholderTextColor={darkColors.textMuted}
+              placeholderTextColor={screenColors.textMuted}
             />
           </View>
         </ScrollView>
@@ -252,7 +252,7 @@ function PlanFeature({ text, muted }: { text: string; muted?: boolean }) {
       <Ionicons
         name={muted ? 'information-circle-outline' : 'checkmark-circle'}
         size={15}
-        color={muted ? darkColors.textMuted : darkColors.primaryLight}
+        color={muted ? screenColors.textMuted : screenColors.primaryLight}
       />
       <Text style={[styles.featureText, muted && styles.featureTextMuted]}>{text}</Text>
     </View>
@@ -260,15 +260,15 @@ function PlanFeature({ text, muted }: { text: string; muted?: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: darkColors.background, paddingHorizontal: spacing.lg },
+  container: { flex: 1, backgroundColor: screenColors.background, paddingHorizontal: spacing.lg },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: darkColors.text },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: screenColors.text },
   stepRow: { alignItems: 'center', marginTop: spacing.lg },
   scroll: { paddingTop: spacing.lg, paddingBottom: spacing.lg },
-  sectionTitle: { fontSize: 20, fontWeight: '800', color: darkColors.text, textAlign: 'center' },
+  sectionTitle: { fontSize: 20, fontWeight: '800', color: screenColors.text, textAlign: 'center' },
   sectionSubtitle: {
     fontSize: 13,
-    color: darkColors.textMuted,
+    color: screenColors.textMuted,
     marginTop: spacing.xs,
     textAlign: 'center',
     lineHeight: 19,
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
   teamCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginTop: spacing.lg,
@@ -286,78 +286,78 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: darkColors.surfaceAlt,
+    backgroundColor: screenColors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  teamName: { fontSize: 14, fontWeight: '700', color: darkColors.text },
-  teamMeta: { fontSize: 11, color: darkColors.textMuted, marginTop: 2 },
+  teamName: { fontSize: 14, fontWeight: '700', color: screenColors.text },
+  teamMeta: { fontSize: 11, color: screenColors.textMuted, marginTop: 2 },
 
   planCard: {
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
     borderWidth: 1.5,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
     overflow: 'hidden',
   },
-  planCardSelected: { borderColor: darkColors.primaryLight },
+  planCardSelected: { borderColor: screenColors.primaryLight },
   planBanner: {
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: darkColors.primaryLight,
+    backgroundColor: screenColors.primaryLight,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderBottomLeftRadius: radii.sm,
   },
-  planBannerText: { fontSize: 10, fontWeight: '800', color: '#04211D' },
+  planBannerText: { fontSize: 10, fontWeight: '800', color: '#FFFFFF' },
   planHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  planName: { fontSize: 15, fontWeight: '700', color: darkColors.text },
-  planPrice: { fontSize: 24, fontWeight: '800', color: darkColors.text, marginTop: 2 },
+  planName: { fontSize: 15, fontWeight: '700', color: screenColors.text },
+  planPrice: { fontSize: 24, fontWeight: '800', color: screenColors.text, marginTop: 2 },
   radio: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  radioSelected: { backgroundColor: darkColors.primaryLight, borderColor: darkColors.primaryLight },
+  radioSelected: { backgroundColor: screenColors.primaryLight, borderColor: screenColors.primaryLight },
 
   featureRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, marginTop: spacing.sm },
-  featureText: { flex: 1, fontSize: 12.5, color: darkColors.text, lineHeight: 18 },
-  featureTextMuted: { color: darkColors.textMuted },
+  featureText: { flex: 1, fontSize: 12.5, color: screenColors.text, lineHeight: 18 },
+  featureTextMuted: { color: screenColors.textMuted },
 
   sportRateBlock: {
     marginTop: spacing.md,
     paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: darkColors.border,
+    borderTopColor: screenColors.border,
   },
-  sportRateLabel: { fontSize: 11, fontWeight: '800', color: darkColors.primaryLight, letterSpacing: 0.4 },
+  sportRateLabel: { fontSize: 11, fontWeight: '800', color: screenColors.primaryLight, letterSpacing: 0.4 },
 
   infoCard: {
     flexDirection: 'row',
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
   },
-  infoTitle: { fontSize: 11, fontWeight: '700', color: darkColors.text, letterSpacing: 0.4 },
-  infoBody: { fontSize: 12, color: darkColors.textMuted, marginTop: 4, lineHeight: 18 },
+  infoTitle: { fontSize: 11, fontWeight: '700', color: screenColors.text, letterSpacing: 0.4 },
+  infoBody: { fontSize: 12, color: screenColors.textMuted, marginTop: 4, lineHeight: 18 },
 
   contactCard: {
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.lg,
   },
-  contactLabel: { fontSize: 12, fontWeight: '700', color: darkColors.text, marginBottom: spacing.sm },
-  input: { backgroundColor: darkColors.surfaceAlt, borderColor: darkColors.border, color: darkColors.text },
+  contactLabel: { fontSize: 12, fontWeight: '700', color: screenColors.text, marginBottom: spacing.sm },
+  input: { backgroundColor: screenColors.surfaceAlt, borderColor: screenColors.border, color: screenColors.text },
 
   footer: { paddingBottom: spacing.lg, paddingTop: spacing.sm },
-  footerHint: { fontSize: 11, color: darkColors.textMuted, textAlign: 'center', marginTop: spacing.sm },
+  footerHint: { fontSize: 11, color: screenColors.textMuted, textAlign: 'center', marginTop: spacing.sm },
 });

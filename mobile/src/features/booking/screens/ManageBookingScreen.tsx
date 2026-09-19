@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   saveEditButton: { flex: 1, backgroundColor: colors.primary, borderRadius: radii.pill, alignItems: 'center', paddingVertical: spacing.sm },
   saveEditText: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
 
-  walletCard: { backgroundColor: '#0F1729', borderRadius: radii.lg, padding: spacing.lg },
+  walletCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg },
   walletTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   walletLabel: { fontSize: 10, fontWeight: '700', color: '#94A3B8', letterSpacing: 0.3 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },

@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
 
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
-  planBox: { backgroundColor: '#0F1729', borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
+  planBox: { backgroundColor: '#0C5C54', borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
   planName: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
   planCaption: { fontSize: 11, color: '#94A3B8', marginTop: 2 },
   limitBox: { backgroundColor: '#F8FAFC', borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.sm },

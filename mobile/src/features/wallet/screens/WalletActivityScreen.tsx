@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
-import { darkColors, radii, spacing } from '@/constants/theme';
+import { screenColors, radii, spacing } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { useTeamWallet, useWalletLedger } from '../useWallet';
 import type { WalletLedgerEntry } from '@/types/db';
@@ -16,9 +16,9 @@ const ENTRY_META: Record<
   WalletLedgerEntry['entry_type'],
   { icon: keyof typeof Ionicons.glyphMap; color: string; sign: '+' | '-' }
 > = {
-  MEMBERSHIP_CREDIT: { icon: 'add-circle', color: darkColors.success, sign: '+' },
+  MEMBERSHIP_CREDIT: { icon: 'add-circle', color: screenColors.success, sign: '+' },
   BOOKING_CONSUME: { icon: 'football', color: '#F97316', sign: '-' },
-  BOOKING_REFUND: { icon: 'refresh-circle', color: darkColors.primaryLight, sign: '+' },
+  BOOKING_REFUND: { icon: 'refresh-circle', color: screenColors.primaryLight, sign: '+' },
   ADMIN_ADJUSTMENT: { icon: 'construct', color: '#A78BFA', sign: '+' },
 };
 
@@ -48,7 +48,7 @@ export function WalletActivityScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={22} color={darkColors.text} />
+          <Ionicons name="arrow-back" size={22} color={screenColors.text} />
         </Pressable>
         <View style={{ alignItems: 'center' }}>
           <Text style={styles.headerTitle}>Wallet Activity</Text>
@@ -60,11 +60,11 @@ export function WalletActivityScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.balanceCard}>
           <View style={styles.balanceLabelRow}>
-            <Ionicons name="card" size={14} color={darkColors.primaryLight} />
+            <Ionicons name="card" size={14} color={screenColors.primaryLight} />
             <Text style={styles.balanceLabel}>CURRENT TEAM BALANCE</Text>
           </View>
           {walletPending ? (
-            <ActivityIndicator color={darkColors.primaryLight} style={{ marginTop: spacing.sm }} />
+            <ActivityIndicator color={screenColors.primaryLight} style={{ marginTop: spacing.sm }} />
           ) : (
             <Text style={styles.balanceValue}>
               {Math.round(wallet?.available_credits ?? 0).toLocaleString()}{' '}
@@ -72,7 +72,7 @@ export function WalletActivityScreen() {
             </Text>
           )}
           <View style={styles.balanceNoteRow}>
-            <Ionicons name="people" size={13} color={darkColors.textMuted} />
+            <Ionicons name="people" size={13} color={screenColors.textMuted} />
             <Text style={styles.balanceNote}>Shared Team Wallet</Text>
           </View>
           <Text style={styles.balanceHint}>All Team credit activity is recorded here.</Text>
@@ -95,7 +95,7 @@ export function WalletActivityScreen() {
         <Text style={styles.sectionTitle}>Credit Activity</Text>
 
         {ledgerPending ? (
-          <ActivityIndicator color={darkColors.primaryLight} style={{ marginTop: spacing.lg }} />
+          <ActivityIndicator color={screenColors.primaryLight} style={{ marginTop: spacing.lg }} />
         ) : filtered.length === 0 ? (
           <EmptyState icon="receipt-outline" title="No activity yet" message="Credit changes will show up here." />
         ) : (
@@ -113,7 +113,7 @@ export function WalletActivityScreen() {
                   <View style={styles.timelineCard}>
                     <View style={styles.timelineTopRow}>
                       <Text style={styles.timelineTitle}>{ENTRY_TITLE[entry.entry_type]}</Text>
-                      <Text style={[styles.timelineAmount, { color: entry.amount >= 0 ? darkColors.primaryLight : '#F97316' }]}>
+                      <Text style={[styles.timelineAmount, { color: entry.amount >= 0 ? screenColors.primaryLight : '#F97316' }]}>
                         {entry.amount >= 0 ? '+' : ''}
                         {Math.round(entry.amount)} Credits
                       </Text>
@@ -138,7 +138,7 @@ export function WalletActivityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: darkColors.background },
+  container: { flex: 1, backgroundColor: screenColors.background },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -146,55 +146,55 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
   },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: darkColors.text },
-  headerSubtitle: { fontSize: 11, color: darkColors.textMuted, marginTop: 2 },
+  headerTitle: { fontSize: 16, fontWeight: '800', color: screenColors.text },
+  headerSubtitle: { fontSize: 11, color: screenColors.textMuted, marginTop: 2 },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   balanceCard: {
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
   },
   balanceLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  balanceLabel: { fontSize: 11, fontWeight: '700', color: darkColors.primaryLight, letterSpacing: 0.4 },
-  balanceValue: { fontSize: 28, fontWeight: '800', color: darkColors.text, marginTop: spacing.sm },
-  balanceUnit: { fontSize: 14, fontWeight: '600', color: darkColors.textMuted },
+  balanceLabel: { fontSize: 11, fontWeight: '700', color: screenColors.primaryLight, letterSpacing: 0.4 },
+  balanceValue: { fontSize: 28, fontWeight: '800', color: screenColors.text, marginTop: spacing.sm },
+  balanceUnit: { fontSize: 14, fontWeight: '600', color: screenColors.textMuted },
   balanceNoteRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.md },
-  balanceNote: { fontSize: 12, fontWeight: '600', color: darkColors.text },
-  balanceHint: { fontSize: 11, color: darkColors.textMuted, marginTop: 4 },
+  balanceNote: { fontSize: 12, fontWeight: '600', color: screenColors.text },
+  balanceHint: { fontSize: 11, color: screenColors.textMuted, marginTop: 4 },
 
   tabRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
   tab: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radii.pill,
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderWidth: 1,
-    borderColor: darkColors.border,
+    borderColor: screenColors.border,
   },
-  tabActive: { backgroundColor: darkColors.primaryLight, borderColor: darkColors.primaryLight },
-  tabLabel: { fontSize: 12, fontWeight: '700', color: darkColors.textMuted },
-  tabLabelActive: { color: '#04211D' },
+  tabActive: { backgroundColor: screenColors.primaryLight, borderColor: screenColors.primaryLight },
+  tabLabel: { fontSize: 12, fontWeight: '700', color: screenColors.textMuted },
+  tabLabelActive: { color: '#FFFFFF' },
 
-  sectionTitle: { fontSize: 15, fontWeight: '800', color: darkColors.text, marginTop: spacing.xl, marginBottom: spacing.md },
+  sectionTitle: { fontSize: 15, fontWeight: '800', color: screenColors.text, marginTop: spacing.xl, marginBottom: spacing.md },
 
   timeline: {},
   timelineRow: { flexDirection: 'row' },
   timelineIconCol: { alignItems: 'center', width: 40 },
   timelineIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  timelineLine: { flex: 1, width: 1, backgroundColor: darkColors.border, marginVertical: 4 },
+  timelineLine: { flex: 1, width: 1, backgroundColor: screenColors.border, marginVertical: 4 },
   timelineCard: {
     flex: 1,
-    backgroundColor: darkColors.surface,
+    backgroundColor: screenColors.surface,
     borderRadius: radii.md,
     padding: spacing.md,
     marginBottom: spacing.md,
   },
   timelineTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  timelineTitle: { flex: 1, fontSize: 14, fontWeight: '700', color: darkColors.text, marginRight: spacing.sm },
+  timelineTitle: { flex: 1, fontSize: 14, fontWeight: '700', color: screenColors.text, marginRight: spacing.sm },
   timelineAmount: { fontSize: 13, fontWeight: '800' },
-  timelineReason: { fontSize: 12, color: darkColors.textMuted, marginTop: 4 },
-  timelineDate: { fontSize: 11, color: darkColors.textMuted, marginTop: spacing.sm },
+  timelineReason: { fontSize: 12, color: screenColors.textMuted, marginTop: 4 },
+  timelineDate: { fontSize: 11, color: screenColors.textMuted, marginTop: spacing.sm },
 });

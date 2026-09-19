@@ -28,19 +28,21 @@ export const radii = {
   pill: 999,
 } as const;
 
-// A handful of screens in the Figma export (Create Team, Add Members,
-// Choose Membership, Wallet Activity, the top cards on Team/Manage
-// Booking) are intentionally dark-surfaced, not a global light/dark mode
-// toggle. These tokens are scoped to just those screens.
-export const darkColors = {
-  background: '#0A0F1E',
-  surface: '#111A2E',
-  surfaceAlt: '#0D1526',
-  border: '#22304A',
-  text: '#F8FAFC',
-  textMuted: '#8B96AC',
+// Surface tokens for the multi-step flows (Create Team, Add Members, Choose
+// Membership, Wallet Activity). These screens were originally drawn in a dark
+// navy style, which made the app look like it had two colour themes — the
+// owner asked for ONE theme across every screen, so these now resolve to the
+// same light palette as the rest of the app. The names (surface, surfaceAlt,
+// primaryLight, ...) are kept so those screens' styles didn't need rewriting.
+export const screenColors = {
+  background: '#F7F8FA',
+  surface: '#FFFFFF',
+  surfaceAlt: '#F1F5F9',
+  border: colors.border,
+  text: colors.text,
+  textMuted: colors.textMuted,
   primary: colors.primary,
-  primaryLight: '#1BB6A6',
-  success: '#22C55E',
-  danger: '#F87171',
+  primaryLight: colors.primary,
+  success: '#16A34A',
+  danger: colors.danger,
 } as const;
