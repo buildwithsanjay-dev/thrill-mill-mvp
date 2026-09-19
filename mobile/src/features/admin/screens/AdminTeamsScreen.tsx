@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader } from '@/components/AppHeader';
+import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
@@ -44,10 +44,11 @@ export function AdminTeamsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <AppHeader>
+        <ScreenIntro>
           <Text style={styles.title}>Teams</Text>
-        </AppHeader>
+        </ScreenIntro>
 
         {isPending ? (
           <ActivityIndicator color={colors.primary} />

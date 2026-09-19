@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader } from '@/components/AppHeader';
+import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
@@ -49,11 +49,12 @@ export function AdminHomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <AppHeader>
+        <ScreenIntro>
           <Text style={styles.greetingLabel}>GOOD EVENING 👋</Text>
           <Text style={styles.greetingName}>Admin</Text>
-        </AppHeader>
+        </ScreenIntro>
         <Text style={styles.tagline}>Here&apos;s what&apos;s happening today.</Text>
 
         {statsPending ? (

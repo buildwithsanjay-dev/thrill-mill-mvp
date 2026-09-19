@@ -6,7 +6,7 @@ import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 
 type IoniconName = ComponentProps<typeof Ionicons>['name'];
 
-type ButtonVariant = 'primary' | 'outline' | 'danger';
+type ButtonVariant = 'primary' | 'outline' | 'danger' | 'accent';
 
 type ButtonProps = {
   title: string;
@@ -29,6 +29,7 @@ export function Button({
 }: ButtonProps) {
   const isOutline = variant === 'outline';
   const isDanger = variant === 'danger';
+  const isAccent = variant === 'accent';
   const isDisabled = disabled || loading;
 
   return (
@@ -37,7 +38,7 @@ export function Button({
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        isOutline ? styles.outline : isDanger ? styles.danger : styles.primary,
+        isOutline ? styles.outline : isDanger ? styles.danger : isAccent ? styles.accent : styles.primary,
         isDisabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
       ]}
@@ -89,6 +90,9 @@ const styles = themedStyles(() => ({
   },
   danger: {
     backgroundColor: colors.danger,
+  },
+  accent: {
+    backgroundColor: colors.accent,
   },
   disabled: {
     opacity: 0.5,

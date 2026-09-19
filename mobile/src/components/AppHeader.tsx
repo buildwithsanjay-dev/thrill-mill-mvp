@@ -1,56 +1,74 @@
 import type { PropsWithChildren } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors, spacing, themedStyles } from '@/constants/theme';
+import { LogoBadge } from '@/features/auth/components/LogoBadge';
 import { useProfile } from '@/features/profile/useProfile';
 import { useHasUnreadNotifications } from '@/features/notifications/useNotifications';
 import { Avatar } from './Avatar';
 
-// Shared across every (app) tab: tapping the avatar opens the Profile
-// screen (edit details / sign out); the bell opens Notifications. Each tab
-// supplies its own title/greeting as children so this stays presentational.
-export function AppHeader({ children }: PropsWithChildren) {
+// The app's fixed top bar, shared by every tab: Thrill Mill logo + name on the
+// left, notifications bell and your avatar (opens Profile) on the right. Screens
+// place it OUTSIDE their ScrollView, so it stays put while the content scrolls.
+// The logo and your picture sit at opposite ends on purpose — side by side they
+// competed with each other.
+export function AppHeader() {
   const router = useRouter();
   const { data: profile } = useProfile();
   const hasUnread = useHasUnreadNotifications();
 
   return (
-    <View style={styles.row}>
-      <Pressable onPress={() => router.push('/(app)/(tabs)/profile')} hitSlop={8}>
-        <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={40} />
-      </Pressable>
-      <View style={styles.content}>{children}</View>
-      <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8}>
-        <View>
+    <View style={styles.bar}>
+      <View style={styles.brand}>
+        <LogoBadge size={32} />
+        <Text style={styles.brandText}>Thrill Mill Club</Text>
+      </View>
+      <View style={styles.actions}>
+        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={styles.iconButton}>
           <Ionicons name="notifications-outline" size={22} color={colors.text} />
           {hasUnread && <View style={styles.notificationDot} />}
-        </View>
-      </Pressable>
+        </Pressable>
+        <Pressable onPress={() => router.push('/(app)/(tabs)/profile')} hitSlop={8}>
+          <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={34} />
+        </Pressable>
+      </View>
     </View>
   );
 }
 
+// Per-screen title / greeting block, shown at the top of the scrolling content
+// just under the fixed bar.
+export function ScreenIntro({ children }: PropsWithChildren) {
+  return <View style={styles.intro}>{children}</View>;
+}
+
 const styles = themedStyles(() => ({
-  row: {
+  bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.lg,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
-  content: {
-    flex: 1,
-    marginHorizontal: spacing.sm,
-  },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, flexShrink: 1 },
+  brandText: { fontSize: 17, fontWeight: '800', color: colors.text, letterSpacing: 0.1 },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  iconButton: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   notificationDot: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
-    borderWidth: 1,
-    borderColor: colors.surface,
+    top: 4,
+    right: 5,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: colors.accent,
+    borderWidth: 1.5,
+    borderColor: colors.background,
   },
+  intro: { marginTop: spacing.md, marginBottom: spacing.lg },
 }));

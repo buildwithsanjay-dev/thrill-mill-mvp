@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, Share, Text, View } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader } from '@/components/AppHeader';
+import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminAuditLogFeed, useAdminTeamLeaderboard } from '../useAdmin';
@@ -97,10 +97,11 @@ export function AdminLeaderboardScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <AppHeader>
+        <ScreenIntro>
           <Text style={styles.title}>Leaderboard</Text>
-        </AppHeader>
+        </ScreenIntro>
         <Text style={styles.tagline}>Team rankings and the full Admin audit trail.</Text>
 
         <Text style={styles.sectionTitle}>Team Leaderboard</Text>

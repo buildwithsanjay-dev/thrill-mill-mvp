@@ -235,10 +235,9 @@ export function BookTurfScreen() {
   if (!activeTeam) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
+        <AppHeader />
         <View style={styles.header}>
-          <AppHeader>
-            <Text style={styles.title}>Book a Slot</Text>
-          </AppHeader>
+          <Text style={styles.title}>Book a Slot</Text>
         </View>
         <EmptyState
           icon="football-outline"
@@ -371,13 +370,10 @@ export function BookTurfScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <AppHeader>
-          <Text style={styles.title}>Book a Slot</Text>
-        </AppHeader>
-      </View>
+      <AppHeader />
 
       <ScrollView contentContainerStyle={styles.scroll}>
+        <Text style={styles.title}>Book a Slot</Text>
         <View style={styles.teamPill}>
           <Ionicons name="business" size={16} color={colors.textMuted} />
           <View style={{ marginLeft: spacing.sm }}>
@@ -730,13 +726,13 @@ const styles = themedStyles(() => ({
   walletPreviewValue: { fontSize: 12, fontWeight: '700', color: colors.text },
 
   confirmBar: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     padding: spacing.lg,
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
   },
   confirmTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md },
-  confirmLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.4 },
+  confirmLabel: { fontSize: 10, fontWeight: '700', color: colors.heroMuted, letterSpacing: 0.4 },
   confirmMeta: { fontSize: 13, fontWeight: '700', color: '#FFFFFF', marginTop: 2 },
   confirmTimer: { fontSize: 13, fontWeight: '700', color: colors.warning },
 }));

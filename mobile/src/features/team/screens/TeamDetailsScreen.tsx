@@ -424,12 +424,12 @@ const styles = themedStyles(() => ({
     height: 140,
     borderRadius: radii.lg,
     overflow: 'hidden',
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     marginBottom: spacing.md,
   },
   bannerImage: { width: '100%', height: '100%' },
   bannerPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
-  bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: colors.textFaint },
+  bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: colors.heroMuted },
   bannerEditBadge: {
     position: 'absolute',
     right: spacing.sm,
@@ -471,15 +471,15 @@ const styles = themedStyles(() => ({
   planText: { fontSize: 13, fontWeight: '600', color: colors.text },
 
   walletCard: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
   },
-  walletLabel: { fontSize: 12, color: colors.primaryBorder, fontWeight: '700' },
+  walletLabel: { fontSize: 12, color: colors.heroAccent, fontWeight: '700' },
   walletValue: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
-  walletCaption: { fontSize: 12, color: colors.textFaint },
-  walletSub: { fontSize: 11, color: '#64748B', marginTop: spacing.sm, lineHeight: 16 },
+  walletCaption: { fontSize: 12, color: colors.heroMuted },
+  walletSub: { fontSize: 11, color: colors.heroMuted, marginTop: spacing.sm, lineHeight: 16 },
   walletCta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -530,9 +530,9 @@ const styles = themedStyles(() => ({
   },
   addMembersLabel: { fontSize: 12, fontWeight: '800', color: colors.primary },
 
-  upcomingCard: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg },
+  upcomingCard: { backgroundColor: colors.hero, borderRadius: radii.lg, padding: spacing.lg },
   upcomingTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  upcomingMeta: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
+  upcomingMeta: { fontSize: 12, color: colors.heroMuted, marginTop: 4 },
   upcomingLink: { fontSize: 12, fontWeight: '700', color: colors.heroAccent, marginTop: spacing.sm },
 
   requestRow: {

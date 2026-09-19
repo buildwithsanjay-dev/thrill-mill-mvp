@@ -257,8 +257,8 @@ const styles = themedStyles(() => ({
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.md },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
 
-  planBox: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.md },
-  planLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.3 },
+  planBox: { backgroundColor: colors.hero, borderRadius: radii.md, padding: spacing.md },
+  planLabel: { fontSize: 10, fontWeight: '700', color: colors.heroMuted, letterSpacing: 0.3 },
   planName: { fontSize: 18, fontWeight: '800', color: '#FFFFFF', marginTop: 2 },
 
   rateRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
@@ -280,10 +280,10 @@ const styles = themedStyles(() => ({
   loadValueEmphasis: { fontSize: 16, fontWeight: '800', color: colors.primary },
   loadHint: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm, fontStyle: 'italic' },
 
-  summaryDark: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
+  summaryDark: { backgroundColor: colors.hero, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg },
   summaryDarkTitle: { fontSize: 14, fontWeight: '800', color: '#FFFFFF', marginBottom: spacing.sm },
   summaryDarkRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
-  summaryDarkLabel: { fontSize: 10, fontWeight: '700', color: colors.textFaint, letterSpacing: 0.3 },
+  summaryDarkLabel: { fontSize: 10, fontWeight: '700', color: colors.heroMuted, letterSpacing: 0.3 },
   summaryDarkValue: { fontSize: 13, fontWeight: '700', color: '#FFFFFF' },
   summaryDarkValueGreen: { fontSize: 13, fontWeight: '700', color: colors.heroAccent },
 

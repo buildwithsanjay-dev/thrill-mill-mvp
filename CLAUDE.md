@@ -103,8 +103,13 @@ underlying engine/rules as a Host/Co-host would.
   under review, only Host/Co-host can book, slot already passed) via `lib/errors.ts` and
   `features/booking/reasons.ts` — never a generic "could not …" or raw DB text. The app uses one
   custom dialog (`components/AppDialog.tsx`, `showAlert`) instead of the system `Alert`.
-- **One colour theme app-wide** (light, brand teal `#0C5C54`); no screen may introduce a second
-  (e.g. dark navy) surface theme.
+- **One design system, light + dark** (`mobile/src/constants/theme.ts`): the palette comes from the
+  logo — navy `#0B2545`/`#0B1F3F`, teal `#0E7C86`, orange `#EA5F14`, amber — and follows the phone's
+  light/dark setting (or Profile → Appearance). Screens must use the tokens (`colors.text`,
+  `colors.surface`, `colors.hero`, `colors.accent`, …) and build styles with `themedStyles(() => ({…}))`,
+  never `StyleSheet.create` or raw hex, so both themes stay consistent. Navy (`hero`) is the card
+  colour, teal the interactive colour, orange the single call-to-action colour (`Button variant="accent"`).
+  Every tab shows the fixed `AppHeader` (logo + name, bell, avatar) outside its ScrollView.
 
 ## Technology Stack
 

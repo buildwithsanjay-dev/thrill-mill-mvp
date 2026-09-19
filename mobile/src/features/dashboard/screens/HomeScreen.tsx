@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppHeader } from '@/components/AppHeader';
+import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
@@ -12,7 +12,6 @@ import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
 import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { LogoBadge } from '@/features/auth/components/LogoBadge';
 import { useHasUnreadChat } from '@/features/chat/useChat';
 import type { MyTeamSummary } from '@/features/team/api';
 import { PendingInvites } from '@/features/team/components/PendingInvites';
@@ -56,16 +55,12 @@ export function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.brandRow}>
-          <LogoBadge size={30} />
-          <Text style={styles.brandText}>Thrill Mill Club</Text>
-        </View>
-
-        <AppHeader>
+        <ScreenIntro>
           <Text style={styles.greetingLabel}>{greeting().toUpperCase()},</Text>
           <Text style={styles.greetingName}>{profile?.full_name?.split(' ')[0] ?? 'there'} 👋</Text>
-        </AppHeader>
+        </ScreenIntro>
 
         <PendingInvites />
 
@@ -226,6 +221,7 @@ function DashboardContent({
         <View style={{ height: spacing.md }} />
         <Button
           title="Book a Slot"
+          variant="accent"
           iconLeft="football"
           onPress={() => router.push('/(app)/(tabs)/book')}
         />
@@ -439,12 +435,12 @@ const styles = themedStyles(() => ({
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
   newMemberCard: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
   newMemberTitle: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', lineHeight: 28 },
-  newMemberSubtitle: { fontSize: 13, color: colors.textFaint, marginTop: spacing.sm, lineHeight: 19 },
+  newMemberSubtitle: { fontSize: 13, color: colors.heroMuted, marginTop: spacing.sm, lineHeight: 19 },
 
   teamSwitcher: {
     flexDirection: 'row',
@@ -484,13 +480,13 @@ const styles = themedStyles(() => ({
   actionNeededText: { flex: 1, fontSize: 12.5, fontWeight: '700', color: colors.warningText },
 
   creditsCard: {
-    backgroundColor: colors.primaryDark,
+    backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
   },
   creditsCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  creditsLabel: { fontSize: 11, fontWeight: '700', color: colors.primaryBorder, letterSpacing: 0.5 },
+  creditsLabel: { fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.5 },
   creditsValue: { fontSize: 34, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.xs },
 
   sectionHeader: {
@@ -504,12 +500,12 @@ const styles = themedStyles(() => ({
   seeAll: { fontSize: 12, fontWeight: '700', color: colors.primary },
 
   bookingCard: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.lg,
   },
   bookingTitle: { fontSize: 17, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  bookingMeta: { fontSize: 13, color: colors.textFaint, marginTop: 4 },
+  bookingMeta: { fontSize: 13, color: colors.heroMuted, marginTop: 4 },
 
   noBookingCard: {
     backgroundColor: colors.surface,
@@ -568,15 +564,15 @@ const styles = themedStyles(() => ({
   },
   upcomingCard: {
     width: 168,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.md,
   },
   upcomingCardTeamRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  upcomingCardTeam: { flex: 1, fontSize: 11, fontWeight: '700', color: colors.primaryBorder, letterSpacing: 0.3 },
+  upcomingCardTeam: { flex: 1, fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.3 },
   upcomingCardTurf: { fontSize: 15, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },
-  upcomingCardDate: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
-  upcomingCardTime: { fontSize: 12, color: colors.textFaint, marginTop: 2 },
+  upcomingCardDate: { fontSize: 12, color: colors.heroMuted, marginTop: 4 },
+  upcomingCardTime: { fontSize: 12, color: colors.heroMuted, marginTop: 2 },
 
   activityRow: {
     flexDirection: 'row',

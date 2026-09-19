@@ -147,7 +147,7 @@ const styles = themedStyles(() => ({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   teamCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
-  teamIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  teamIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.hero, alignItems: 'center', justifyContent: 'center' },
   teamName: { fontSize: 14, fontWeight: '800', color: colors.text },
   teamMeta: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
 

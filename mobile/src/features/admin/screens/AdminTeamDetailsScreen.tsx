@@ -375,10 +375,10 @@ const styles = themedStyles(() => ({
   memberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   memberName: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
 
-  walletCard: { backgroundColor: colors.primary, borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
+  walletCard: { backgroundColor: colors.hero, borderRadius: radii.lg, padding: spacing.lg, marginBottom: spacing.md },
   walletLabel: { fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.4 },
   walletValue: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
-  walletCaption: { fontSize: 12, color: colors.textFaint, marginTop: 4 },
+  walletCaption: { fontSize: 12, color: colors.heroMuted, marginTop: 4 },
 
   statsRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   statBox: {

@@ -10,6 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/Badge';
+import { useAppearance, type AppearancePreference } from '@/components/ThemeProvider';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
@@ -321,6 +322,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
         <View style={styles.divider} />
 
+        <AppearanceRow />
+
+        <View style={styles.divider} />
+
         <Pressable style={styles.settingsRow} onPress={handleRateUs}>
           <Ionicons name="star-outline" size={20} color={colors.text} />
           <Text style={styles.settingsRowText}>Rate us on Google</Text>
@@ -415,6 +420,37 @@ function NotificationPermissionRow() {
   );
 }
 
+// Light / Dark / System. "System" (the default) follows the phone's own setting;
+// the other two force a theme regardless of it.
+function AppearanceRow() {
+  const { preference, setPreference } = useAppearance();
+  const options: { key: AppearancePreference; label: string }[] = [
+    { key: 'system', label: 'System' },
+    { key: 'light', label: 'Light' },
+    { key: 'dark', label: 'Dark' },
+  ];
+  return (
+    <View>
+      <View style={styles.settingsRow}>
+        <Ionicons name="contrast-outline" size={20} color={colors.text} />
+        <Text style={styles.settingsRowText}>Appearance</Text>
+      </View>
+      <View style={styles.appearanceTabs}>
+        {options.map((o) => (
+          <Pressable
+            key={o.key}
+            onPress={() => setPreference(o.key)}
+            style={[styles.appearanceTab, preference === o.key && styles.appearanceTabActive]}
+          >
+            <Text style={[styles.appearanceTabText, preference === o.key && styles.appearanceTabTextActive]}>{o.label}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <Text style={styles.appearanceHint}>System follows your phone&apos;s light / dark setting.</Text>
+    </View>
+  );
+}
+
 // Per-member credit-usage log: `completed booking credits ÷ final
 // participant count` per booking the caller played in, Week/Month
 // filterable. Analytics only — this never represents a per-member wallet or
@@ -495,6 +531,18 @@ const styles = themedStyles(() => ({
     marginTop: spacing.sm,
   },
   deleteText: { fontSize: 13, fontWeight: '700', color: colors.danger },
+  appearanceTabs: {
+    flexDirection: 'row',
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radii.pill,
+    padding: 3,
+    marginTop: spacing.xs,
+  },
+  appearanceTab: { flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: radii.pill },
+  appearanceTabActive: { backgroundColor: colors.primary },
+  appearanceTabText: { fontSize: 13, fontWeight: '700', color: colors.textMuted },
+  appearanceTabTextActive: { color: colors.white },
+  appearanceHint: { fontSize: 11, color: colors.textMuted, marginTop: spacing.sm },
   container: { flex: 1, backgroundColor: colors.background },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {

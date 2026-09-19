@@ -28,10 +28,8 @@ export function LeaderboardScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <AppHeader>
-          <Text style={styles.title}>Thrill Mill Club</Text>
-        </AppHeader>
         <View style={styles.titleRow}>
           <Text style={styles.subtitle}>Leaderboard</Text>
           <Ionicons name="trophy" size={18} color={colors.warning} />

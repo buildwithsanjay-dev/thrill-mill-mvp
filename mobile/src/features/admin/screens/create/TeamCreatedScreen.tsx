@@ -212,9 +212,9 @@ const styles = themedStyles(() => ({
 
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginBottom: spacing.sm },
   cardHeaderText: { fontSize: 14, fontWeight: '800', color: colors.text },
-  planBox: { backgroundColor: colors.primary, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
+  planBox: { backgroundColor: colors.hero, borderRadius: radii.md, padding: spacing.md, marginBottom: spacing.sm },
   planName: { fontSize: 16, fontWeight: '800', color: '#FFFFFF' },
-  planCaption: { fontSize: 11, color: colors.textFaint, marginTop: 2 },
+  planCaption: { fontSize: 11, color: colors.heroMuted, marginTop: 2 },
   limitBox: { backgroundColor: colors.surfaceAlt, borderRadius: radii.sm, padding: spacing.sm, marginTop: spacing.sm },
   limitText: { fontSize: 11, color: colors.textMuted },
 
