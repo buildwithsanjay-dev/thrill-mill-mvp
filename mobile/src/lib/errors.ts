@@ -44,6 +44,7 @@ const RULES: [RegExp, string][] = [
   [/INVALID_TEAM_NAME/, 'Enter a team name (at least 3 characters).'],
   [/TEAM_FULL/, 'This team already has the maximum of 10 members.'],
   [/MEMBER_ALREADY_ON_TEAM/, 'This person is already on the team or has a pending invite.'],
+  [/MEMBERSHIP_ALREADY_ACTIVE/, 'This membership is already active, so it can no longer be flagged.'],
   [/TEAM_ALREADY_FINALIZED/, 'This team has already been submitted, so it can no longer be discarded.'],
   [/HOST_MUST_TRANSFER/, "You're the Host of an active team. Hand the Host role to another member (or ask the Admin to archive the team) before deleting your account."],
 

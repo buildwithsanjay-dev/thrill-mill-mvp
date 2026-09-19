@@ -128,6 +128,17 @@ export async function activateMembership(paymentId: string, externalReference?: 
   if (error) throw error;
 }
 
+// Tells the team's Host/Co-host their membership needs attention (payment not
+// received / something to sort out). Audited server-side; the request stays
+// pending, so the Admin can still activate it later.
+export async function flagMembershipIssue(membershipId: string, reason?: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_admin_flag_membership_issue', {
+    p_membership_id: membershipId,
+    p_reason: reason ?? null,
+  });
+  if (error) throw error;
+}
+
 // -- Admin bookings ----------------------------------------------------------
 
 export type AdminBookingRow = {

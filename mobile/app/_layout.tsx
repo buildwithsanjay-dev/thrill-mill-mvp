@@ -33,12 +33,20 @@ function useNotificationTapNavigation() {
       if (route) router.push(route);
     });
 
+    // A push arrived while the app is open: refresh the bell list/red dot now.
+    const received = Notifications.addNotificationReceivedListener(() => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    });
+
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data as NotificationData;
       const route = resolveNotificationRoute(data);
       if (route) router.push(route);
     });
-    return () => subscription.remove();
+    return () => {
+      subscription.remove();
+      received.remove();
+    };
   }, [router]);
 }
 

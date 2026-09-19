@@ -8,6 +8,24 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { resolveNotificationRoute } from '../api';
 import { useMarkNotificationRead, useMyNotifications } from '../useNotifications';
 
+type TypeStyle = { icon: keyof typeof Ionicons.glyphMap; tint: string; bg: string };
+
+const TYPE_STYLES: Record<string, TypeStyle> = {
+  BOOKING_CONFIRMED: { icon: 'calendar', tint: '#16A34A', bg: '#DCFCE7' },
+  SLOT_BOOKED: { icon: 'football', tint: '#0C5C54', bg: '#DCEEE8' },
+  ADDED_TO_BOOKING: { icon: 'person-add', tint: '#0C5C54', bg: '#DCEEE8' },
+  BOOKING_CANCELLED: { icon: 'close-circle', tint: '#DC2626', bg: '#FEE2E2' },
+  GAME_REMINDER: { icon: 'alarm', tint: '#D97706', bg: '#FEF3C7' },
+  MEMBERSHIP_APPROVED: { icon: 'ribbon', tint: '#16A34A', bg: '#DCFCE7' },
+  MEMBERSHIP_REQUESTED: { icon: 'document-text', tint: '#0C5C54', bg: '#DCEEE8' },
+  MEMBERSHIP_NEEDS_ATTENTION: { icon: 'alert-circle', tint: '#D97706', bg: '#FEF3C7' },
+  JOIN_REQUEST_APPROVED: { icon: 'checkmark-circle', tint: '#16A34A', bg: '#DCFCE7' },
+  JOIN_REQUEST_REJECTED: { icon: 'close-circle', tint: '#DC2626', bg: '#FEE2E2' },
+  TEAM_INVITE: { icon: 'mail', tint: '#0C5C54', bg: '#DCEEE8' },
+  TEAM_POLL: { icon: 'bar-chart', tint: '#0C5C54', bg: '#DCEEE8' },
+};
+const DEFAULT_STYLE: TypeStyle = { icon: 'notifications', tint: '#0C5C54', bg: '#DCEEE8' };
+
 export function NotificationsScreen() {
   const router = useRouter();
   const { data: notifications, isPending } = useMyNotifications();
@@ -44,16 +62,21 @@ export function NotificationsScreen() {
               }}
             >
               {!n.read_at && <View style={styles.unreadDot} />}
-              <Text style={styles.cardTitle}>{n.title}</Text>
-              {!!n.body && <Text style={styles.cardBody}>{n.body}</Text>}
-              <Text style={styles.cardDate}>
-                {new Date(n.created_at).toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  hour: 'numeric',
-                  minute: '2-digit',
-                })}
-              </Text>
+              <View style={[styles.typeIcon, { backgroundColor: (TYPE_STYLES[n.type] ?? DEFAULT_STYLE).bg }]}>
+                <Ionicons name={(TYPE_STYLES[n.type] ?? DEFAULT_STYLE).icon} size={20} color={(TYPE_STYLES[n.type] ?? DEFAULT_STYLE).tint} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{n.title}</Text>
+                {!!n.body && <Text style={styles.cardBody}>{n.body}</Text>}
+                <Text style={styles.cardDate}>
+                  {new Date(n.created_at).toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </Text>
+              </View>
             </Pressable>
           ))}
         </ScrollView>
@@ -75,6 +98,8 @@ const styles = StyleSheet.create({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   card: {
+    flexDirection: 'row',
+    gap: spacing.md,
     backgroundColor: '#FFFFFF',
     borderRadius: radii.md,
     padding: spacing.md,
@@ -83,6 +108,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   cardUnread: { borderColor: colors.primary },
+  typeIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   unreadDot: {
     position: 'absolute',
     top: spacing.md,

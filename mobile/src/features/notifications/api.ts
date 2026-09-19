@@ -8,6 +8,11 @@ export type NotificationData = {
   booking_id?: string;
   booking_ids?: string[];
   team_id?: string;
+  // 'ADMIN' = sent to a platform Admin, so a tap opens the Admin screens.
+  audience?: 'ADMIN';
+  // 'home' = nothing to open beyond the dashboard (e.g. a team invite, where
+  // the pending invite card lives, or a declined join request).
+  open?: 'home';
 } | null;
 
 export type AppNotification = {
@@ -40,9 +45,13 @@ export async function getMyNotifications(): Promise<AppNotification[]> {
 // unambiguous by shape alone: a membership approval never carries a booking
 // id, a booking confirmation always does.
 export function resolveNotificationRoute(data: NotificationData): string | null {
+  if (data?.open === 'home') return '/(app)/(tabs)';
   const bookingId = data?.booking_id ?? data?.booking_ids?.[0];
   if (bookingId) return `/(app)/booking/${bookingId}`;
-  if (data?.team_id) return `/(app)/team/${data.team_id}`;
+  // An Admin tapping a team notification (new membership request, ...) lands
+  // on the Admin's team page, where Activate / Review lives, not the member
+  // view of that team.
+  if (data?.team_id) return data.audience === 'ADMIN' ? `/(admin)/team/${data.team_id}` : `/(app)/team/${data.team_id}`;
   return null;
 }
 

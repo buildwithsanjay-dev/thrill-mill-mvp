@@ -221,6 +221,12 @@ decided.
 - No payment gateway integration in the MVP. Payment = external collection + Admin-recorded
   verification only. Do not add Razorpay or similar without explicit user approval.
 - Push notifications should avoid putting financial/private detail in the notification body itself.
+- **Notification catalogue** (all via `fn_send_push_notification`, which writes the in-app bell row AND
+  pushes, so the two can't diverge): membership approved / needs attention, booking confirmed /
+  cancelled, added to a booking, game reminder (~2h, pg_cron every 5 min), join request approved /
+  declined, team invite, team poll, and for Admins: new membership request, new slot booking,
+  booking cancelled by a team. Most are DB triggers (`20260920120000_complete_notification_set.sql`),
+  so they fire regardless of which RPC caused the event. Admin-bound ones carry `audience: 'ADMIN'`.
 - **Push provider decision:** Expo Push Service (not direct Firebase Admin SDK integration).
   Client registers an Expo push token (via `expo-notifications`) and stores it on the user's
   `profiles` row; the backend sends to Expo's push endpoint, which relays to FCM (Android) /

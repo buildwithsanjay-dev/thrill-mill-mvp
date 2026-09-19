@@ -9,6 +9,9 @@ export function useMyNotifications() {
     queryKey: ['notifications', session?.user.id],
     queryFn: getMyNotifications,
     enabled: !!session?.user.id,
+    // A push can arrive while the app is open; poll lightly as a safety net
+    // (the foreground listener in app/_layout.tsx refreshes it instantly).
+    refetchInterval: 30_000,
   });
 }
 

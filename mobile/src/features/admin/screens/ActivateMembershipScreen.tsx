@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
-import { activateMembership } from '../api';
+import { activateMembership, flagMembershipIssue } from '../api';
 import { useInvalidateAdminQueries } from '../useAdmin';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -19,6 +19,7 @@ export function ActivateMembershipScreen() {
   const invalidateAdmin = useInvalidateAdminQueries();
   const [isVerified, setIsVerified] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
+  const [isFlagging, setIsFlagging] = useState(false);
 
   if (isPending || !data) {
     return (
@@ -64,6 +65,32 @@ export function ActivateMembershipScreen() {
     } finally {
       setIsActivating(false);
     }
+  };
+
+  const handleFlagIssue = () => {
+    showAlert(
+      'Payment not received?',
+      `${team.name}'s Host and Co-host will be told their membership needs attention and that you will contact them. The request stays pending — you can still activate it later.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Notify the team',
+          onPress: async () => {
+            setIsFlagging(true);
+            try {
+              await flagMembershipIssue(membership.id, 'Payment not received / needs attention');
+              invalidateAdmin();
+              showAlert('Team notified', 'The Host and Co-host have been told to expect your call.', undefined, { variant: 'success' });
+            } catch (error) {
+              showAlert('Could not notify the team', friendlyError(error));
+            } finally {
+              setIsFlagging(false);
+            }
+          },
+        },
+      ],
+      { variant: 'warning' }
+    );
   };
 
   return (
@@ -195,6 +222,13 @@ export function ActivateMembershipScreen() {
           onPress={handleActivate}
           loading={isActivating}
           disabled={!isVerified}
+        />
+        <View style={{ height: spacing.sm }} />
+        <Button
+          title="Payment not received / needs attention"
+          variant="outline"
+          onPress={handleFlagIssue}
+          loading={isFlagging}
         />
       </View>
     </SafeAreaView>
