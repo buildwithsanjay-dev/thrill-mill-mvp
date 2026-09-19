@@ -179,7 +179,7 @@ function TimelineStep({ label, done, last }: { label: string; done?: boolean; la
         <Ionicons
           name={done ? 'checkmark-circle' : 'ellipse-outline'}
           size={20}
-          color={done ? colors.primary : colors.border}
+          color={done ? colors.primary : colors.textFaint}
         />
         {!last && <View style={styles.timelineLine} />}
       </View>

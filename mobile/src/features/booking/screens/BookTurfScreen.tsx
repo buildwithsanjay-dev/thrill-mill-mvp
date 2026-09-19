@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/AppHeader';
@@ -20,6 +22,8 @@ import { whySlotNotBookable, whyTeamCannotHold } from '../reasons';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
+
+const TURF_HERO = require('../../../../assets/turf-hero.webp');
 
 const DATE_WINDOW = 14;
 
@@ -423,7 +427,13 @@ export function BookTurfScreen() {
 
         {turf && (
           <View style={styles.heroCard}>
-            <Text style={styles.heroTitle}>{turf.name}</Text>
+            <Image source={TURF_HERO} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="center" />
+            {/* Dark fade under the text so it reads on the photo in light AND dark mode. */}
+            <LinearGradient
+              colors={['rgba(5,12,28,0.05)', 'rgba(5,12,28,0.88)']}
+              style={StyleSheet.absoluteFill}
+            />
+            <Text style={styles.heroTitle}>Thrill Mill Turf and Pickleball</Text>
             <View style={styles.heroBadgeRow}>
               <View style={styles.heroDot} />
               <Text style={styles.heroBadgeText}>Available for booking</Text>
@@ -506,7 +516,7 @@ export function BookTurfScreen() {
                   <Ionicons
                     name={checked ? 'checkmark-circle' : 'ellipse-outline'}
                     size={22}
-                    color={checked ? colors.primary : colors.border}
+                    color={checked ? colors.primary : colors.textMuted}
                     style={{ marginLeft: spacing.sm }}
                   />
                 </Pressable>
@@ -627,17 +637,18 @@ const styles = themedStyles(() => ({
   teamPillValue: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 2 },
 
   heroCard: {
-    height: 130,
+    height: 150,
     borderRadius: radii.lg,
-    backgroundColor: colors.primaryDark,
+    overflow: 'hidden',
+    backgroundColor: colors.hero,
     marginTop: spacing.md,
     padding: spacing.lg,
     justifyContent: 'flex-end',
   },
-  heroTitle: { fontSize: 20, fontWeight: '800', color: '#FFFFFF' },
+  heroTitle: { fontSize: 21, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
   heroBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
-  heroDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.heroAccent },
-  heroBadgeText: { fontSize: 12, color: colors.primaryBorder, fontWeight: '600' },
+  heroDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#5EE0A0' },
+  heroBadgeText: { fontSize: 12, color: '#FFFFFF', fontWeight: '600' },
 
   sectionLabel: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },

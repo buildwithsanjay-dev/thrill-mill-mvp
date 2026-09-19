@@ -160,11 +160,16 @@ export function ActivateMembershipScreen() {
             <Text style={styles.cardHeaderText}>Payment Verification</Text>
           </View>
           <Text style={styles.verifyBody}>Payment is collected and verified externally by the Thrill Mill Admin.</Text>
-          <Pressable style={styles.checkboxRow} onPress={() => setIsVerified((v) => !v)}>
+          <Pressable
+            style={[styles.checkboxRow, isVerified && styles.checkboxRowChecked]}
+            onPress={() => setIsVerified((v) => !v)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: isVerified }}
+          >
             <Ionicons
               name={isVerified ? 'checkbox' : 'square-outline'}
-              size={22}
-              color={isVerified ? colors.primary : colors.border}
+              size={26}
+              color={isVerified ? colors.primary : colors.textMuted}
             />
             <View style={{ flex: 1, marginLeft: spacing.sm }}>
               <Text style={styles.checkboxTitle}>Payment Received and Verified</Text>
@@ -270,7 +275,16 @@ const styles = themedStyles(() => ({
   ruleText: { flex: 1, fontSize: 11, color: colors.textMuted, lineHeight: 16 },
 
   verifyBody: { fontSize: 12, color: colors.textMuted, marginBottom: spacing.md },
-  checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.surfaceAlt, borderRadius: radii.md, padding: spacing.md },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: colors.surface,
+    borderWidth: 1.5,
+    borderColor: colors.textFaint,
+    borderRadius: radii.md,
+    padding: spacing.md,
+  },
+  checkboxRowChecked: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
   checkboxTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
   checkboxBody: { fontSize: 11, color: colors.textMuted, marginTop: 2, lineHeight: 16 },
 

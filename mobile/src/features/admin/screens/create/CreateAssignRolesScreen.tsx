@@ -101,7 +101,7 @@ export function CreateAssignRolesScreen() {
                 <Ionicons
                   name={m.role === 'HOST' ? 'checkmark-circle' : 'ellipse-outline'}
                   size={22}
-                  color={m.role === 'HOST' ? colors.primary : colors.border}
+                  color={m.role === 'HOST' ? colors.primary : colors.textMuted}
                 />
               </Pressable>
               <Pressable
@@ -112,7 +112,7 @@ export function CreateAssignRolesScreen() {
                 <Ionicons
                   name={m.role === 'CO_HOST' ? 'checkmark-circle' : 'ellipse-outline'}
                   size={22}
-                  color={m.role === 'CO_HOST' ? colors.primary : colors.border}
+                  color={m.role === 'CO_HOST' ? colors.primary : colors.textMuted}
                 />
               </Pressable>
             </View>

@@ -423,7 +423,7 @@ export function SelectSlotScreen() {
                 <Ionicons
                   name={checked ? 'checkmark-circle' : 'ellipse-outline'}
                   size={20}
-                  color={checked ? colors.primary : colors.border}
+                  color={checked ? colors.primary : colors.textMuted}
                   style={{ marginLeft: spacing.sm }}
                 />
               </Pressable>
