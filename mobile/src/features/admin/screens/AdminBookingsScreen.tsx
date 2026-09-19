@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,8 @@ import { teamDetailsQueryKey } from '@/features/team/useTeams';
 import { formatBookingDate, formatSlotTime, todayIso } from '@/utils/datetime';
 import { adminCancelBooking, type AdminBookingRow } from '../api';
 import { useAllBookings, useInvalidateAdminQueries } from '../useAdmin';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 type Filter = 'ALL' | 'TODAY' | 'UPCOMING' | 'COMPLETED';
 
@@ -36,7 +38,7 @@ export function AdminBookingsScreen() {
   const invalidateAdmin = useInvalidateAdminQueries();
 
   const handleCancel = (booking: AdminBookingRow) => {
-    Alert.alert(
+    showAlert(
       'Cancel this booking?',
       `${booking.team?.name ?? 'This Team'}'s booking on ${formatBookingDate(booking.booking_date)} at ${formatSlotTime(
         booking.start_time
@@ -56,14 +58,14 @@ export function AdminBookingsScreen() {
               queryClient.invalidateQueries({ queryKey: teamDetailsQueryKey(booking.team_id) });
               queryClient.invalidateQueries({ queryKey: ['turf-slots', booking.turf_id] });
               queryClient.invalidateQueries({ queryKey: ['booking', booking.id] });
-              Alert.alert(
+              showAlert(
                 'Booking cancelled',
                 outcome === 'CANCELLED_REFUNDED'
                   ? 'Full credits were refunded to the Team wallet.'
                   : 'No refund — cancelled within 24 hours of the slot.'
               );
             } catch (error) {
-              Alert.alert('Could not cancel', error instanceof Error ? error.message : 'Please try again.');
+              showAlert('Could not cancel', friendlyError(error));
             } finally {
               setCancellingId(null);
             }

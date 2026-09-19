@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -17,6 +17,8 @@ import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { assignCoHost, removeTeamMember, respondToJoinRequest, setTeamBanner, uploadTeamBanner } from '../api';
 import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '../useTeams';
 import type { TeamMember, TeamRole } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const ROLE_TONE: Record<TeamRole, 'host' | 'coHost' | 'member'> = {
   HOST: 'host',
@@ -78,7 +80,7 @@ export function TeamDetailsScreen() {
       invalidate(team.id);
       refetch();
     } catch (error) {
-      Alert.alert('Action failed', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Action failed', friendlyError(error));
     } finally {
       setBusyId(null);
     }
@@ -96,7 +98,7 @@ export function TeamDetailsScreen() {
             invalidate(team.id);
             refetch();
           } catch (error) {
-            Alert.alert('Failed', error instanceof Error ? error.message : 'Please try again.');
+            showAlert('Failed', friendlyError(error));
           }
         },
       });
@@ -110,12 +112,12 @@ export function TeamDetailsScreen() {
           invalidate(team.id);
           refetch();
         } catch (error) {
-          Alert.alert('Failed', error instanceof Error ? error.message : 'Please try again.');
+          showAlert('Failed', friendlyError(error));
         }
       },
     });
     options.push({ text: 'Cancel', style: 'cancel' });
-    Alert.alert(member.profile?.full_name ?? 'Member', undefined, options);
+    showAlert(member.profile?.full_name ?? 'Member', undefined, options);
   };
 
   // Book Turf reads whichever Team is "active" (client-only UI state, see
@@ -134,7 +136,7 @@ export function TeamDetailsScreen() {
   const handleEditBanner = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow photo access to set a Team banner.');
+      showAlert('Permission needed', 'Allow photo access to set a Team banner.');
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -151,7 +153,7 @@ export function TeamDetailsScreen() {
       invalidate(team.id);
       refetch();
     } catch (error) {
-      Alert.alert('Could not update banner', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not update banner', friendlyError(error));
     } finally {
       setIsUploadingBanner(false);
     }

@@ -1,24 +1,8 @@
-// Shared business-outcome-code -> friendly-message mapping for the booking
-// feature. One definition so every screen that calls a booking RPC
-// (BookTurfScreen's hold/confirm, ManageBookingScreen's modify/cancel)
-// reports the same codes the same way, per CLAUDE.md's "structured
-// business-outcome codes, never raw DB/server errors" API convention.
+import { friendlyError } from '@/lib/errors';
+
+// Kept as a named export so every booking screen's existing import keeps
+// working; the actual code -> plain-language mapping now lives in
+// src/lib/errors.ts so the whole app reports the same reason the same way.
 export function mapBookingError(error: unknown): string {
-  const message = error instanceof Error ? error.message : '';
-  if (message.includes('INSUFFICIENT_CREDITS')) return 'Not enough Team credits for this booking.';
-  if (message.includes('HOLD_EXPIRED')) return 'One or more holds expired before confirming. Please reselect and try again.';
-  if (message.includes('SLOTS_MUST_BE_SAME_DAY')) return 'All selected slots must be on the same day.';
-  if (message.includes('SLOTS_MUST_BE_SAME_TEAM')) return 'Something went wrong — the selected slots did not all belong to this Team.';
-  if (message.includes('SLOTS_MUST_BE_SAME_SPORT')) return 'Something went wrong — the selected slots were not all the same sport.';
-  if (message.includes('SLOT_UNAVAILABLE')) return 'One of the selected slots is no longer available.';
-  if (message.includes('PARTICIPANT_INVALID')) return 'One of the selected players is not an active Team member.';
-  if (message.includes('MEMBERSHIP_INACTIVE')) return "This Team's membership is not active.";
-  if (message.includes('TEAM_ARCHIVED')) return 'This Team has been archived and can no longer make bookings.';
-  if (message.includes('NO_SLOTS_SELECTED')) return 'Select at least one slot first.';
-  if (message.includes('NO_PARTICIPANTS')) return 'Select at least one player.';
-  if (message.includes('PARTICIPANTS_LOCKED')) return 'This session has already started — participants can no longer be changed.';
-  if (message.includes('CANCELLATION_NOT_ALLOWED')) return 'This booking can no longer be cancelled.';
-  if (message.includes('NOT_FOUND')) return 'This booking could not be found.';
-  if (message.includes('FORBIDDEN')) return 'You are not authorized to do this.';
-  return message || 'Please try again.';
+  return friendlyError(error, 'Please try again.');
 }

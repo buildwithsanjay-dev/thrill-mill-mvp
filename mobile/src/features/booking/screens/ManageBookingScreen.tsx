@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +19,7 @@ import {
   useBookingParticipants,
   useInvalidateBookingQueries,
 } from '../useBooking';
+import { showAlert } from '@/components/AppDialog';
 
 const STATUS_TONE = {
   CONFIRMED: 'active',
@@ -103,14 +104,14 @@ export function ManageBookingScreen() {
       invalidate({ bookingId: booking.id });
       setIsEditing(false);
     } catch (error) {
-      Alert.alert('Could not update participants', mapBookingError(error));
+      showAlert('Could not update participants', mapBookingError(error));
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleCancel = () => {
-    Alert.alert(
+    showAlert(
       'Cancel this booking?',
       'Full refund if cancelled 24 hours or more before the slot. No refund if cancelled within 24 hours — decided by server time.',
       [
@@ -134,7 +135,7 @@ export function ManageBookingScreen() {
                 ),
               ]);
               invalidate({ teamId: booking.team_id, bookingId: booking.id, turfId: booking.turf_id });
-              Alert.alert(
+              showAlert(
                 'Booking cancelled',
                 outcome.includes('REFUND') ? 'Full credits were refunded to the Team wallet.' : 'No refund — cancelled within 24 hours of the slot.'
               );
@@ -144,7 +145,7 @@ export function ManageBookingScreen() {
                 error instanceof Error && error.message === 'CANCEL_TIMEOUT'
                   ? 'This is taking longer than expected — check your connection and try again.'
                   : mapBookingError(error);
-              Alert.alert('Could not cancel', message);
+              showAlert('Could not cancel', message);
             } finally {
               setIsCancelling(false);
             }

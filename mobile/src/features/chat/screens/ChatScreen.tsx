@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,8 @@ import { useTeamDetails } from '@/features/team/useTeams';
 import type { ChatPresetCategory, ChatReactionEmoji } from '@/types/db';
 import { markRoomRead, sendMessage, setReaction } from '../api';
 import { useChatRoom, useInvalidateChatQueries, useMessages, usePresetCatalog, useReactions } from '../useChat';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const REACTION_EMOJIS: ChatReactionEmoji[] = ['👍', '❤️', '😂', '😮', '😢', '👏'];
 const CATEGORY_LABELS: Record<ChatPresetCategory, string> = {
@@ -83,7 +85,7 @@ export function ChatScreen() {
       await sendMessage(room.id, session.user.id, presetKey);
       invalidateChat({ roomId: room.id });
     } catch (error) {
-      Alert.alert('Could not send', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not send', friendlyError(error));
     } finally {
       setIsSending(false);
     }
@@ -96,7 +98,7 @@ export function ChatScreen() {
       await setReaction(messageId, session.user.id, emoji);
       invalidateChat({ messageIds });
     } catch (error) {
-      Alert.alert('Could not react', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not react', friendlyError(error));
     }
   };
 

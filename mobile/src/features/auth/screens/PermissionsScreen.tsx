@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,7 @@ import { PaginationDots } from '@/components/PaginationDots';
 import { colors, radii, spacing } from '@/constants/theme';
 import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 import { GradientButton } from '../components/GradientButton';
+import { showAlert } from '@/components/AppDialog';
 
 type GrantState = 'unknown' | 'granted' | 'not-granted';
 
@@ -77,7 +78,7 @@ export function PermissionsScreen() {
         // needed) — this is a real failure the user didn't choose, worth a
         // one-line heads-up. Fire-and-forget: still proceeds regardless,
         // same as every other outcome here.
-        Alert.alert('Notifications could not be set up', 'You can try again later from your Profile.');
+        showAlert('Notifications could not be set up', 'You can try again later from your Profile.');
       }
       const notifStatus = await Notifications.getPermissionsAsync();
       setNotificationsGranted(notifStatus.status === 'granted' ? 'granted' : 'not-granted');

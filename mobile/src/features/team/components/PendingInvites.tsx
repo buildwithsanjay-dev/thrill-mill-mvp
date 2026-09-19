@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors, radii, spacing } from '@/constants/theme';
 import { respondToInvite } from '../api';
 import { useInvalidateTeamQueries, useMyInvites } from '../useTeams';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 // Surfaces on Home and My Teams: an invited (not-yet-ACTIVE) member
 // otherwise had no way to even see they'd been invited, let alone accept —
@@ -22,7 +24,7 @@ export function PendingInvites() {
       await respondToInvite(teamMemberId, accept);
       invalidate();
     } catch (error) {
-      Alert.alert('Could not respond', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not respond', friendlyError(error));
     } finally {
       setBusyId(null);
     }

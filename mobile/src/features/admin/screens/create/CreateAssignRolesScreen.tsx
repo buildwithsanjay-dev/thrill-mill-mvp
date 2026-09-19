@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,8 @@ import { StepIndicator } from '@/components/StepIndicator';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminSetTeamRole } from '../../api';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const STEPS = ['DETAILS', 'MEMBERS', 'ROLES', 'MEMBERSHIP', 'REVIEW'];
 
@@ -32,7 +34,7 @@ export function CreateAssignRolesScreen() {
       await adminSetTeamRole(teamId, userId, nextRole);
       setMemberRole(userId, nextRole);
     } catch (error) {
-      Alert.alert('Could not update role', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not update role', friendlyError(error));
     } finally {
       setBusyId(null);
     }

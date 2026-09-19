@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +14,8 @@ import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { addDaysIso, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const DATE_WINDOW = 14;
 
@@ -206,7 +208,7 @@ export function SelectSlotScreen() {
         [slot.id]: { holdId: result.hold_id, expiresAt: new Date(result.expires_at).getTime() },
       }));
     } catch (error) {
-      Alert.alert('Could not hold slot', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not hold slot', friendlyError(error));
     } finally {
       setPendingSlotIds((prev) => {
         const next = { ...prev };
@@ -229,10 +231,10 @@ export function SelectSlotScreen() {
       await confirmMultiSlotBooking(holdIds, participantIds);
       setSelectedHolds({});
       invalidateBooking({ teamId, turfId: turf?.id });
-      Alert.alert('Booking confirmed', `Booking created for ${teamName}.`);
+      showAlert('Booking confirmed', `Booking created for ${teamName}.`);
       router.replace('/(admin)/(tabs)/bookings');
     } catch (error) {
-      Alert.alert('Booking failed', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Booking failed', friendlyError(error));
     } finally {
       setIsConfirming(false);
     }

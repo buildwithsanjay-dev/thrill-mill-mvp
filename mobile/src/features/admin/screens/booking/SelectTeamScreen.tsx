@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +10,8 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { findTeamByJoinCodeOrName } from '../../api';
 import type { Team, TeamWallet } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 export function SelectTeamScreen() {
   const router = useRouter();
@@ -31,7 +33,7 @@ export function SelectTeamScreen() {
       const rows = await findTeamByJoinCodeOrName(text.trim());
       setResults(rows);
     } catch (error) {
-      Alert.alert('Search failed', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Search failed', friendlyError(error));
     } finally {
       setIsSearching(false);
     }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +14,8 @@ import type { Profile } from '@/features/profile/api';
 import { useProfile } from '@/features/profile/useProfile';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import type { MembershipPlan } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 export function ChooseMembershipScreen() {
   const router = useRouter();
@@ -64,7 +66,7 @@ function MembershipForm({
   const handleConfirm = async () => {
     if (!planCode) return;
     if (!hostPhone.trim()) {
-      Alert.alert('Host phone required', 'The Admin needs a number to reach the Host for payment.');
+      showAlert('Host phone required', 'The Admin needs a number to reach the Host for payment.');
       return;
     }
     setIsSubmitting(true);
@@ -83,12 +85,12 @@ function MembershipForm({
       // home base, not one level deep into the new Team.
       router.replace('/(app)/(tabs)');
       reset();
-      Alert.alert(
+      showAlert(
         'Team created!',
         'Your membership request has been submitted. A Thrill Mill Admin will contact you to collect and verify payment before credits are loaded.'
       );
     } catch (error) {
-      Alert.alert('Could not submit request', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not submit request', friendlyError(error));
       setIsSubmitting(false);
     }
   };

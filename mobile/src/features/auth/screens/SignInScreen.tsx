@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,6 +12,8 @@ import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { colors, radii, spacing } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { signInWithGoogle, signInWithUsername } from '../api';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 // Note: the Figma design (assets/ui/Sign In.png) also shows a "Continue with
 // Apple" option. Omitted here on purpose — CLAUDE.md scopes this MVP to
@@ -42,9 +44,9 @@ export function SignInScreen() {
       }
       goToApp();
     } catch (error) {
-      Alert.alert(
+      showAlert(
         'Sign in failed',
-        error instanceof Error ? error.message : 'Something went wrong. Please try again.'
+        friendlyError(error)
       );
     } finally {
       setIsSigningIn(false);
@@ -53,7 +55,7 @@ export function SignInScreen() {
 
   const handleUsernameSignIn = async () => {
     if (!username.trim() || !password) {
-      Alert.alert('Missing details', 'Enter both username and password.');
+      showAlert('Missing details', 'Enter both username and password.');
       return;
     }
     setIsSigningIn(true);
@@ -65,7 +67,7 @@ export function SignInScreen() {
         error instanceof Error && error.message === 'UNKNOWN_USERNAME'
           ? 'Unknown username.'
           : 'Incorrect username or password.';
-      Alert.alert('Sign in failed', message);
+      showAlert('Sign in failed', message);
     } finally {
       setIsSigningIn(false);
     }

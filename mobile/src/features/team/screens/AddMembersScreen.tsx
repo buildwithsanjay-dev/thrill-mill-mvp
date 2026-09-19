@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +13,8 @@ import { darkColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import { inviteTeamMember, searchMembers, type LookupUserResult } from '../api';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const MAX_MEMBERS = 10;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -49,7 +51,7 @@ export function AddMembersScreen() {
         const rows = await searchMembers(query.trim());
         setResults(rows.filter((r) => !selectedMembers.some((m) => m.id === r.id) && r.id !== session?.user.id));
       } catch (error) {
-        Alert.alert('Search failed', error instanceof Error ? error.message : 'Please try again.');
+        showAlert('Search failed', friendlyError(error));
       } finally {
         setIsSearching(false);
         setHasSearched(true);
@@ -65,11 +67,11 @@ export function AddMembersScreen() {
 
   const handleInvite = async (user: LookupUserResult) => {
     if (user.id === session?.user.id) {
-      Alert.alert('Already on the team', "You're the Host — no need to add yourself.");
+      showAlert('Already on the team', "You're the Host — no need to add yourself.");
       return;
     }
     if (selectedMembers.length >= MAX_MEMBERS - 1) {
-      Alert.alert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
+      showAlert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
       return;
     }
     setInvitingId(user.id);
@@ -84,7 +86,7 @@ export function AddMembersScreen() {
           : error instanceof Error
             ? error.message
             : 'Please try again.';
-      Alert.alert('Could not invite member', message);
+      showAlert('Could not invite member', message);
     } finally {
       setInvitingId(null);
     }

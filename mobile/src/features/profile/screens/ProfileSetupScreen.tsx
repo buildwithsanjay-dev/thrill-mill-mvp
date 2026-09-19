@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +14,8 @@ import { colors, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 export function ProfileSetupScreen() {
   const { data: profile, isPending } = useProfile();
@@ -43,7 +45,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow photo access to set a profile picture.');
+      showAlert('Permission needed', 'Allow photo access to set a profile picture.');
       return;
     }
     // See ProfileScreen.tsx's pickImage for why `allowsEditing`/`aspect`
@@ -70,7 +72,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
   const handleContinue = async () => {
     if (!fullName.trim()) {
-      Alert.alert('Name required', 'Please enter your full name to continue.');
+      showAlert('Name required', 'Please enter your full name to continue.');
       return;
     }
     // Mobile number is mandatory too (and can't be skipped) — the Host/
@@ -79,7 +81,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
     // verification of external payments relies on being able to reach
     // whoever's involved.
     if (!phone.trim()) {
-      Alert.alert('Mobile number required', 'Please enter your mobile number to continue.');
+      showAlert('Mobile number required', 'Please enter your mobile number to continue.');
       return;
     }
     setIsSaving(true);
@@ -94,7 +96,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
         avatar_url: avatarUrl,
       });
     } catch (error) {
-      Alert.alert('Could not save profile', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not save profile', friendlyError(error));
     } finally {
       setIsSaving(false);
     }

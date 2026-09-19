@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api
 import { mapBookingError } from '../errors';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
 
 const DATE_WINDOW = 14;
 
@@ -191,7 +192,7 @@ export function BookTurfScreen() {
           expiredIds.forEach((id) => next.delete(id));
           return next;
         });
-        Alert.alert(
+        showAlert(
           'Hold expired',
           expiredIds.length === 1
             ? 'Your slot hold expired. Please select it again.'
@@ -298,7 +299,7 @@ export function BookTurfScreen() {
           : error instanceof Error
             ? error.message
             : 'Please try again.';
-      Alert.alert('Could not hold slot', msg);
+      showAlert('Could not hold slot', msg);
     } finally {
       setMutatingSlotId(null);
     }
@@ -331,7 +332,7 @@ export function BookTurfScreen() {
         return next;
       });
       Promise.all(stale.map((h) => releaseSlotHold(h.holdId).catch(() => undefined)));
-      Alert.alert(
+      showAlert(
         'Selection changed',
         'A held slot belonged to a resource you navigated away from and was released. Please review your selection.'
       );
@@ -345,7 +346,7 @@ export function BookTurfScreen() {
       setHeldSlots(new Map());
       setSelectedParticipantIds([]);
       if (bookingIds.length > 1) {
-        Alert.alert('Booking confirmed', `${bookingIds.length} slots were booked successfully.`);
+        showAlert('Booking confirmed', `${bookingIds.length} slots were booked successfully.`);
       }
       if (bookingIds[0]) {
         router.push(`/(app)/booking/${bookingIds[0]}`);
@@ -355,7 +356,7 @@ export function BookTurfScreen() {
       // were booked, so the holds are likely still active — leave the
       // selection exactly as it was rather than clearing it, so the user can
       // retry without reselecting everything.
-      Alert.alert('Booking failed', mapBookingError(error));
+      showAlert('Booking failed', mapBookingError(error));
     } finally {
       setIsConfirming(false);
     }

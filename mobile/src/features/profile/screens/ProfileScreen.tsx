@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
@@ -21,6 +21,8 @@ import { registerForPushNotificationsAsync } from '@/features/notifications/push
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 export function ProfileScreen() {
   const { data: profile, isPending } = useProfile();
@@ -56,7 +58,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow photo access to update your profile picture.');
+      showAlert('Permission needed', 'Allow photo access to update your profile picture.');
       return;
     }
     // NOTE: `allowsEditing`/`aspect` would delegate to the OS's native image
@@ -81,7 +83,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
   const handleSave = async () => {
     if (!fullName.trim()) {
-      Alert.alert('Name required', 'Please enter your full name.');
+      showAlert('Name required', 'Please enter your full name.');
       return;
     }
     setIsSaving(true);
@@ -99,16 +101,16 @@ function ProfileForm({ profile }: { profile: Profile }) {
         await queryClient.invalidateQueries({ queryKey: profileQueryKey(session.user.id) });
       }
       setPickedImageUri(null);
-      Alert.alert('Saved', 'Your profile has been updated.');
+      showAlert('Saved', 'Your profile has been updated.');
     } catch (error) {
-      Alert.alert('Could not save', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not save', friendlyError(error));
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleSignOut = () => {
-    Alert.alert('Sign out?', 'You can sign back in anytime.', [
+    showAlert('Sign out?', 'You can sign back in anytime.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Sign out',
@@ -119,7 +121,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
             await signOut();
             router.replace('/(auth)/welcome');
           } catch (error) {
-            Alert.alert('Sign out failed', error instanceof Error ? error.message : 'Please try again.');
+            showAlert('Sign out failed', friendlyError(error));
             setIsSigningOut(false);
           }
         },

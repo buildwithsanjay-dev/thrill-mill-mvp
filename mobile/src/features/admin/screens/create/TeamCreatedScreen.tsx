@@ -10,6 +10,7 @@ import { requestTeamMembership } from '@/features/membership/api';
 import { useMembershipPlans } from '@/features/membership/useMembershipPlans';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { useInvalidateAdminQueries } from '../../useAdmin';
+import { friendlyError } from '@/lib/errors';
 
 export function TeamCreatedScreen() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export function TeamCreatedScreen() {
     submitted.current = true;
     requestTeamMembership({ teamId, planCode, hostPhone: host?.phone ?? '', coHostPhone: coHost?.phone ?? undefined })
       .then(() => invalidateAdmin())
-      .catch((error) => setSubmitError(error instanceof Error ? error.message : 'Please try again.'))
+      .catch((error) => setSubmitError(friendlyError(error)))
       .finally(() => setIsSubmitting(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId, planCode]);

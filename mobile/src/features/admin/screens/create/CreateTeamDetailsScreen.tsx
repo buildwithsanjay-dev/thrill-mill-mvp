@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,8 @@ import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminCreateTeam } from '../../api';
 import { useInvalidateAdminQueries } from '../../useAdmin';
 import { abandonTeamCreation, getTeamJoinCode } from '@/features/team/api';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const STEPS = ['DETAILS', 'MEMBERS', 'ROLES', 'MEMBERSHIP', 'REVIEW'];
 
@@ -34,7 +36,7 @@ export function CreateTeamDetailsScreen() {
 
   const handleContinue = async () => {
     if (!teamName.trim()) {
-      Alert.alert('Team name required', 'Give this Team a name to continue.');
+      showAlert('Team name required', 'Give this Team a name to continue.');
       return;
     }
     // Re-entering Step 1 (e.g. via the back button from Add Members)
@@ -56,7 +58,7 @@ export function CreateTeamDetailsScreen() {
       invalidateAdmin();
       router.push('/(admin)/team/create-members');
     } catch (error) {
-      Alert.alert('Could not create Team', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not create Team', friendlyError(error));
     } finally {
       setIsCreating(false);
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,8 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { activateMembership } from '../api';
 import { useInvalidateAdminQueries } from '../useAdmin';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 export function ActivateMembershipScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,7 +46,7 @@ export function ActivateMembershipScreen() {
       await activateMembership(membership.payment_id!);
       invalidateAdmin();
       refetch();
-      Alert.alert(
+      showAlert(
         'Membership activated',
         `${plan.credits_allocated.toLocaleString()} credits loaded to ${team.name}'s wallet.`
       );
@@ -58,7 +60,7 @@ export function ActivateMembershipScreen() {
       // TeamCreatedScreen's own goToDetails() uses.
       router.replace(`/(admin)/team/${team.id}`);
     } catch (error) {
-      Alert.alert('Could not activate', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not activate', friendlyError(error));
     } finally {
       setIsActivating(false);
     }

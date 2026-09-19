@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +14,7 @@ import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { adminArchiveTeam } from '../api';
 import { useAdminAuditLogFeed, useInvalidateAdminQueries } from '../useAdmin';
+import { showAlert } from '@/components/AppDialog';
 
 const ROLE_TONE = { HOST: 'host', CO_HOST: 'coHost', MEMBER: 'member' } as const;
 const BOOKING_STATUS_TONE = {
@@ -66,7 +67,7 @@ export function AdminTeamDetailsScreen() {
   // the Team's wallet, bookings, and membership history all stay intact;
   // it just becomes un-joinable and un-bookable going forward.
   const handleArchive = () => {
-    Alert.alert(
+    showAlert(
       'Archive this Team?',
       `${team.name} will no longer be joinable or able to make new bookings. Its history, wallet, and past bookings are kept — this can be reviewed again later, it does not delete anything.`,
       [
@@ -82,7 +83,7 @@ export function AdminTeamDetailsScreen() {
               invalidateTeam(team.id);
               refetch();
             } catch (error) {
-              Alert.alert('Could not archive Team', mapBookingError(error));
+              showAlert('Could not archive Team', mapBookingError(error));
             } finally {
               setIsArchiving(false);
             }

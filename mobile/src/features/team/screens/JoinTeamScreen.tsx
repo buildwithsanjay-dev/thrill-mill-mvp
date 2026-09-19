@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,7 @@ import { TextField } from '@/components/TextField';
 import { colors, radii, spacing } from '@/constants/theme';
 import { requestJoinTeam } from '../api';
 import { useInvalidateTeamQueries } from '../useTeams';
+import { showAlert } from '@/components/AppDialog';
 
 export function JoinTeamScreen() {
   const router = useRouter();
@@ -18,14 +19,14 @@ export function JoinTeamScreen() {
 
   const handleJoin = async () => {
     if (!code.trim()) {
-      Alert.alert('Enter a code', 'Ask your Team Host for their Team ID.');
+      showAlert('Enter a code', 'Ask your Team Host for their Team ID.');
       return;
     }
     setIsSubmitting(true);
     try {
       const result = await requestJoinTeam(code.trim());
       invalidate();
-      Alert.alert(
+      showAlert(
         'Request sent',
         `Your request to join ${result.team_name} has been sent to the Host for approval.`
       );
@@ -39,7 +40,7 @@ export function JoinTeamScreen() {
             : error instanceof Error && error.message.includes('TEAM_FULL')
               ? 'This Team already has the maximum of 10 members.'
               : 'Please try again.';
-      Alert.alert('Could not join Team', message);
+      showAlert('Could not join Team', message);
     } finally {
       setIsSubmitting(false);
     }

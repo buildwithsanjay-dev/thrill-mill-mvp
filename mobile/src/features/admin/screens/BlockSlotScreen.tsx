@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,8 @@ import { useTurfResources, useTurfSlots } from '@/features/booking/useBooking';
 import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
 import { adminBlockSlot, adminUnblockSlot } from '../api';
 import type { TurfSlot } from '@/types/db';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const DATE_WINDOW = 14;
 
@@ -47,7 +49,7 @@ export function BlockSlotScreen() {
 
   const handleBlock = async () => {
     if (!selectedSlot || !reason.trim()) {
-      Alert.alert('Reason required', 'Enter a reason for blocking this slot.');
+      showAlert('Reason required', 'Enter a reason for blocking this slot.');
       return;
     }
     setIsSubmitting(true);
@@ -56,16 +58,16 @@ export function BlockSlotScreen() {
       setSelectedSlot(null);
       setReason('');
       refetch();
-      Alert.alert('Slot blocked', 'This slot is no longer bookable.');
+      showAlert('Slot blocked', 'This slot is no longer bookable.');
     } catch (error) {
-      Alert.alert('Could not block slot', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not block slot', friendlyError(error));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleUnblock = (slot: TurfSlot) => {
-    Alert.alert('Unblock this slot?', 'It will become bookable again.', [
+    showAlert('Unblock this slot?', 'It will become bookable again.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Unblock',
@@ -74,7 +76,7 @@ export function BlockSlotScreen() {
             await adminUnblockSlot(slot.id);
             refetch();
           } catch (error) {
-            Alert.alert('Could not unblock slot', error instanceof Error ? error.message : 'Please try again.');
+            showAlert('Could not unblock slot', friendlyError(error));
           }
         },
       },

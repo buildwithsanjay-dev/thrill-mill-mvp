@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DialogHost } from '../src/components/AppDialog';
 import { ExitOnDoubleBack } from '../src/components/ExitOnDoubleBack';
 import { queryClient, registerQueryClientFocusManager } from '../src/lib/queryClient';
 import { AuthProvider } from '../src/features/auth/AuthProvider';
@@ -58,6 +59,7 @@ export default function RootLayout() {
           <StatusBar style="auto" />
           <ExitOnDoubleBack />
           <Stack screenOptions={{ headerShown: false }} />
+          <DialogHost />
         </QueryClientProvider>
       </AuthProvider>
     </SafeAreaProvider>

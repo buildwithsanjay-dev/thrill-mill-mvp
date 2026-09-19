@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,8 @@ import { TextField } from '@/components/TextField';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminAddTeamMember, adminSearchMembers, type AdminMemberSearchResult } from '../../api';
+import { showAlert } from '@/components/AppDialog';
+import { friendlyError } from '@/lib/errors';
 
 const STEPS = ['DETAILS', 'MEMBERS', 'ROLES', 'MEMBERSHIP', 'REVIEW'];
 const MAX_MEMBERS = 10;
@@ -40,7 +42,7 @@ export function CreateAddMembersScreen() {
       const rows = await adminSearchMembers(text.trim());
       setResults(rows.filter((r) => !members.some((m) => m.id === r.id)));
     } catch (error) {
-      Alert.alert('Search failed', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Search failed', friendlyError(error));
     } finally {
       setIsSearching(false);
     }
@@ -48,7 +50,7 @@ export function CreateAddMembersScreen() {
 
   const handleAdd = async (user: AdminMemberSearchResult) => {
     if (members.length >= MAX_MEMBERS) {
-      Alert.alert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
+      showAlert('Team is full', `A Team can have up to ${MAX_MEMBERS} playing members.`);
       return;
     }
     setAddingId(user.id);
@@ -57,7 +59,7 @@ export function CreateAddMembersScreen() {
       addMember({ ...user, teamMemberId });
       setResults((prev) => prev.filter((r) => r.id !== user.id));
     } catch (error) {
-      Alert.alert('Could not add member', error instanceof Error ? error.message : 'Please try again.');
+      showAlert('Could not add member', friendlyError(error));
     } finally {
       setAddingId(null);
     }
