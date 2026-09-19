@@ -443,7 +443,12 @@ function CreditUsageSection() {
           {period === 'WEEK' ? 'No games played this week yet.' : 'No games played this month yet.'}
         </Text>
       ) : (
-        rows.map((row) => (
+        // The list scrolls inside its own fixed-height box (nestedScrollEnabled
+        // lets Android scroll it independently of the page) so a long usage
+        // history no longer stretches the whole Profile screen.
+        <View style={styles.usageBox}>
+          <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+          {rows.map((row) => (
           <View key={row.booking_id} style={styles.usageRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.usageTeam} numberOfLines={1}>
@@ -457,7 +462,9 @@ function CreditUsageSection() {
             </View>
             <Text style={styles.usageCredits}>{Math.round(row.credits_attributed)}</Text>
           </View>
-        ))
+        ))}
+          </ScrollView>
+        </View>
       )}
     </View>
   );
@@ -537,6 +544,15 @@ const styles = StyleSheet.create({
   grantedPillText: { fontSize: 10, fontWeight: '700', color: colors.white },
 
   usageSection: { width: '100%' },
+  usageBox: {
+    maxHeight: 280,
+    marginTop: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.white,
+  },
   usageHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   usageTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   usagePeriodTabs: { flexDirection: 'row', backgroundColor: '#EEF1F5', borderRadius: radii.pill, padding: 3 },
