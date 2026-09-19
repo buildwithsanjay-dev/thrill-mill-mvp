@@ -139,6 +139,14 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
   );
 }
 
+// Pre-check so a duplicate name is reported inline on the form. The unique
+// index on teams (see 20260919120000_*.sql) is the actual guard.
+export async function isTeamNameAvailable(name: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('fn_is_team_name_available', { p_name: name });
+  if (error) throw error;
+  return data === true;
+}
+
 export async function createTeam(name: string): Promise<string> {
   const { data, error } = await supabase.rpc('fn_create_team', { p_name: name });
   if (error) throw error;
@@ -191,7 +199,8 @@ export async function uploadTeamBanner(teamId: string, localUri: string): Promis
   return `${data.publicUrl}?t=${Date.now()}`;
 }
 
-export async function setTeamBanner(teamId: string, bannerUrl: string): Promise<void> {
+// bannerUrl = null clears the banner (the screen falls back to its placeholder).
+export async function setTeamBanner(teamId: string, bannerUrl: string | null): Promise<void> {
   const { error } = await supabase.rpc('fn_set_team_banner', {
     p_team_id: teamId,
     p_banner_url: bannerUrl,

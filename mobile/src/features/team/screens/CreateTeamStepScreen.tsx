@@ -12,7 +12,8 @@ import { screenColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
-import { abandonTeamCreation, createTeam, getTeamJoinCode } from '../api';
+import { validateTeamName } from '@/lib/validation';
+import { abandonTeamCreation, createTeam, getTeamJoinCode, isTeamNameAvailable } from '../api';
 import { useInvalidateTeamQueries } from '../useTeams';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -24,12 +25,12 @@ export function CreateTeamStepScreen() {
   const invalidate = useInvalidateTeamQueries();
   const { teamName, teamId: existingTeamId, setTeamName, setTeamId, setTeamJoinCode, reset } = useCreateTeamWizard();
   const [isCreating, setIsCreating] = useState(false);
+  const [nameError, setNameError] = useState<string | undefined>();
 
   const handleContinue = async () => {
-    if (!teamName.trim()) {
-      showAlert('Team name required', 'Give your Team a name to continue.');
-      return;
-    }
+    const problem = validateTeamName(teamName);
+    setNameError(problem);
+    if (problem) return;
     // Re-entering Step 1 (e.g. via the back button from Add Members)
     // already has a real, server-created Team from an earlier Continue
     // press in this same wizard session — call createTeam() again here and
@@ -44,7 +45,13 @@ export function CreateTeamStepScreen() {
     }
     setIsCreating(true);
     try {
-      const teamId = await createTeam(teamName.trim());
+      // Team names are unique across the club — check first so the user sees
+      // the reason right on the field instead of a failed request.
+      if (!(await isTeamNameAvailable(teamName.trim()))) {
+        setNameError('A team with this name already exists. Choose a different name.');
+        return;
+      }
+      const teamId = await createTeam(teamName.trim().replace(/\s+/g, ' '));
       setTeamId(teamId);
       getTeamJoinCode(teamId).then(setTeamJoinCode).catch(() => undefined);
       invalidate();
@@ -99,7 +106,12 @@ export function CreateTeamStepScreen() {
             label=""
             placeholder="e.g. Weekend Warriors"
             value={teamName}
-            onChangeText={setTeamName}
+            onChangeText={(v) => {
+              setTeamName(v);
+              if (nameError) setNameError(undefined);
+            }}
+            error={nameError}
+            maxLength={40}
             style={styles.input}
             placeholderTextColor={screenColors.textMuted}
           />

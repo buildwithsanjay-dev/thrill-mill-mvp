@@ -9,9 +9,12 @@ type TextFieldProps = TextInputProps & {
   // a dark surface — this swaps label/prefix text to a light color rather
   // than requiring every call site to override styles individually.
   labelColor?: string;
+  // Inline validation message — shown under the field with a red border, so
+  // forms never need a popup just to say "this field is wrong".
+  error?: string;
 };
 
-export function TextField({ label, prefix, labelColor, style, ...inputProps }: TextFieldProps) {
+export function TextField({ label, prefix, labelColor, error, style, ...inputProps }: TextFieldProps) {
   return (
     <View style={styles.container}>
       {!!label && <Text style={[styles.label, labelColor ? { color: labelColor } : undefined]}>{label}</Text>}
@@ -22,16 +25,19 @@ export function TextField({ label, prefix, labelColor, style, ...inputProps }: T
           </View>
         )}
         <TextInput
-          style={[styles.input, prefix ? styles.inputWithPrefix : undefined, style]}
+          style={[styles.input, prefix ? styles.inputWithPrefix : undefined, style, error ? styles.inputError : undefined]}
           placeholderTextColor={colors.textMuted}
           {...inputProps}
         />
       </View>
+      {!!error && <Text style={styles.errorText}>{error}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  inputError: { borderColor: colors.danger },
+  errorText: { marginTop: spacing.xs, fontSize: 12, fontWeight: '600', color: colors.danger },
   container: {
     width: '100%',
   },

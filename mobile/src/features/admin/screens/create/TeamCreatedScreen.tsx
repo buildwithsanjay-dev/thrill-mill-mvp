@@ -35,20 +35,18 @@ export function TeamCreatedScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId, planCode]);
 
-  const goToActivate = () => {
-    const id = teamId;
+  // Every exit pops the whole wizard off the stack first (dismissAll) and
+  // only then resets its store. Resetting first and using router.replace left
+  // the earlier wizard screens underneath, so pressing Back landed on a
+  // screen whose teamId guard had just fired — a blank white screen.
+  const leaveWizard = (target?: string) => {
+    router.dismissAll();
+    if (target) router.push(target as never);
     reset();
-    router.replace(`/(admin)/team/${id}/activate`);
   };
-  const goToDetails = () => {
-    const id = teamId;
-    reset();
-    router.replace(`/(admin)/team/${id}`);
-  };
-  const goToDashboard = () => {
-    reset();
-    router.replace('/(admin)/(tabs)');
-  };
+  const goToActivate = () => leaveWizard(`/(admin)/team/${teamId}/activate`);
+  const goToDetails = () => leaveWizard(`/(admin)/team/${teamId}`);
+  const goToDashboard = () => leaveWizard();
 
   if (isSubmitting) {
     return (

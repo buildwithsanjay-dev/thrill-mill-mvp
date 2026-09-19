@@ -160,8 +160,13 @@ export function AdminTeamDetailsScreen() {
         )}
 
         <View style={styles.card}>
-          <View style={styles.sectionHeaderRow}>
+          <View style={[styles.sectionHeaderRow, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
             <Text style={styles.cardLabelDark}>{activeMembers.length} Members</Text>
+            {!isArchived && (
+              <Pressable onPress={() => router.push(`/(app)/team/${team.id}/add-members`)} hitSlop={8}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: colors.primary }}>+ Add members</Text>
+              </Pressable>
+            )}
           </View>
           {activeMembers.slice(0, 6).map((m) => (
             <View key={m.id} style={styles.memberRow}>

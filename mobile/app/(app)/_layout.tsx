@@ -20,6 +20,7 @@ export default function AppLayout() {
       <Stack.Screen name="team/create" />
       <Stack.Screen name="team/create-members" />
       <Stack.Screen name="team/create-membership" />
+      <Stack.Screen name="team/created" options={{ gestureEnabled: false }} />
       <Stack.Screen name="team/join" />
       <Stack.Screen name="team/[id]" />
       <Stack.Screen name="booking/[id]" />

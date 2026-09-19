@@ -13,6 +13,7 @@ import { screenColors, radii, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import { inviteTeamMember, searchMembers, type LookupUserResult } from '../api';
+import { buildInviteMessage } from '../invite';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
 
@@ -95,7 +96,7 @@ export function AddMembersScreen() {
   const handleInviteByShare = async () => {
     try {
       await Share.share({
-        message: `Join me on Thrill Mill Club! Download the app, sign in, then open "Join a Team" and enter this Team ID: ${teamJoinCode ?? ''}`,
+        message: buildInviteMessage(teamName, teamJoinCode),
       });
     } catch {
       // User dismissed the share sheet — nothing to do.

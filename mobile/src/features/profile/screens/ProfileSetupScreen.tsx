@@ -12,7 +12,8 @@ import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
 import { colors, spacing } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { updateMyProfile, uploadAvatar, type Profile } from '../api';
+import { cleanPhoneDigits, validateFullName, validatePhone } from '@/lib/validation';
+import { isPhoneAvailable, updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -39,6 +40,8 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const [phone, setPhone] = useState(profile.phone?.replace(/^\+91/, '') ?? '');
   const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState<string | undefined>();
 
   const avatarPreviewUri = pickedImageUri ?? profile.avatar_url ?? undefined;
 
@@ -71,32 +74,35 @@ function ProfileForm({ profile }: { profile: Profile }) {
   };
 
   const handleContinue = async () => {
-    if (!fullName.trim()) {
-      showAlert('Name required', 'Please enter your full name to continue.');
-      return;
-    }
-    // Mobile number is mandatory too (and can't be skipped) — the Host/
-    // Co-host contact numbers collected later during a Team's membership
-    // request assume every member already has one on file, and Admin
-    // verification of external payments relies on being able to reach
-    // whoever's involved.
-    if (!phone.trim()) {
-      showAlert('Mobile number required', 'Please enter your mobile number to continue.');
-      return;
-    }
+    // Inline validation first — no popup for a plain "you forgot a field".
+    // Mobile number is mandatory (and can't be skipped): the Host/Co-host
+    // contact numbers collected later during a Team's membership request
+    // assume every member already has one on file, and Admin verification
+    // of external payments relies on being able to reach whoever's involved.
+    const nameProblem = validateFullName(fullName);
+    const phoneProblem = validatePhone(phone);
+    setNameError(nameProblem);
+    setPhoneError(phoneProblem);
+    if (nameProblem || phoneProblem) return;
+
+    const digits = cleanPhoneDigits(phone);
     setIsSaving(true);
     try {
+      if (!(await isPhoneAvailable(`+91${digits}`))) {
+        setPhoneError('This mobile number is already registered with another account.');
+        return;
+      }
       let avatarUrl = profile.avatar_url ?? undefined;
       if (pickedImageUri) {
         avatarUrl = await uploadAvatar(pickedImageUri);
       }
       await finishOnboarding({
-        full_name: fullName.trim(),
-        phone: `+91${phone.trim()}`,
+        full_name: fullName.trim().replace(/\s+/g, ' '),
+        phone: `+91${digits}`,
         avatar_url: avatarUrl,
       });
     } catch (error) {
-      showAlert('Could not save profile', friendlyError(error));
+      showAlert('Could not save your profile', friendlyError(error));
     } finally {
       setIsSaving(false);
     }
@@ -126,16 +132,37 @@ function ProfileForm({ profile }: { profile: Profile }) {
         </View>
       </Pressable>
 
+      {pickedImageUri && (
+        <Pressable onPress={() => setPickedImageUri(null)} style={styles.removePhoto}>
+          <Text style={styles.removePhotoText}>Remove photo</Text>
+        </Pressable>
+      )}
+
       <View style={styles.form}>
-        <TextField label="Full Name" placeholder="e.g. Sanjay PC" value={fullName} onChangeText={setFullName} />
+        <TextField
+          label="Full Name"
+          placeholder="e.g. Sanjay PC"
+          value={fullName}
+          onChangeText={(v) => {
+            setFullName(v);
+            if (nameError) setNameError(undefined);
+          }}
+          autoCapitalize="words"
+          error={nameError}
+        />
         <View style={{ height: spacing.md }} />
         <TextField
           label="Mobile Number"
           prefix="+91"
           placeholder="00000 00000"
-          keyboardType="phone-pad"
+          keyboardType="number-pad"
+          maxLength={10}
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={(v) => {
+            setPhone(cleanPhoneDigits(v));
+            if (phoneError) setPhoneError(undefined);
+          }}
+          error={phoneError}
         />
       </View>
 
@@ -213,6 +240,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.white,
   },
+  removePhoto: { alignSelf: 'center', marginTop: spacing.sm, padding: spacing.xs },
+  removePhotoText: { fontSize: 13, fontWeight: '700', color: colors.danger },
   form: {
     marginTop: spacing.xl,
   },

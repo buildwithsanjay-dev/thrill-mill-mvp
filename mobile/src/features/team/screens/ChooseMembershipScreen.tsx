@@ -16,6 +16,7 @@ import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import type { MembershipPlan } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
+import { cleanPhoneDigits, validatePhone } from '@/lib/validation';
 
 export function ChooseMembershipScreen() {
   const router = useRouter();
@@ -50,10 +51,12 @@ function MembershipForm({
   teamId: string;
 }) {
   const router = useRouter();
-  const { teamName, selectedMembers, planCode, setPlanCode, reset } = useCreateTeamWizard();
+  const { teamName, selectedMembers, planCode, setPlanCode } = useCreateTeamWizard();
   const [hostPhone, setHostPhone] = useState(() => profile.phone?.replace(/^\+91/, '') ?? '');
   const [coHostPhone, setCoHostPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hostPhoneError, setHostPhoneError] = useState<string | undefined>();
+  const [coHostPhoneError, setCoHostPhoneError] = useState<string | undefined>();
 
   useEffect(() => {
     if (plans.length > 0 && !planCode) {
@@ -65,32 +68,26 @@ function MembershipForm({
 
   const handleConfirm = async () => {
     if (!planCode) return;
-    if (!hostPhone.trim()) {
-      showAlert('Host phone required', 'The Admin needs a number to reach the Host for payment.');
-      return;
-    }
+    const hostProblem = validatePhone(hostPhone);
+    const coHostProblem = coHostPhone.trim() ? validatePhone(coHostPhone) : undefined;
+    setHostPhoneError(hostProblem ? `Host phone: ${hostProblem}` : undefined);
+    setCoHostPhoneError(coHostProblem ? `Co-host phone: ${coHostProblem}` : undefined);
+    if (hostProblem || coHostProblem) return;
+
     setIsSubmitting(true);
     try {
       await requestTeamMembership({
         teamId,
         planCode,
-        hostPhone: `+91${hostPhone.trim()}`,
-        coHostPhone: coHostPhone.trim() ? `+91${coHostPhone.trim()}` : undefined,
+        hostPhone: `+91${cleanPhoneDigits(hostPhone)}`,
+        coHostPhone: coHostPhone.trim() ? `+91${cleanPhoneDigits(coHostPhone)}` : undefined,
       });
-      // Navigate first, then reset the wizard store — this screen (and its
-      // isSubmitting state) is about to unmount as part of that
-      // navigation, so nothing here should touch local state afterward.
-      // Goes to the Home dashboard (not Team Details) per explicit user
-      // request — confirming membership should drop you back at the app's
-      // home base, not one level deep into the new Team.
-      router.replace('/(app)/(tabs)');
-      reset();
-      showAlert(
-        'Team created!',
-        'Your membership request has been submitted. A Thrill Mill Admin will contact you to collect and verify payment before credits are loaded.'
-      );
+      // The wizard store is deliberately NOT reset here: the success screen
+      // reads the team name / join code from it, and resets it itself when
+      // the user leaves (which also pops the whole wizard off the stack).
+      router.replace('/(app)/team/created');
     } catch (error) {
-      showAlert('Could not submit request', friendlyError(error));
+      showAlert('Could not submit your request', friendlyError(error));
       setIsSubmitting(false);
     }
   };
@@ -154,9 +151,14 @@ function MembershipForm({
               labelColor={screenColors.text}
               prefix="+91"
               placeholder="00000 00000"
-              keyboardType="phone-pad"
+              keyboardType="number-pad"
+              maxLength={10}
               value={hostPhone}
-              onChangeText={setHostPhone}
+              onChangeText={(v) => {
+                setHostPhone(cleanPhoneDigits(v));
+                if (hostPhoneError) setHostPhoneError(undefined);
+              }}
+              error={hostPhoneError}
               style={styles.input}
               placeholderTextColor={screenColors.textMuted}
             />
@@ -166,9 +168,14 @@ function MembershipForm({
               labelColor={screenColors.text}
               prefix="+91"
               placeholder="00000 00000"
-              keyboardType="phone-pad"
+              keyboardType="number-pad"
+              maxLength={10}
               value={coHostPhone}
-              onChangeText={setCoHostPhone}
+              onChangeText={(v) => {
+                setCoHostPhone(cleanPhoneDigits(v));
+                if (coHostPhoneError) setCoHostPhoneError(undefined);
+              }}
+              error={coHostPhoneError}
               style={styles.input}
               placeholderTextColor={screenColors.textMuted}
             />

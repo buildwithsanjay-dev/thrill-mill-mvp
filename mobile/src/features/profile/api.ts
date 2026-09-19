@@ -63,3 +63,31 @@ export async function uploadAvatar(localUri: string): Promise<string> {
   const { data } = supabase.storage.from('avatars').getPublicUrl(path);
   return `${data.publicUrl}?t=${Date.now()}`;
 }
+
+// Pre-check used by onboarding so the user sees "already registered" inline
+// before anything is saved. The database's unique index is the real guard.
+export async function isPhoneAvailable(phoneE164: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('fn_is_phone_available', { p_phone: phoneE164 });
+  if (error) throw error;
+  return data === true;
+}
+
+// Clears the profile picture: removes the stored file (best-effort) and
+// nulls avatar_url so every screen falls back to the initials avatar.
+export async function removeAvatar(): Promise<void> {
+  const userId = await requireUserId();
+  const { data: files } = await supabase.storage.from('avatars').list(userId);
+  const paths = (files ?? []).map((f) => `${userId}/${f.name}`);
+  if (paths.length > 0) {
+    await supabase.storage.from('avatars').remove(paths);
+  }
+  const { error } = await supabase.from('profiles').update({ avatar_url: null }).eq('id', userId);
+  if (error) throw error;
+}
+
+// Self-service account deletion — see fn_delete_my_account. Throws
+// HOST_MUST_TRANSFER when the caller still hosts a live Team.
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.rpc('fn_delete_my_account');
+  if (error) throw error;
+}

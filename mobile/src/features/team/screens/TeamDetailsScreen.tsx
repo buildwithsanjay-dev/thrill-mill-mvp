@@ -133,6 +133,38 @@ export function TeamDetailsScreen() {
     router.push(`/(app)/team/${team.id}/chat`);
   };
 
+  const handleRemoveBanner = async () => {
+    setIsUploadingBanner(true);
+    try {
+      await setTeamBanner(team.id, null);
+      invalidate(team.id);
+      refetch();
+    } catch (error) {
+      showAlert('Could not remove the banner', friendlyError(error));
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  };
+
+  // Tapping an existing banner offers change OR remove; with no banner yet it
+  // goes straight to the picker.
+  const handleBannerPress = () => {
+    if (!team.banner_url) {
+      handleEditBanner();
+      return;
+    }
+    showAlert(
+      'Team banner',
+      'Change the banner photo, or remove it and go back to the plain placeholder.',
+      [
+        { text: 'Change banner', onPress: handleEditBanner },
+        { text: 'Remove banner', style: 'destructive', onPress: handleRemoveBanner },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+      { variant: 'info' }
+    );
+  };
+
   const handleEditBanner = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
@@ -178,7 +210,7 @@ export function TeamDetailsScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <Pressable
           style={styles.bannerWrap}
-          onPress={isHost ? handleEditBanner : undefined}
+          onPress={isHost ? handleBannerPress : undefined}
           disabled={!isHost || isUploadingBanner}
         >
           {team.banner_url ? (
@@ -311,6 +343,12 @@ export function TeamDetailsScreen() {
 
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Members</Text>
+          {isHostOrCoHost && (
+            <Pressable style={styles.addMembersChip} onPress={() => router.push(`/(app)/team/${team.id}/add-members`)}>
+              <Ionicons name="person-add-outline" size={14} color={colors.primary} />
+              <Text style={styles.addMembersLabel}>Add members</Text>
+            </Pressable>
+          )}
         </View>
         <View style={styles.membersGrid}>
           {activeMembers.map((m) => (
@@ -480,6 +518,17 @@ const styles = StyleSheet.create({
 
   sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  addMembersChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: radii.pill,
+    paddingVertical: 5,
+    paddingHorizontal: spacing.md,
+  },
+  addMembersLabel: { fontSize: 12, fontWeight: '800', color: colors.primary },
 
   upcomingCard: { backgroundColor: '#0C5C54', borderRadius: radii.lg, padding: spacing.lg },
   upcomingTitle: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.sm },

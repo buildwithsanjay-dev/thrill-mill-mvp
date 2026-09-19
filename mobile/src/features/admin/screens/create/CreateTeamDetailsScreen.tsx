@@ -11,7 +11,8 @@ import { colors, radii, spacing } from '@/constants/theme';
 import { useAdminTeamWizard } from '@/stores/adminTeamWizard';
 import { adminCreateTeam } from '../../api';
 import { useInvalidateAdminQueries } from '../../useAdmin';
-import { abandonTeamCreation, getTeamJoinCode } from '@/features/team/api';
+import { validateTeamName } from '@/lib/validation';
+import { abandonTeamCreation, getTeamJoinCode, isTeamNameAvailable } from '@/features/team/api';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
 
@@ -22,6 +23,7 @@ export function CreateTeamDetailsScreen() {
   const invalidateAdmin = useInvalidateAdminQueries();
   const { teamName, teamId: existingTeamId, setTeamName, setTeamId, setTeamJoinCode, reset } = useAdminTeamWizard();
   const [isCreating, setIsCreating] = useState(false);
+  const [nameError, setNameError] = useState<string | undefined>();
 
   const handleBack = () => {
     // See CreateTeamStepScreen.tsx's identical handleBack for why this only
@@ -35,10 +37,9 @@ export function CreateTeamDetailsScreen() {
   };
 
   const handleContinue = async () => {
-    if (!teamName.trim()) {
-      showAlert('Team name required', 'Give this Team a name to continue.');
-      return;
-    }
+    const problem = validateTeamName(teamName);
+    setNameError(problem);
+    if (problem) return;
     // Re-entering Step 1 (e.g. via the back button from Add Members)
     // already has a real, server-created Team from an earlier Continue in
     // this same wizard session — calling adminCreateTeam() again here would
@@ -52,7 +53,11 @@ export function CreateTeamDetailsScreen() {
     }
     setIsCreating(true);
     try {
-      const teamId = await adminCreateTeam(teamName.trim());
+      if (!(await isTeamNameAvailable(teamName.trim()))) {
+        setNameError('A team with this name already exists. Choose a different name.');
+        return;
+      }
+      const teamId = await adminCreateTeam(teamName.trim().replace(/\s+/g, ' '));
       setTeamId(teamId);
       getTeamJoinCode(teamId).then(setTeamJoinCode).catch(() => undefined);
       invalidateAdmin();
@@ -102,7 +107,17 @@ export function CreateTeamDetailsScreen() {
         <Text style={styles.imageOptional}>Optional</Text>
 
         <View style={{ marginTop: spacing.lg }}>
-          <TextField label="Team Name" placeholder="e.g. Weekend Warriors" value={teamName} onChangeText={setTeamName} />
+          <TextField
+            label="Team Name"
+            placeholder="e.g. Weekend Warriors"
+            value={teamName}
+            onChangeText={(v) => {
+              setTeamName(v);
+              if (nameError) setNameError(undefined);
+            }}
+            error={nameError}
+            maxLength={40}
+          />
           <Text style={styles.hint}>Choose a name that represents the team or community.</Text>
         </View>
 
