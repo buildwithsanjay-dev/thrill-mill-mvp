@@ -21,7 +21,15 @@ import { registerForPushNotificationsAsync } from '@/features/notifications/push
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import { REVIEW_URL } from '@/constants/links';
 import { cleanPhoneDigits, validateFullName, validatePhone } from '@/lib/validation';
-import { deleteMyAccount, isPhoneAvailable, removeAvatar, updateMyProfile, uploadAvatar, type Profile } from '../api';
+import {
+  deleteMyAccount,
+  isPhoneAvailable,
+  removeAvatar,
+  removeAvatarFiles,
+  updateMyProfile,
+  uploadAvatar,
+  type Profile,
+} from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -174,9 +182,13 @@ function ProfileForm({ profile }: { profile: Profile }) {
           onPress: async () => {
             setIsDeleting(true);
             try {
-              // Best-effort: the RPC anonymises the profile regardless.
-              await removeAvatar().catch(() => undefined);
+              // Ask the server first: if it refuses (e.g. you still host a live
+              // team) nothing has been touched. Only after it accepts do we
+              // clean up the stored photo (best-effort — the RPC already
+              // cleared avatar_url) and sign out.
+              const userId = session?.user.id;
               await deleteMyAccount();
+              if (userId) await removeAvatarFiles(userId).catch(() => undefined);
               await signOut().catch(() => undefined);
               router.replace('/(auth)/welcome');
               showAlert(

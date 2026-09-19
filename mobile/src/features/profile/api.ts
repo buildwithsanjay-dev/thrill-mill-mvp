@@ -72,15 +72,22 @@ export async function isPhoneAvailable(phoneE164: string): Promise<boolean> {
   return data === true;
 }
 
-// Clears the profile picture: removes the stored file (best-effort) and
-// nulls avatar_url so every screen falls back to the initials avatar.
-export async function removeAvatar(): Promise<void> {
-  const userId = await requireUserId();
+// Deletes the stored avatar file(s) for a user. Split out (and taking the id
+// explicitly) so account deletion can run it AFTER the server has accepted
+// the deletion, when the session may no longer answer getUser().
+export async function removeAvatarFiles(userId: string): Promise<void> {
   const { data: files } = await supabase.storage.from('avatars').list(userId);
   const paths = (files ?? []).map((f) => `${userId}/${f.name}`);
   if (paths.length > 0) {
     await supabase.storage.from('avatars').remove(paths);
   }
+}
+
+// Clears the profile picture: removes the stored file (best-effort) and
+// nulls avatar_url so every screen falls back to the initials avatar.
+export async function removeAvatar(): Promise<void> {
+  const userId = await requireUserId();
+  await removeAvatarFiles(userId).catch(() => undefined);
   const { error } = await supabase.from('profiles').update({ avatar_url: null }).eq('id', userId);
   if (error) throw error;
 }
