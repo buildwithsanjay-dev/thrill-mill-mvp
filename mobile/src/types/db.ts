@@ -211,10 +211,35 @@ export type ChatMessage = {
   id: string;
   room_id: string;
   sender_id: string;
-  preset_key: string;
+  // Exactly one of preset_key / body / poll_id is set (DB check constraint).
+  preset_key: string | null;
+  body: string | null;
+  poll_id: string | null;
   is_deleted: boolean;
   created_at: string;
   sender?: { full_name: string | null; avatar_url: string | null };
+};
+
+export type ChatPollOption = { id: string; label: string; sort_order: number };
+
+export type ChatPoll = {
+  id: string;
+  room_id: string;
+  created_by: string;
+  question: string;
+  closes_at: string | null;
+  created_at: string;
+  options: ChatPollOption[];
+};
+
+// One row per poll option from fn_chat_poll_results. voter_names is only
+// filled in for an Admin; everyone else gets counts + their own vote.
+export type ChatPollResult = {
+  poll_id: string;
+  option_id: string;
+  vote_count: number;
+  i_voted: boolean;
+  voter_names: string[] | null;
 };
 
 export type ChatMessageReaction = {

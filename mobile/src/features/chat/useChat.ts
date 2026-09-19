@@ -1,6 +1,15 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getChatRoom, getLastReadAt, getLatestMessageAt, getMessages, getPresetCatalog, getReactions } from './api';
+import {
+  getChatRoom,
+  getLastReadAt,
+  getLatestMessageAt,
+  getMessages,
+  getPolls,
+  getPollResults,
+  getPresetCatalog,
+  getReactions,
+} from './api';
 
 // Fixed reference data — long staleTime, same pattern as other
 // rarely-changing lookups in this app (cf. useDefaultTurf's 1h staleTime
@@ -40,10 +49,33 @@ export function useReactions(messageIds: string[]) {
   });
 }
 
+export function usePolls(pollIds: string[]) {
+  return useQuery({
+    queryKey: ['chat-polls', pollIds],
+    queryFn: () => getPolls(pollIds),
+    enabled: pollIds.length > 0,
+  });
+}
+
+// Live counts — polled like the rest of chat so a vote from another phone
+// shows up within a few seconds.
+export function usePollResults(pollIds: string[]) {
+  return useQuery({
+    queryKey: ['chat-poll-results', pollIds],
+    queryFn: () => getPollResults(pollIds),
+    enabled: pollIds.length > 0,
+    refetchInterval: 5_000,
+  });
+}
+
 export function useInvalidateChatQueries() {
   const queryClient = useQueryClient();
-  return (opts: { roomId?: string; messageIds?: string[]; readMarker?: { roomId: string; userId: string } }) => {
+  return (opts: { roomId?: string; messageIds?: string[]; polls?: boolean; readMarker?: { roomId: string; userId: string } }) => {
     if (opts.roomId) queryClient.invalidateQueries({ queryKey: ['chat-messages', opts.roomId] });
+    if (opts.polls) {
+      queryClient.invalidateQueries({ queryKey: ['chat-polls'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-poll-results'] });
+    }
     if (opts.messageIds) queryClient.invalidateQueries({ queryKey: ['chat-reactions', opts.messageIds] });
     // The dashboard's red dot reads this same key — without invalidating
     // it here, the global 30s default staleTime means returning to the

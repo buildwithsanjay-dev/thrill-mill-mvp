@@ -1,5 +1,13 @@
 import { supabase } from '@/lib/supabase';
-import type { ChatMessage, ChatMessageReaction, ChatPreset, ChatReactionEmoji, ChatRoom } from '@/types/db';
+import type {
+  ChatMessage,
+  ChatMessageReaction,
+  ChatPoll,
+  ChatPollResult,
+  ChatPreset,
+  ChatReactionEmoji,
+  ChatRoom,
+} from '@/types/db';
 
 // Fixed reference data (17 rows, never changes at runtime) — a plain
 // select, not something worth a Realtime subscription or aggressive
@@ -30,10 +38,10 @@ export async function getMessages(roomId: string): Promise<ChatMessage[]> {
   return (data ?? []) as unknown as ChatMessage[];
 }
 
-// Plain RLS-gated insert (no RPC) — the preset_key foreign key is the
-// actual boundary against freeform/violating content, per
-// docs/superpowers/specs/2026-09-11-team-chat-design.md. RLS already
-// requires sender_id = auth.uid() and Team membership.
+// Plain RLS-gated insert (no RPC). RLS requires sender_id = auth.uid() and
+// Team membership. Quick-reply presets still go through preset_key; typed
+// messages use sendTextMessage below (free text was added at the owner's
+// request, reversing the original preset-only design).
 export async function sendMessage(roomId: string, senderId: string, presetKey: string): Promise<void> {
   const { error } = await supabase
     .from('chat_messages')
@@ -92,5 +100,63 @@ export async function markRoomRead(roomId: string, userId: string): Promise<void
   const { error } = await supabase
     .from('chat_room_reads')
     .upsert({ room_id: roomId, user_id: userId, last_read_at: new Date().toISOString() }, { onConflict: 'room_id,user_id' });
+  if (error) throw error;
+}
+
+export async function sendTextMessage(roomId: string, senderId: string, body: string): Promise<void> {
+  const { error } = await supabase
+    .from('chat_messages')
+    .insert({ room_id: roomId, sender_id: senderId, body: body.trim() });
+  if (error) throw error;
+}
+
+// Soft delete only (is_deleted) — RLS lets the sender, the Team's Host/
+// Co-host, or an Admin do this.
+export async function deleteMessage(messageId: string): Promise<void> {
+  const { error } = await supabase.from('chat_messages').update({ is_deleted: true }).eq('id', messageId);
+  if (error) throw error;
+}
+
+export async function getPolls(pollIds: string[]): Promise<ChatPoll[]> {
+  if (pollIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from('chat_polls')
+    .select('*, options:chat_poll_options(id, label, sort_order)')
+    .in('id', pollIds);
+  if (error) throw error;
+  return ((data ?? []) as unknown as ChatPoll[]).map((p) => ({
+    ...p,
+    options: [...p.options].sort((a, b) => a.sort_order - b.sort_order),
+  }));
+}
+
+export async function getPollResults(pollIds: string[]): Promise<ChatPollResult[]> {
+  if (pollIds.length === 0) return [];
+  const { data, error } = await supabase.rpc('fn_chat_poll_results', { p_poll_ids: pollIds });
+  if (error) throw error;
+  return ((data ?? []) as ChatPollResult[]).map((r) => ({ ...r, vote_count: Number(r.vote_count) }));
+}
+
+// Host/Co-host only (server-enforced). closesAt is an ISO string or null.
+export async function createPoll(params: {
+  roomId: string;
+  question: string;
+  options: string[];
+  closesAt: string | null;
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('fn_create_chat_poll', {
+    p_room_id: params.roomId,
+    p_question: params.question,
+    p_options: params.options,
+    p_closes_at: params.closesAt,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
+// One vote per member per poll; voting again changes the vote until the
+// poll closes.
+export async function votePoll(pollId: string, optionId: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_vote_chat_poll', { p_poll_id: pollId, p_option_id: optionId });
   if (error) throw error;
 }
