@@ -16,6 +16,7 @@ import { useActiveTeamStore } from '@/stores/activeTeam';
 import { addDaysIso, formatBookingDate, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
 import { confirmMultiSlotBooking, createSlotHold, releaseSlotHold } from '../api';
 import { mapBookingError } from '../errors';
+import { whySlotNotBookable, whyTeamCannotHold } from '../reasons';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
@@ -236,7 +237,7 @@ export function BookTurfScreen() {
       <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
           <AppHeader>
-            <Text style={styles.title}>Book Turf</Text>
+            <Text style={styles.title}>Book a Slot</Text>
           </AppHeader>
         </View>
         <EmptyState
@@ -281,7 +282,19 @@ export function BookTurfScreen() {
       return;
     }
 
-    if (slot.status !== 'AVAILABLE' || isSlotInPast(selectedDate, slot.start_time)) return;
+    // Say WHY instead of silently ignoring the tap: the slot may be past,
+    // taken, or blocked; or the team itself may not be allowed to hold yet
+    // (not Host/Co-host, membership still under review, archived).
+    const slotReason = whySlotNotBookable(slot, selectedDate, isSlotInPast(selectedDate, slot.start_time));
+    if (slotReason) {
+      showAlert(slotReason.title, slotReason.message, undefined, { variant: 'info' });
+      return;
+    }
+    const teamReason = whyTeamCannotHold(activeTeam);
+    if (teamReason) {
+      showAlert(teamReason.title, teamReason.message, undefined, { variant: 'warning' });
+      return;
+    }
     setMutatingSlotId(slot.id);
     try {
       const result = await createSlotHold(slot.id, activeTeam.team.id);
@@ -293,13 +306,7 @@ export function BookTurfScreen() {
         })
       );
     } catch (error) {
-      const msg =
-        error instanceof Error && error.message.includes('SLOT_UNAVAILABLE')
-          ? 'That slot was just taken. Pick another.'
-          : error instanceof Error
-            ? error.message
-            : 'Please try again.';
-      showAlert('Could not hold slot', msg);
+      showAlert('Could not hold this slot', mapBookingError(error));
     } finally {
       setMutatingSlotId(null);
     }
@@ -366,7 +373,7 @@ export function BookTurfScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <AppHeader>
-          <Text style={styles.title}>Book Turf</Text>
+          <Text style={styles.title}>Book a Slot</Text>
         </AppHeader>
       </View>
 
@@ -465,7 +472,7 @@ export function BookTurfScreen() {
                     isSelected && styles.slotChipSelected,
                     isDisabled && styles.slotChipDisabled,
                   ]}
-                  disabled={isDisabled || mutatingSlotId === slot.id}
+                  disabled={mutatingSlotId === slot.id}
                   onPress={() => handleToggleSlot(slot)}
                 >
                   {mutatingSlotId === slot.id ? (

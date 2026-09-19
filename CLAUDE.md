@@ -87,6 +87,22 @@ underlying engine/rules as a Host/Co-host would.
   count = per-member usage insight. The Team wallet is not split or debited per member.
 - Historical financial/booking/audit records are never silently overwritten — use soft states
   (`CANCELLED`, `REMOVED`, `ARCHIVED`) and correction events, not deletion or in-place edits.
+- **Team names are unique** (case-insensitive, among non-archived Teams) and **phone numbers are
+  unique and validated** (`+91` + 10 digits starting 6–9), enforced by DB unique indexes; the client
+  pre-checks for inline errors (`fn_is_team_name_available`, `fn_is_phone_available`).
+- **Team chat** is a normal typed chat (free text, 1000 chars) with the old preset messages kept as
+  quick replies (reversed from "preset-only" on 2026-09-19 at the owner's request). A **Host/Co-host**
+  can post single-choice **polls** into the chat (`fn_create_chat_poll`); members vote once and may
+  change it until the poll closes; everyone sees live counts, only an Admin sees who voted for what.
+- **Account deletion** is self-service (Profile → Delete account, `fn_delete_my_account`): the profile
+  is anonymised and sign-in revoked, never hard-deleted, so wallet/booking/audit history is kept. A
+  Host of a live Team must hand the Team over first (`HOST_MUST_TRANSFER`).
+- **Every failure shown to a user states the real reason in plain language** (e.g. membership still
+  under review, only Host/Co-host can book, slot already passed) via `lib/errors.ts` and
+  `features/booking/reasons.ts` — never a generic "could not …" or raw DB text. The app uses one
+  custom dialog (`components/AppDialog.tsx`, `showAlert`) instead of the system `Alert`.
+- **One colour theme app-wide** (light, brand teal `#0C5C54`); no screen may introduce a second
+  (e.g. dark navy) surface theme.
 
 ## Technology Stack
 

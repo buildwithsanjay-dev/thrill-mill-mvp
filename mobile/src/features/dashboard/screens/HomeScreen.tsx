@@ -12,6 +12,7 @@ import { colors, radii, spacing } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
 import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
 import { useAuth } from '@/features/auth/AuthProvider';
+import { LogoBadge } from '@/features/auth/components/LogoBadge';
 import { useHasUnreadChat } from '@/features/chat/useChat';
 import type { MyTeamSummary } from '@/features/team/api';
 import { PendingInvites } from '@/features/team/components/PendingInvites';
@@ -56,6 +57,11 @@ export function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.brandRow}>
+          <LogoBadge size={30} />
+          <Text style={styles.brandText}>Thrill Mill Club</Text>
+        </View>
+
         <AppHeader>
           <Text style={styles.greetingLabel}>{greeting().toUpperCase()},</Text>
           <Text style={styles.greetingName}>{profile?.full_name?.split(' ')[0] ?? 'there'} 👋</Text>
@@ -219,7 +225,7 @@ function DashboardContent({
         <Text style={styles.creditsValue}>{Math.round(wallet?.available_credits ?? 0).toLocaleString()}</Text>
         <View style={{ height: spacing.md }} />
         <Button
-          title="Book Turf"
+          title="Book a Slot"
           iconLeft="football"
           onPress={() => router.push('/(app)/(tabs)/book')}
         />
@@ -240,7 +246,7 @@ function DashboardContent({
           onPress={() => router.push(`/(app)/booking/${upcomingBooking.id}`)}
         >
           <Badge label="CONFIRMED" tone="active" />
-          <Text style={styles.bookingTitle}>Turf Booking</Text>
+          <Text style={styles.bookingTitle}>Slot Booking</Text>
           <Text style={styles.bookingMeta}>
             {formatBookingDate(upcomingBooking.booking_date)} • {formatSlotTime(upcomingBooking.start_time)}
             {' – '}
@@ -249,12 +255,12 @@ function DashboardContent({
         </Pressable>
       ) : (
         <View style={styles.noBookingCard}>
-          <Text style={styles.noBookingText}>No upcoming games. Book a Turf to get started.</Text>
+          <Text style={styles.noBookingText}>No upcoming games. Book a slot to get started.</Text>
         </View>
       )}
 
       <View style={styles.quickGrid}>
-        <QuickAction icon="add-circle" label="Book Turf" onPress={() => router.push('/(app)/(tabs)/book')} />
+        <QuickAction icon="add-circle" label="Book a Slot" onPress={() => router.push('/(app)/(tabs)/book')} />
         <QuickAction icon="git-network" label="Team" onPress={() => router.push(`/(app)/team/${team.id}`)} />
         <QuickAction
           icon="time"
@@ -425,6 +431,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F7F8FA' },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
+  brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
   greetingLabel: { fontSize: 11, fontWeight: '600', color: colors.textMuted, letterSpacing: 0.5 },
   greetingName: { fontSize: 18, fontWeight: '800', color: colors.text },
 

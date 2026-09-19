@@ -24,7 +24,7 @@ const ENTRY_META: Record<
 
 const ENTRY_TITLE: Record<WalletLedgerEntry['entry_type'], string> = {
   MEMBERSHIP_CREDIT: 'Membership Activated',
-  BOOKING_CONSUME: 'Turf Booking',
+  BOOKING_CONSUME: 'Slot Booking',
   BOOKING_REFUND: 'Booking Cancelled',
   ADMIN_ADJUSTMENT: 'Admin Adjustment',
 };

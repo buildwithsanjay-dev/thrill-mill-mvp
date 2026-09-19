@@ -19,7 +19,9 @@ import type { LeaderboardPeriod } from '@/features/leaderboard/api';
 import { useMyCreditUsageLog } from '@/features/leaderboard/useLeaderboard';
 import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
-import { updateMyProfile, uploadAvatar, type Profile } from '../api';
+import { REVIEW_URL } from '@/constants/links';
+import { cleanPhoneDigits, validateFullName, validatePhone } from '@/lib/validation';
+import { deleteMyAccount, isPhoneAvailable, removeAvatar, updateMyProfile, uploadAvatar, type Profile } from '../api';
 import { profileQueryKey, useProfile } from '../useProfile';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -48,6 +50,10 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const [pickedImageUri, setPickedImageUri] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [phoneError, setPhoneError] = useState<string | undefined>();
+  const [isRemovingPhoto, setIsRemovingPhoto] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const avatarPreviewUri = pickedImageUri ?? profile.avatar_url ?? undefined;
   const isDirty =
@@ -82,31 +88,111 @@ function ProfileForm({ profile }: { profile: Profile }) {
   };
 
   const handleSave = async () => {
-    if (!fullName.trim()) {
-      showAlert('Name required', 'Please enter your full name.');
-      return;
-    }
+    const nameProblem = validateFullName(fullName);
+    const phoneProblem = validatePhone(phone);
+    setNameError(nameProblem);
+    setPhoneError(phoneProblem);
+    if (nameProblem || phoneProblem) return;
+
+    const e164 = `+91${cleanPhoneDigits(phone)}`;
     setIsSaving(true);
     try {
+      if (e164 !== profile.phone && !(await isPhoneAvailable(e164))) {
+        setPhoneError('This mobile number is already registered with another account.');
+        return;
+      }
       let avatarUrl = profile.avatar_url ?? undefined;
       if (pickedImageUri) {
         avatarUrl = await uploadAvatar(pickedImageUri);
       }
       await updateMyProfile({
-        full_name: fullName.trim(),
-        phone: phone.trim() ? `+91${phone.trim()}` : undefined,
+        full_name: fullName.trim().replace(/\s+/g, ' '),
+        phone: e164,
         avatar_url: avatarUrl,
       });
       if (session?.user.id) {
         await queryClient.invalidateQueries({ queryKey: profileQueryKey(session.user.id) });
       }
       setPickedImageUri(null);
-      showAlert('Saved', 'Your profile has been updated.');
+      showAlert('Profile saved', 'Your details have been updated.');
     } catch (error) {
-      showAlert('Could not save', friendlyError(error));
+      showAlert('Could not save your profile', friendlyError(error));
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleRemovePhoto = () => {
+    // A photo picked but not yet saved is just discarded locally.
+    if (pickedImageUri) {
+      setPickedImageUri(null);
+      return;
+    }
+    showAlert(
+      'Remove your profile picture?',
+      'Your initials will be shown instead. You can add a new photo any time.',
+      [
+        { text: 'Keep photo', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: async () => {
+            setIsRemovingPhoto(true);
+            try {
+              await removeAvatar();
+              if (session?.user.id) {
+                await queryClient.invalidateQueries({ queryKey: profileQueryKey(session.user.id) });
+              }
+            } catch (error) {
+              showAlert('Could not remove the photo', friendlyError(error));
+            } finally {
+              setIsRemovingPhoto(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleRateUs = async () => {
+    try {
+      await Linking.openURL(REVIEW_URL);
+    } catch {
+      showAlert('Could not open the review page', 'Check your internet connection and try again.');
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    showAlert(
+      'Delete your account?',
+      'This signs you out everywhere and removes your name, phone number, photo and chat messages. Your team keeps its bookings and wallet history, shown under "Deleted user". This cannot be undone.',
+      [
+        { text: 'Keep my account', style: 'cancel' },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              // Best-effort: the RPC anonymises the profile regardless.
+              await removeAvatar().catch(() => undefined);
+              await deleteMyAccount();
+              await signOut().catch(() => undefined);
+              router.replace('/(auth)/welcome');
+              showAlert(
+                'Account deleted',
+                'Your Thrill Mill Club account has been deleted. Thank you for playing with us.',
+                undefined,
+                { variant: 'success' }
+              );
+            } catch (error) {
+              showAlert('Could not delete your account', friendlyError(error));
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleSignOut = () => {
@@ -153,6 +239,16 @@ function ProfileForm({ profile }: { profile: Profile }) {
           </View>
         </Pressable>
 
+        {avatarPreviewUri && (
+          <Pressable onPress={handleRemovePhoto} disabled={isRemovingPhoto} style={styles.removePhoto}>
+            {isRemovingPhoto ? (
+              <ActivityIndicator size="small" color={colors.danger} />
+            ) : (
+              <Text style={styles.removePhotoText}>Remove photo</Text>
+            )}
+          </Pressable>
+        )}
+
         {profile.platform_role === 'ADMIN' && (
           <View style={styles.adminBadgeWrap}>
             <Badge label="ADMIN" tone="host" />
@@ -160,15 +256,30 @@ function ProfileForm({ profile }: { profile: Profile }) {
         )}
 
         <View style={styles.form}>
-          <TextField label="Full Name" placeholder="Your name" value={fullName} onChangeText={setFullName} />
+          <TextField
+            label="Full Name"
+            placeholder="Your name"
+            value={fullName}
+            autoCapitalize="words"
+            onChangeText={(v) => {
+              setFullName(v);
+              if (nameError) setNameError(undefined);
+            }}
+            error={nameError}
+          />
           <View style={{ height: spacing.md }} />
           <TextField
             label="Mobile Number"
             prefix="+91"
             placeholder="00000 00000"
-            keyboardType="phone-pad"
+            keyboardType="number-pad"
+            maxLength={10}
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(v) => {
+              setPhone(cleanPhoneDigits(v));
+              if (phoneError) setPhoneError(undefined);
+            }}
+            error={phoneError}
           />
         </View>
 
@@ -195,6 +306,14 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
         <View style={styles.divider} />
 
+        <Pressable style={styles.settingsRow} onPress={handleRateUs}>
+          <Ionicons name="star-outline" size={20} color={colors.text} />
+          <Text style={styles.settingsRowText}>Rate us on Google</Text>
+          <Ionicons name="open-outline" size={16} color={colors.textMuted} />
+        </Pressable>
+
+        <View style={styles.divider} />
+
         <Pressable style={styles.signOutRow} onPress={handleSignOut} disabled={isSigningOut}>
           {isSigningOut ? (
             <ActivityIndicator size="small" color={colors.danger} />
@@ -205,6 +324,21 @@ function ProfileForm({ profile }: { profile: Profile }) {
             </>
           )}
         </Pressable>
+
+        {/* An Admin is a platform operator account, not a member account, so
+            self-service deletion is not offered (the server refuses it too). */}
+        {profile.platform_role !== 'ADMIN' && (
+          <Pressable style={styles.deleteRow} onPress={handleDeleteAccount} disabled={isDeleting}>
+            {isDeleting ? (
+              <ActivityIndicator size="small" color={colors.danger} />
+            ) : (
+              <>
+                <Ionicons name="trash-outline" size={18} color={colors.danger} />
+                <Text style={styles.deleteText}>Delete account</Text>
+              </>
+            )}
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -332,6 +466,17 @@ function CreditUsageSection() {
 const AVATAR_SIZE = 96;
 
 const styles = StyleSheet.create({
+  removePhoto: { alignSelf: 'center', marginTop: spacing.sm, padding: spacing.xs },
+  removePhotoText: { fontSize: 13, fontWeight: '700', color: colors.danger },
+  deleteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    marginTop: spacing.sm,
+  },
+  deleteText: { fontSize: 13, fontWeight: '700', color: colors.danger },
   container: { flex: 1, backgroundColor: colors.background },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
   header: {

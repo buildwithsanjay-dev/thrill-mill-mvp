@@ -13,6 +13,7 @@ import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '@/f
 import { useTeamDetails, useTeamMembers } from '@/features/team/useTeams';
 import { useAdminBookingDraft } from '@/stores/adminBookingDraft';
 import { addDaysIso, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
+import { whySlotNotBookable } from '@/features/booking/reasons';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
@@ -199,7 +200,11 @@ export function SelectSlotScreen() {
       return;
     }
 
-    if (slot.status !== 'AVAILABLE' || isSlotInPast(selectedDate, slot.start_time)) return;
+    const slotReason = whySlotNotBookable(slot, selectedDate, isSlotInPast(selectedDate, slot.start_time));
+    if (slotReason) {
+      showAlert(slotReason.title, slotReason.message, undefined, { variant: 'info' });
+      return;
+    }
     setPendingSlotIds((prev) => ({ ...prev, [slot.id]: true }));
     try {
       const result = await createSlotHold(slot.id, teamId);
@@ -208,7 +213,7 @@ export function SelectSlotScreen() {
         [slot.id]: { holdId: result.hold_id, expiresAt: new Date(result.expires_at).getTime() },
       }));
     } catch (error) {
-      showAlert('Could not hold slot', friendlyError(error));
+      showAlert('Could not hold this slot', friendlyError(error));
     } finally {
       setPendingSlotIds((prev) => {
         const next = { ...prev };
@@ -367,7 +372,6 @@ export function SelectSlotScreen() {
                 <Pressable
                   key={slot.id}
                   style={[styles.slotChip, isSelected && styles.slotChipSelected, isDisabled && !isSelected && styles.slotChipDisabled]}
-                  disabled={isDisabled}
                   onPress={() => handleToggleSlot(slot)}
                 >
                   {isPending ? (

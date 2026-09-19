@@ -288,7 +288,7 @@ export function TeamDetailsScreen() {
         </Pressable>
 
         <View style={styles.bookTurfWrap}>
-          <Button title="Book Turf" iconLeft="football" onPress={handleBookTurf} />
+          <Button title="Book a Slot" iconLeft="football" onPress={handleBookTurf} />
         </View>
         <View style={styles.bookTurfWrap}>
           <Button title="Team Chat" iconLeft="chatbubbles-outline" variant="outline" onPress={handleOpenChat} />
@@ -305,7 +305,7 @@ export function TeamDetailsScreen() {
             <Text style={styles.sectionTitle}>Upcoming Game</Text>
             <Pressable style={styles.upcomingCard} onPress={() => router.push(`/(app)/booking/${upcoming.id}`)}>
               <Badge label="CONFIRMED" tone="active" />
-              <Text style={styles.upcomingTitle}>{upcoming.turf?.name ?? 'Turf Booking'}</Text>
+              <Text style={styles.upcomingTitle}>{upcoming.turf?.name ?? 'Slot Booking'}</Text>
               <Text style={styles.upcomingMeta}>
                 {formatBookingDate(upcoming.booking_date)} • {formatSlotTime(upcoming.start_time)}–
                 {formatSlotTime(upcoming.end_time)}
