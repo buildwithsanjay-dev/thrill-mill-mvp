@@ -38,8 +38,8 @@ const RULES: [RegExp, string][] = [
   [/MEMBERSHIP_INACTIVE/, "This team's membership isn't active yet. Bookings open once the club Admin verifies your payment and loads your credits."],
 
   // Teams / people
-  [/TEAM_NAME_TAKEN/, 'A team with this name already exists. Please choose a different team name.'],
-  [/PHONE_TAKEN|profiles_phone_unique|profiles_phone_key/i, 'This mobile number is already registered with another account. Use a different number or sign in with that account.'],
+  [/TEAM_NAME_TAKEN|uq_teams_name_active/, 'A team with this name already exists. Please choose a different team name.'],
+  [/PHONE_TAKEN|uq_profiles_phone/i, 'This mobile number is already registered with another account. Use a different number or sign in with that account.'],
   [/INVALID_PHONE/, 'Enter a valid 10-digit Indian mobile number (it should start with 6, 7, 8 or 9).'],
   [/INVALID_TEAM_NAME/, 'Enter a team name (at least 3 characters).'],
   [/TEAM_FULL/, 'This team already has the maximum of 10 members.'],
