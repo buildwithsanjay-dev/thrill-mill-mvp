@@ -234,6 +234,10 @@ decided.
   declined, team invite, team poll, and for Admins: new membership request, new slot booking,
   booking cancelled by a team. Most are DB triggers (`20260920120000_complete_notification_set.sql`),
   so they fire regardless of which RPC caused the event. Admin-bound ones carry `audience: 'ADMIN'`.
+  **An Admin's session can READ every user's notifications (RLS), so the client must always filter
+  `user_id = me`** (`getMyNotifications`). A push token belongs to one profile at a time (DB trigger;
+  cleared on sign-out); every push carries `recipient_id` + `notification_id`, and a push for another
+  account is ignored. Notification taps route by role — an Admin never lands on customer screens.
 - **Push provider decision:** Expo Push Service (not direct Firebase Admin SDK integration).
   Client registers an Expo push token (via `expo-notifications`) and stores it on the user's
   `profiles` row; the backend sends to Expo's push endpoint, which relays to FCM (Android) /

@@ -1,5 +1,6 @@
 import { Redirect, Stack } from 'expo-router';
 
+import { colors } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 
 // Guards the whole (app) group: if the session disappears (sign-out, token
@@ -14,7 +15,7 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="team/create" />

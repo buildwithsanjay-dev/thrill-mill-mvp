@@ -17,6 +17,8 @@ export default function TabsLayout() {
       backBehavior="history"
       screenOptions={{
         headerShown: false,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarBadgeStyle: { backgroundColor: colors.danger },

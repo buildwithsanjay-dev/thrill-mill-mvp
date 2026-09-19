@@ -17,18 +17,13 @@ import type { MyTeamSummary } from '@/features/team/api';
 import { PendingInvites } from '@/features/team/components/PendingInvites';
 import { useProfile } from '@/features/profile/useProfile';
 import { useMyTeams } from '@/features/team/useTeams';
+import { useGreeting } from '@/utils/greeting';
 import { useWalletLedger } from '@/features/wallet/useWallet';
 import { useActiveTeamStore } from '@/stores/activeTeam';
 import { formatSlotTime, formatBookingDate } from '@/utils/datetime';
 
-function greeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good Morning';
-  if (hour < 17) return 'Good Afternoon';
-  return 'Good Evening';
-}
-
 export function HomeScreen() {
+  const greeting = useGreeting();
   const { data: profile } = useProfile();
   const { data: teams, isPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
@@ -58,7 +53,7 @@ export function HomeScreen() {
       <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
         <ScreenIntro>
-          <Text style={styles.greetingLabel}>{greeting().toUpperCase()},</Text>
+          <Text style={styles.greetingLabel}>{greeting.toUpperCase()},</Text>
           <Text style={styles.greetingName}>{profile?.full_name?.split(' ')[0] ?? 'there'} 👋</Text>
         </ScreenIntro>
 
@@ -429,8 +424,8 @@ const styles = themedStyles(() => ({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
-  greetingLabel: { fontSize: 11, fontWeight: '600', color: colors.textMuted, letterSpacing: 0.5 },
-  greetingName: { fontSize: 18, fontWeight: '800', color: colors.text },
+  greetingLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.8 },
+  greetingName: { fontSize: 28, fontWeight: '800', color: colors.text, marginTop: 2 },
 
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },

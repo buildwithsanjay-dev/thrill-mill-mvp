@@ -9,6 +9,8 @@ export default function AdminTabsLayout() {
       backBehavior="history"
       screenOptions={{
         headerShown: false,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        sceneStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
       }}

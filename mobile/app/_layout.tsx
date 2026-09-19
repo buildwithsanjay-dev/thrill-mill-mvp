@@ -10,7 +10,8 @@ import { AppThemeProvider, ThemedTree, useAppearance } from '../src/components/T
 import { ExitOnDoubleBack } from '../src/components/ExitOnDoubleBack';
 import { queryClient, registerQueryClientFocusManager } from '../src/lib/queryClient';
 import { AuthProvider } from '../src/features/auth/AuthProvider';
-import { resolveNotificationRoute, type NotificationData } from '../src/features/notifications/api';
+import { handlePushTap, type NotificationData } from '../src/features/notifications/api';
+import { colors } from '../src/constants/theme';
 
 // Handles a tap on the actual OS push notification (as opposed to tapping
 // its in-app equivalent in the Notifications list, handled separately in
@@ -30,8 +31,9 @@ function useNotificationTapNavigation() {
       if (!response) return;
       const data = response.notification.request.content.data as NotificationData;
       Notifications.clearLastNotificationResponseAsync();
-      const route = resolveNotificationRoute(data);
-      if (route) router.push(route);
+      handlePushTap(data).then((route) => {
+        if (route) router.push(route as never);
+      });
     });
 
     // A push arrived while the app is open: refresh the bell list/red dot now.
@@ -41,8 +43,9 @@ function useNotificationTapNavigation() {
 
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
       const data = response.notification.request.content.data as NotificationData;
-      const route = resolveNotificationRoute(data);
-      if (route) router.push(route);
+      handlePushTap(data).then((route) => {
+        if (route) router.push(route as never);
+      });
     });
     return () => {
       subscription.remove();
@@ -57,6 +60,13 @@ function useNotificationTapNavigation() {
 function ThemedStatusBar() {
   const { scheme } = useAppearance();
   return <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />;
+}
+
+// Rendered inside ThemedTree so it is rebuilt (and re-reads the palette) when
+// the theme flips; the screen background must follow the theme too, otherwise
+// the navigator's default white shows through in dark mode.
+function ThemedStack() {
+  return <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }} />;
 }
 
 export default function RootLayout() {
@@ -78,7 +88,7 @@ export default function RootLayout() {
             <ThemedTree>
               <ThemedStatusBar />
               <ExitOnDoubleBack />
-              <Stack screenOptions={{ headerShown: false }} />
+              <ThemedStack />
               <DialogHost />
             </ThemedTree>
           </QueryClientProvider>

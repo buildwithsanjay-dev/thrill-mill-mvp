@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
+import { useGreeting } from '@/utils/greeting';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
@@ -35,6 +36,7 @@ function formatCredits(value: number) {
 }
 
 export function AdminHomeScreen() {
+  const greeting = useGreeting();
   const router = useRouter();
   const [rangePreset, setRangePreset] = useState<RangePreset>('month');
   const { data: stats, isPending: statsPending } = useDashboardStats();
@@ -52,7 +54,7 @@ export function AdminHomeScreen() {
       <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
         <ScreenIntro>
-          <Text style={styles.greetingLabel}>GOOD EVENING 👋</Text>
+          <Text style={styles.greetingLabel}>{greeting.toUpperCase()} 👋</Text>
           <Text style={styles.greetingName}>Admin</Text>
         </ScreenIntro>
         <Text style={styles.tagline}>Here&apos;s what&apos;s happening today.</Text>
@@ -384,8 +386,8 @@ function QuickAction({
 const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
-  greetingLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.4 },
-  greetingName: { fontSize: 18, fontWeight: '800', color: colors.text },
+  greetingLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.8 },
+  greetingName: { fontSize: 28, fontWeight: '800', color: colors.text, marginTop: 2 },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: -spacing.sm, marginBottom: spacing.md },
 
   statsRow: { flexDirection: 'row', gap: spacing.md },

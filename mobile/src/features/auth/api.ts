@@ -147,6 +147,19 @@ export async function signInWithUsername(username: string, password: string): Pr
 }
 
 export async function signOut(): Promise<void> {
+  // A push token belongs to the DEVICE. Release it before signing out so this
+  // phone stops receiving the account's notifications — otherwise the next
+  // person (or another of your own accounts) who signs in here keeps getting
+  // them. Best-effort: never blocks signing out.
+  try {
+    const { data } = await supabase.auth.getSession();
+    const userId = data.session?.user.id;
+    if (userId) {
+      await supabase.from('profiles').update({ expo_push_token: null }).eq('id', userId);
+    }
+  } catch {
+    // ignore
+  }
   // `scope: 'local'` clears the on-device session immediately without
   // waiting on a network round-trip to revoke the refresh token
   // server-side. The default 'global' scope throws (and leaves the app

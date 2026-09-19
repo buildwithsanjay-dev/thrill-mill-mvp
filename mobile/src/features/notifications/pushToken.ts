@@ -9,12 +9,19 @@ import { supabase } from '@/lib/supabase';
 // matching what a user expects from a push notification rather than it
 // silently arriving with no visible effect.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    // A push addressed to a different account (one that used to be signed in on
+    // this phone) must not pop up for whoever is signed in now.
+    const data = notification.request.content.data as { recipient_id?: string } | null;
+    const { data: sessionData } = await supabase.auth.getSession();
+    const forSomeoneElse = !!data?.recipient_id && data.recipient_id !== sessionData.session?.user.id;
+    return {
+      shouldShowBanner: !forSomeoneElse,
+      shouldShowList: !forSomeoneElse,
+      shouldPlaySound: !forSomeoneElse,
+      shouldSetBadge: false,
+    };
+  },
 });
 
 // Discriminated outcome instead of throwing — every caller can react to

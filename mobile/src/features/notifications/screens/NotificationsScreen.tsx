@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
+import { useProfile } from '@/features/profile/useProfile';
 import { resolveNotificationRoute } from '../api';
 import { useMarkNotificationRead, useMyNotifications } from '../useNotifications';
 
@@ -41,6 +42,7 @@ function typeStyle(type: string): { icon: keyof typeof Ionicons.glyphMap; tint: 
 export function NotificationsScreen() {
   const router = useRouter();
   const { data: notifications, isPending } = useMyNotifications();
+  const { data: profile } = useProfile();
   const markRead = useMarkNotificationRead();
 
   return (
@@ -69,7 +71,7 @@ export function NotificationsScreen() {
               style={[styles.card, !n.read_at && styles.cardUnread]}
               onPress={() => {
                 if (!n.read_at) markRead(n.id);
-                const route = resolveNotificationRoute(n.data);
+                const route = resolveNotificationRoute(n.data, profile?.platform_role === 'ADMIN');
                 if (route) router.push(route);
               }}
             >
