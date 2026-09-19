@@ -20,11 +20,15 @@ export function TeamCreatedSuccessScreen() {
 
   const leaveWizard = (target: 'home' | 'team') => {
     const id = teamId;
-    router.dismissAll();
+    // Go home FIRST (dismissTo pops the whole wizard stack back to the tabs)
+    // and only clear the wizard's data afterwards. Clearing it immediately
+    // made the still-mounted Create Team / Add Members screens see "no team"
+    // and bounce back to Step 1 — the loop that was reported.
+    router.dismissTo('/(app)/(tabs)');
     if (target === 'team' && id) {
       router.push(`/(app)/team/${id}`);
     }
-    reset();
+    setTimeout(reset, 800);
   };
 
   useEffect(() => {

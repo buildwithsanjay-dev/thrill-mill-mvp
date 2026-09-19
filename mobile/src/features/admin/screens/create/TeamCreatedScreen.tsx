@@ -40,9 +40,11 @@ export function TeamCreatedScreen() {
   // the earlier wizard screens underneath, so pressing Back landed on a
   // screen whose teamId guard had just fired — a blank white screen.
   const leaveWizard = (target?: string) => {
-    router.dismissAll();
+    router.dismissTo('/(admin)/(tabs)');
     if (target) router.push(target as never);
-    reset();
+    // Clear the draft only after the wizard screens are gone (see the member
+    // TeamCreatedSuccessScreen for why order matters).
+    setTimeout(reset, 800);
   };
   const goToActivate = () => leaveWizard(`/(admin)/team/${teamId}/activate`);
   const goToDetails = () => leaveWizard(`/(admin)/team/${teamId}`);

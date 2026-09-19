@@ -33,7 +33,8 @@ export function CreateTeamDetailsScreen() {
       abandonTeamCreation(existingTeamId).catch(() => undefined);
     }
     reset();
-    router.back();
+    if (router.canGoBack()) router.back();
+    else router.replace('/(admin)/(tabs)');
   };
 
   const handleContinue = async () => {

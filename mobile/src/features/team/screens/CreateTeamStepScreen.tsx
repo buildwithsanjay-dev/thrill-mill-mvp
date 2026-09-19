@@ -73,7 +73,8 @@ export function CreateTeamStepScreen() {
       abandonTeamCreation(existingTeamId).catch(() => undefined);
     }
     reset();
-    router.back();
+    if (router.canGoBack()) router.back();
+    else router.replace('/(app)/(tabs)');
   };
 
   return (
