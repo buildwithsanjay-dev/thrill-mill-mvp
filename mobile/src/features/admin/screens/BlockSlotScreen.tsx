@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -8,7 +9,7 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useTurfResources, useTurfSlots } from '@/features/booking/useBooking';
-import { addDaysIso, formatDayLabel, formatSlotTime, todayIso } from '@/utils/datetime';
+import { addDaysIso, formatDayLabel, formatSlotTime, isSlotInPast, todayIso } from '@/utils/datetime';
 import { adminBlockSlot, adminUnblockSlot } from '../api';
 import type { TurfSlot } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
@@ -18,6 +19,7 @@ const DATE_WINDOW = 14;
 
 export function BlockSlotScreen() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: turfResources } = useTurfResources();
   const [selectedSport, setSelectedSport] = useState<'TURF' | 'PICKLEBALL'>('TURF');
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
@@ -45,6 +47,11 @@ export function BlockSlotScreen() {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Every screen that lists slots (Book, Admin booking, this one) reads the same
+  // ['turf-slots', ...] queries — refresh them all so a block / unblock shows up
+  // everywhere on this device at once (other phones pick it up on their 15s poll).
+  const refreshAllSlots = () => queryClient.invalidateQueries({ queryKey: ['turf-slots'] });
+
   const dateOptions = Array.from({ length: DATE_WINDOW }, (_, i) => addDaysIso(todayIso(), i));
 
   const handleBlock = async () => {
@@ -58,9 +65,16 @@ export function BlockSlotScreen() {
       setSelectedSlot(null);
       setReason('');
       refetch();
+      refreshAllSlots();
       showAlert('Slot blocked', 'This slot is no longer bookable.');
     } catch (error) {
-      showAlert('Could not block slot', friendlyError(error));
+      const message = error instanceof Error ? error.message : String((error as { message?: string })?.message ?? error);
+      showAlert(
+        'Could not block slot',
+        message.includes('SLOT_IN_PAST')
+          ? 'This slot has already started or finished, so it cannot be blocked.'
+          : friendlyError(error)
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -75,6 +89,7 @@ export function BlockSlotScreen() {
           try {
             await adminUnblockSlot(slot.id);
             refetch();
+            refreshAllSlots();
           } catch (error) {
             showAlert('Could not unblock slot', friendlyError(error));
           }
@@ -169,8 +184,20 @@ export function BlockSlotScreen() {
           <View style={styles.slotGrid}>
             {(slots ?? []).map((slot) => {
               const isSelected = selectedSlot?.id === slot.id;
-              const isBlocked = slot.status === 'BLOCKED';
-              const isDisabled = slot.status !== 'AVAILABLE' && !isBlocked;
+              const isPast = isSlotInPast(selectedDate, slot.start_time);
+              const isBlocked = slot.status === 'BLOCKED' && !isPast;
+              // Same rule as the Book screens: a slot that has started is passed and
+              // can't be acted on; booked / held slots can't be blocked either.
+              const isDisabled = !isBlocked && (isPast || slot.status !== 'AVAILABLE');
+              const statusLabel = isSelected
+                ? 'Selected'
+                : isPast
+                  ? 'Passed'
+                  : isBlocked
+                    ? 'Blocked · tap to unblock'
+                    : slot.status === 'AVAILABLE'
+                      ? 'Available'
+                      : 'Booked';
               return (
                 <Pressable
                   key={slot.id}
@@ -193,7 +220,16 @@ export function BlockSlotScreen() {
                   >
                     {formatSlotTime(slot.start_time)}
                   </Text>
-                  {isBlocked && <Text style={styles.slotSubText}>Blocked · tap to unblock</Text>}
+                  <Text
+                    style={[
+                      styles.slotSubText,
+                      isBlocked && styles.slotSubTextBlocked,
+                      isSelected && styles.slotSubTextSelected,
+                      isDisabled && styles.slotSubTextDisabled,
+                    ]}
+                  >
+                    {statusLabel}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -253,12 +289,15 @@ const styles = themedStyles(() => ({
   slotChip: { width: '31%', paddingVertical: spacing.md, borderRadius: radii.md, borderWidth: 1, borderColor: colors.border, alignItems: 'center', backgroundColor: colors.surface },
   slotChipSelected: { backgroundColor: colors.danger, borderColor: colors.danger },
   slotChipBlocked: { backgroundColor: colors.dangerSoft, borderColor: colors.dangerBorder },
-  slotChipDisabled: { backgroundColor: colors.surfaceAlt, borderColor: colors.surfaceAlt },
-  slotText: { fontSize: 13, fontWeight: '700', color: colors.text },
+  slotChipDisabled: { backgroundColor: 'transparent', borderColor: colors.border, borderStyle: 'dashed', opacity: 0.8 },
+  slotText: { fontSize: 13, fontWeight: '800', color: colors.primary },
   slotTextSelected: { color: '#FFFFFF' },
   slotTextBlocked: { color: colors.danger },
-  slotTextDisabled: { color: colors.textMuted },
-  slotSubText: { fontSize: 9, color: colors.danger, marginTop: 2 },
+  slotTextDisabled: { color: colors.textFaint, fontWeight: '600', textDecorationLine: 'line-through' },
+  slotSubText: { fontSize: 10, color: colors.textMuted, marginTop: 2, textAlign: 'center' },
+  slotSubTextBlocked: { color: colors.danger },
+  slotSubTextSelected: { color: colors.white },
+  slotSubTextDisabled: { color: colors.textFaint },
 
   reasonCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.xl, borderWidth: 1, borderColor: colors.border },
   reasonTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginBottom: spacing.md },
