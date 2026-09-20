@@ -17,7 +17,9 @@ export default function AdminLayout() {
     return <Redirect href="/(auth)/welcome" />;
   }
 
-  if (authLoading || profileLoading) {
+  // No profile yet (still loading, or a momentary fetch failure) is NOT proof the
+  // user isn't an Admin — wait rather than bouncing an Admin into the customer app.
+  if (authLoading || profileLoading || !profile) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator color={colors.primary} />
@@ -25,13 +27,14 @@ export default function AdminLayout() {
     );
   }
 
-  if (profile?.platform_role !== 'ADMIN') {
+  if (profile.platform_role !== 'ADMIN') {
     return <Redirect href="/(app)" />;
   }
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="notifications" />
       <Stack.Screen name="team/create" />
       <Stack.Screen name="team/create-members" />
       <Stack.Screen name="team/create-roles" />

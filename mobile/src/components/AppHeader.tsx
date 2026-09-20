@@ -18,6 +18,10 @@ export function AppHeader() {
   const router = useRouter();
   const { data: profile } = useProfile();
   const hasUnread = useHasUnreadNotifications();
+  // This bar is shared by the customer and Admin shells. The bell and avatar
+  // must stay inside the caller's own shell — an Admin sent to a customer route
+  // lands on the customer dashboard (treated as a brand-new member).
+  const isAdmin = profile?.platform_role === 'ADMIN';
 
   return (
     <View style={styles.bar}>
@@ -26,11 +30,18 @@ export function AppHeader() {
         <Text style={styles.brandText}>Thrill Mill Club</Text>
       </View>
       <View style={styles.actions}>
-        <Pressable onPress={() => router.push('/(app)/notifications')} hitSlop={8} style={styles.iconButton}>
+        <Pressable
+          onPress={() => router.push(isAdmin ? '/(admin)/notifications' : '/(app)/notifications')}
+          hitSlop={8}
+          style={styles.iconButton}
+        >
           <Ionicons name="notifications-outline" size={22} color={colors.text} />
           {hasUnread && <View style={styles.notificationDot} />}
         </Pressable>
-        <Pressable onPress={() => router.push('/(app)/(tabs)/profile')} hitSlop={8}>
+        <Pressable
+          onPress={() => router.push(isAdmin ? '/(admin)/(tabs)/profile' : '/(app)/(tabs)/profile')}
+          hitSlop={8}
+        >
           <Avatar uri={profile?.avatar_url} name={profile?.full_name} size={34} />
         </Pressable>
       </View>

@@ -1,5 +1,5 @@
 import { createContext, Fragment, useContext, useEffect, useState, type PropsWithChildren } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { Appearance, useColorScheme, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { palettes, setActiveScheme, type Scheme } from '@/constants/theme';
@@ -53,6 +53,14 @@ export function AppThemeProvider({ children }: PropsWithChildren) {
   // Must happen before any child renders, so styles built this pass use the
   // right palette. Idempotent, so it is safe to repeat on every render.
   setActiveScheme(scheme);
+
+  // Tell Android itself which mode the app is in. Without this the OS keeps
+  // treating the app as "dark" whenever the phone is dark, so choosing Light in
+  // the app could still be repainted dark (forced/algorithmic dark mode on some
+  // phones). "system" hands control back to the phone's own setting ('unspecified').
+  useEffect(() => {
+    Appearance.setColorScheme(preference === 'system' ? 'unspecified' : preference);
+  }, [preference]);
 
   useEffect(() => {
     systemUI?.setBackgroundColorAsync(palettes[scheme].background).catch(() => undefined);
