@@ -320,8 +320,6 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
         <NotificationPermissionRow />
 
-        <View style={styles.divider} />
-
         <AppearanceRow />
 
         <View style={styles.divider} />
@@ -402,11 +400,15 @@ function NotificationPermissionRow() {
   if (state === 'checking' || state === 'granted') return null;
 
   return (
-    <Pressable style={styles.settingsRow} onPress={handlePress}>
-      <Ionicons name="notifications-outline" size={20} color={colors.text} />
-      <Text style={styles.settingsRowText}>Booking alerts are off</Text>
-      <Text style={styles.settingsRowAction}>{state === 'denied-permanent' ? 'Open Settings' : 'Turn on'}</Text>
-    </Pressable>
+    <>
+      <Pressable style={styles.settingsRow} onPress={handlePress}>
+        <Ionicons name="notifications-outline" size={20} color={colors.text} />
+        <Text style={styles.settingsRowText}>Booking alerts are off</Text>
+        <Text style={styles.settingsRowAction}>{state === 'denied-permanent' ? 'Open Settings' : 'Turn on'}</Text>
+      </Pressable>
+      {/* Its own divider, so hiding the row leaves no empty gap behind. */}
+      <View style={styles.divider} />
+    </>
   );
 }
 
