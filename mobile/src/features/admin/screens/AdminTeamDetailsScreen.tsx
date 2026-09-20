@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { ScrollBox } from '@/components/ScrollBox';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { mapBookingError } from '@/features/booking/errors';
@@ -244,7 +245,7 @@ export function AdminTeamDetailsScreen() {
             </Text>
           </View>
         ) : (
-          <View style={styles.card}>
+          <ScrollBox maxHeight={340}>
             {(teamLogs ?? []).map((log, idx) => (
               <View key={log.id} style={[styles.logRow, idx > 0 && styles.bookingRowDivider]}>
                 <View style={styles.logTopRow}>
@@ -262,7 +263,7 @@ export function AdminTeamDetailsScreen() {
                 {!!log.reason && <Text style={styles.logReason}>{log.reason}</Text>}
               </View>
             ))}
-          </View>
+          </ScrollBox>
         )}
 
         <Text style={styles.sectionTitle}>Danger Zone</Text>
@@ -421,7 +422,7 @@ const styles = themedStyles(() => ({
     borderColor: colors.dangerBorder,
     marginBottom: spacing.md,
   },
-  dangerBody: { fontSize: 12, color: '#7F1D1D', lineHeight: 17 },
+  dangerBody: { fontSize: 12, color: colors.danger, lineHeight: 17 },
 
   bookingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.sm },
   bookingRowDivider: { borderTopWidth: 1, borderTopColor: colors.border },

@@ -427,7 +427,7 @@ const styles = themedStyles(() => ({
     padding: spacing.md,
     marginTop: spacing.lg,
   },
-  policyText: { flex: 1, fontSize: 12, color: '#991B1B', lineHeight: 17 },
+  policyText: { flex: 1, fontSize: 12, color: colors.danger, lineHeight: 17 },
 
   footer: {
     flexDirection: 'row',

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
+import { ScrollBox } from '@/components/ScrollBox';
 import { useGreeting } from '@/utils/greeting';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
@@ -73,7 +74,7 @@ export function AdminHomeScreen() {
               />
               <StatCard
                 icon="person-add"
-                iconBg="#FFF1E6"
+                iconBg={colors.accentSoft}
                 label="ACTION REQ"
                 value={stats?.pendingRequests ?? 0}
                 caption="Pending Requests"
@@ -195,7 +196,7 @@ export function AdminHomeScreen() {
             <Text style={styles.seeAll}>View All Logs</Text>
           </Pressable>
         </View>
-        <View style={styles.activityCard}>
+        <ScrollBox maxHeight={340}>
           {(auditLog ?? []).length === 0 ? (
             <Text style={styles.emptyText}>No admin activity yet.</Text>
           ) : (
@@ -216,7 +217,7 @@ export function AdminHomeScreen() {
               </View>
             ))
           )}
-        </View>
+        </ScrollBox>
       </ScrollView>
     </SafeAreaView>
   );

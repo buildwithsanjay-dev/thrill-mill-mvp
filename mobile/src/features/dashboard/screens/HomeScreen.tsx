@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { ScrollBox } from '@/components/ScrollBox';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
@@ -275,7 +276,8 @@ function DashboardContent({
       {recentActivity.length === 0 ? (
         <Text style={styles.noBookingText}>No wallet activity yet.</Text>
       ) : (
-        recentActivity.map((entry) => (
+        <ScrollBox variant="plain" maxHeight={300}>
+          {recentActivity.map((entry) => (
           <View key={entry.id} style={styles.activityRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.activityReason}>{entry.reason ?? entry.entry_type.replaceAll('_', ' ')}</Text>
@@ -288,7 +290,8 @@ function DashboardContent({
               {Math.round(entry.amount)}
             </Text>
           </View>
-        ))
+          ))}
+        </ScrollBox>
       )}
     </View>
   );

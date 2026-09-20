@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
+import { ScrollBox } from '@/components/ScrollBox';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAdminAuditLogFeed, useAdminTeamLeaderboard } from '../useAdmin';
@@ -147,15 +148,15 @@ export function AdminLeaderboardScreen() {
             <Text style={styles.sectionTitle}>Admin Logs</Text>
             <Text style={styles.sectionSubtitle}>Every sensitive Admin action, with actor and target</Text>
           </View>
-          <Pressable
-            style={[styles.exportButton, visibleLogs.length === 0 && styles.exportButtonDisabled]}
-            onPress={handleExport}
-            disabled={visibleLogs.length === 0}
-          >
-            <Ionicons name="share-outline" size={16} color={colors.white} />
-            <Text style={styles.exportButtonText}>Export CSV</Text>
-          </Pressable>
         </View>
+        <Pressable
+          style={[styles.exportButton, visibleLogs.length === 0 && styles.exportButtonDisabled]}
+          onPress={handleExport}
+          disabled={visibleLogs.length === 0}
+        >
+          <Ionicons name="share-outline" size={18} color={colors.primary} />
+          <Text style={styles.exportButtonText}>Export CSV</Text>
+        </Pressable>
 
         <Text style={styles.filterLabel}>Action</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
@@ -196,7 +197,7 @@ export function AdminLeaderboardScreen() {
         ) : visibleLogs.length === 0 ? (
           <EmptyState icon="document-text-outline" title="No matching activity" message="Try a different filter." />
         ) : (
-          <View style={styles.logsCard}>
+          <ScrollBox maxHeight={440}>
             {visibleLogs.map((log) => (
               <View key={log.id} style={styles.logRow}>
                 <View style={styles.logTopRow}>
@@ -222,7 +223,7 @@ export function AdminLeaderboardScreen() {
                 {!!log.reason && <Text style={styles.logReason}>{log.reason}</Text>}
               </View>
             ))}
-          </View>
+          </ScrollBox>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -277,14 +278,18 @@ const styles = themedStyles(() => ({
   exportButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    gap: spacing.sm,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    backgroundColor: 'transparent',
+    paddingVertical: 11,
     borderRadius: radii.pill,
+    marginTop: spacing.xs,
   },
   exportButtonDisabled: { opacity: 0.4 },
-  exportButtonText: { fontSize: 12, fontWeight: '700', color: colors.white },
+  exportButtonText: { fontSize: 14, fontWeight: '700', color: colors.primary },
 
   logsCard: { backgroundColor: colors.surface, borderRadius: radii.lg, borderWidth: 1, borderColor: colors.border, padding: spacing.lg },
   logRow: { paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border },

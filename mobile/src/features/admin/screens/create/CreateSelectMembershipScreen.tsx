@@ -156,8 +156,8 @@ const styles = themedStyles(() => ({
 
   planCard: { backgroundColor: colors.surface, borderRadius: radii.lg, padding: spacing.lg, marginTop: spacing.lg, borderWidth: 1.5, borderColor: colors.border, overflow: 'hidden' },
   planCardSelected: { borderColor: colors.primary, backgroundColor: colors.primarySoft },
-  premiumBadge: { position: 'absolute', top: 0, right: 0, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: '#78350F', paddingHorizontal: spacing.sm, paddingVertical: 4, borderBottomLeftRadius: radii.sm },
-  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: colors.warningSoft },
+  premiumBadge: { position: 'absolute', top: 0, right: 0, flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.accentDark, paddingHorizontal: spacing.sm, paddingVertical: 4, borderBottomLeftRadius: radii.sm },
+  premiumBadgeText: { fontSize: 9, fontWeight: '800', color: '#FFFFFF' },
   planTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   tagChip: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.primarySoft, paddingHorizontal: spacing.sm, paddingVertical: 4, borderRadius: radii.pill },
   tagChipText: { fontSize: 9, fontWeight: '800', color: colors.primary },
