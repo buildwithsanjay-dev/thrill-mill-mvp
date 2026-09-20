@@ -94,6 +94,11 @@ export function AdminHomeScreen() {
           </>
         )}
 
+        {/* The Admin's most-used action: kept right under the day's stat boxes, always visible. */}
+        <View style={styles.blockSlotButton}>
+          <Button title="Block Turf Slot" iconLeft="ban" variant="accent" onPress={() => router.push('/(admin)/block-slot')} />
+        </View>
+
         <View style={styles.sectionHeaderRow2}>
           <Text style={styles.sectionTitle2}>Revenue Analytics</Text>
           <View style={styles.rangeChipRow}>
@@ -187,7 +192,6 @@ export function AdminHomeScreen() {
             onPress={() => router.push('/(admin)/(tabs)/teams')}
           />
           <QuickAction icon="calendar" label="Bookings Overview" onPress={() => router.push('/(admin)/(tabs)/bookings')} />
-          <QuickAction icon="ban" label="Block Turf Slot" onPress={() => router.push('/(admin)/block-slot')} />
         </View>
 
         <View style={styles.sectionHeaderRow2}>
@@ -479,6 +483,7 @@ const styles = themedStyles(() => ({
   wideStatIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.infoSoft, alignItems: 'center', justifyContent: 'center' },
   wideStatValue: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: spacing.sm },
   wideStatCaption: { fontSize: 12, color: colors.textMuted },
+  blockSlotButton: { marginTop: spacing.md },
 
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionHeaderRow2: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xl, marginBottom: spacing.sm },
