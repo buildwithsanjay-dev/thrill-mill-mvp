@@ -404,8 +404,8 @@ function NotificationPermissionRow() {
   return (
     <Pressable style={styles.settingsRow} onPress={handlePress}>
       <Ionicons name="notifications-outline" size={20} color={colors.text} />
-      <Text style={styles.settingsRowText}>Push Notifications</Text>
-      <Text style={styles.settingsRowAction}>{state === 'denied-permanent' ? 'Open Settings' : 'Enable'}</Text>
+      <Text style={styles.settingsRowText}>Booking alerts are off</Text>
+      <Text style={styles.settingsRowAction}>{state === 'denied-permanent' ? 'Open Settings' : 'Turn on'}</Text>
     </Pressable>
   );
 }
