@@ -13,8 +13,6 @@ import { registerForPushNotificationsAsync } from '@/features/notifications/push
 import { GradientButton } from '../components/GradientButton';
 import { showAlert } from '@/components/AppDialog';
 
-type GrantState = 'unknown' | 'granted' | 'not-granted';
-
 // First stop after Sign In for anyone not yet onboarded (see app/index.tsx's
 // redirect gate) — primes both permissions the app actually uses (push
 // notifications; photo library for avatars/Team banners) with a plain-
@@ -26,8 +24,6 @@ type GrantState = 'unknown' | 'granted' | 'not-granted';
 // quietly does without, same as before this screen existed.
 export function PermissionsScreen() {
   const router = useRouter();
-  const [notificationsGranted, setNotificationsGranted] = useState<GrantState>('unknown');
-  const [photosGranted, setPhotosGranted] = useState<GrantState>('unknown');
   const [isRequesting, setIsRequesting] = useState(false);
   const [isCheckingInitial, setIsCheckingInitial] = useState(true);
 
@@ -46,8 +42,6 @@ export function PermissionsScreen() {
 
       const notifGranted = notifStatus.status === 'granted';
       const photoGranted = photoStatus.granted;
-      setNotificationsGranted(notifGranted ? 'granted' : 'not-granted');
-      setPhotosGranted(photoGranted ? 'granted' : 'not-granted');
 
       // Both already settled (a returning user re-entering this step, or a
       // device that already granted everything) — nothing to prime, skip
@@ -80,11 +74,7 @@ export function PermissionsScreen() {
         // same as every other outcome here.
         showAlert('Notifications could not be set up', 'You can try again later from your Profile.');
       }
-      const notifStatus = await Notifications.getPermissionsAsync();
-      setNotificationsGranted(notifStatus.status === 'granted' ? 'granted' : 'not-granted');
-
-      const photoResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      setPhotosGranted(photoResult.granted ? 'granted' : 'not-granted');
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     } finally {
       setIsRequesting(false);
       goToProfileSetup();
@@ -113,13 +103,11 @@ export function PermissionsScreen() {
               icon="notifications-outline"
               title="Notifications"
               reason="Know the moment your booking is confirmed or your Team's membership is approved."
-              state={notificationsGranted}
             />
             <PermissionCard
               icon="image-outline"
               title="Photos"
               reason="Set a profile picture and upload your Team's banner photo."
-              state={photosGranted}
             />
           </View>
         </FadeSlideIn>
@@ -145,12 +133,10 @@ function PermissionCard({
   icon,
   title,
   reason,
-  state,
 }: {
   icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string;
   reason: string;
-  state: GrantState;
 }) {
   return (
     <View style={styles.card}>
@@ -160,12 +146,6 @@ function PermissionCard({
       <View style={styles.cardTextWrap}>
         <View style={styles.cardTitleRow}>
           <Text style={styles.cardTitle}>{title}</Text>
-          {state === 'granted' && (
-            <View style={styles.grantedPill}>
-              <Ionicons name="checkmark" size={12} color={colors.white} />
-              <Text style={styles.grantedPillText}>Enabled</Text>
-            </View>
-          )}
         </View>
         <Text style={styles.cardReason}>{reason}</Text>
       </View>
@@ -217,16 +197,6 @@ const styles = themedStyles(() => ({
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   cardTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
   cardReason: { fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 17 },
-  grantedPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-  },
-  grantedPillText: { fontSize: 10, fontWeight: '700', color: colors.white },
   footer: { gap: spacing.md, alignItems: 'center', paddingBottom: spacing.lg },
   skipLink: { fontSize: 13, fontWeight: '600', color: colors.textMuted, textDecorationLine: 'underline' },
 }));

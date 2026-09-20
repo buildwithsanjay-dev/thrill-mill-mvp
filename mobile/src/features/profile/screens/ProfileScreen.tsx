@@ -396,26 +396,16 @@ function NotificationPermissionRow() {
     }
   };
 
-  if (state === 'checking') return null;
+  // Notifications are meant to simply be on, so nothing is shown while they are
+  // (no "Enabled" badge). The row only appears when they are OFF, as the way back
+  // for someone who declined the phone's permission prompt.
+  if (state === 'checking' || state === 'granted') return null;
 
   return (
-    <Pressable
-      style={styles.settingsRow}
-      onPress={state === 'granted' ? undefined : handlePress}
-      disabled={state === 'granted'}
-    >
+    <Pressable style={styles.settingsRow} onPress={handlePress}>
       <Ionicons name="notifications-outline" size={20} color={colors.text} />
       <Text style={styles.settingsRowText}>Push Notifications</Text>
-      {state === 'granted' ? (
-        <View style={styles.grantedPill}>
-          <Ionicons name="checkmark" size={12} color={colors.white} />
-          <Text style={styles.grantedPillText}>Enabled</Text>
-        </View>
-      ) : (
-        <Text style={styles.settingsRowAction}>
-          {state === 'denied-permanent' ? 'Open Settings' : 'Enable'}
-        </Text>
-      )}
+      <Text style={styles.settingsRowAction}>{state === 'denied-permanent' ? 'Open Settings' : 'Enable'}</Text>
     </Pressable>
   );
 }
@@ -591,16 +581,6 @@ const styles = themedStyles(() => ({
   settingsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, width: '100%' },
   settingsRowText: { flex: 1, fontSize: 15, fontWeight: '600', color: colors.text },
   settingsRowAction: { fontSize: 13, fontWeight: '700', color: colors.primary },
-  grantedPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
-  },
-  grantedPillText: { fontSize: 10, fontWeight: '700', color: colors.white },
 
   usageSection: { width: '100%' },
   usageBox: {
