@@ -293,6 +293,15 @@ export async function assignCoHost(teamId: string, userId: string): Promise<void
   if (error) throw error;
 }
 
+// Hands the Host role to another active member in one atomic step — the
+// self-service path fn_delete_my_account's HOST_MUST_TRANSFER error refers
+// to. The caller (current Host) becomes a plain Member; nothing about the
+// Team's wallet/bookings/history changes.
+export async function transferHost(teamId: string, newHostUserId: string): Promise<void> {
+  const { error } = await supabase.rpc('fn_transfer_host', { p_team_id: teamId, p_new_host_user_id: newHostUserId });
+  if (error) throw error;
+}
+
 export async function removeTeamMember(teamMemberId: string): Promise<void> {
   const { error } = await supabase.rpc('fn_remove_team_member', { p_team_member_id: teamMemberId });
   if (error) throw error;

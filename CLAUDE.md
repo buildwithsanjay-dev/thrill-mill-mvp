@@ -96,9 +96,13 @@ underlying engine/rules as a Host/Co-host would.
   change it until the poll closes; everyone sees live counts, only an Admin sees who voted for what.
 - **Account deletion** is self-service (Profile → Delete account, `fn_delete_my_account`): the profile
   is anonymised and sign-in revoked, never hard-deleted, so wallet/booking/audit history is kept. A
-  Host of a live Team must hand the Team over first (`HOST_MUST_TRANSFER`). Admins can delete their own
-  account too: it is audited, demotes the account to MEMBER immediately, and is blocked for the last
-  remaining Admin (`LAST_ADMIN`).
+  Host of a live Team must hand the Team over first (`HOST_MUST_TRANSFER`) — self-service via
+  `fn_transfer_host` (Team → member → "Make Host"), which hands Host to any other active member in one
+  atomic step and demotes the caller to Member; it does not touch the Team's wallet/bookings/history.
+  Before this existed the only way to clear `HOST_MUST_TRANSFER` was an Admin archiving the whole Team,
+  which stranded every other member and the Team's credits just so one person could leave — avoid
+  reintroducing that as the only path. Admins can delete their own account too: it is audited, demotes
+  the account to MEMBER immediately, and is blocked for the last remaining Admin (`LAST_ADMIN`).
 - **Every failure shown to a user states the real reason in plain language** (e.g. membership still
   under review, only Host/Co-host can book, slot already passed) via `lib/errors.ts` and
   `features/booking/reasons.ts` — never a generic "could not …" or raw DB text. The app uses one

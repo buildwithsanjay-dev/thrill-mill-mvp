@@ -14,7 +14,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamBookings } from '@/features/booking/useBooking';
 import { useActiveTeamStore } from '@/stores/activeTeam';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
-import { assignCoHost, removeTeamMember, respondToJoinRequest, setTeamBanner, uploadTeamBanner } from '../api';
+import { assignCoHost, removeTeamMember, respondToJoinRequest, setTeamBanner, transferHost, uploadTeamBanner } from '../api';
 import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '../useTeams';
 import type { TeamMember, TeamRole } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
@@ -86,9 +86,40 @@ export function TeamDetailsScreen() {
     }
   };
 
+  // Hands the Host role to `member` and demotes the current Host (me) to a
+  // plain Member — a bigger deal than "Make Co-Host", so it gets its own
+  // explicit confirmation naming what changes for ME before it fires. This is
+  // the self-service path fn_delete_my_account's HOST_MUST_TRANSFER error
+  // refers to: an Admin no longer has to archive the whole Team just because
+  // its Host wants to leave.
+  const handleTransferHost = (member: TeamMember) => {
+    showAlert(
+      `Make ${member.profile?.full_name ?? 'this member'} the Host?`,
+      "You'll become a regular Member of this team. This can be undone later by whoever is Host, but it takes effect immediately.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Make Host',
+          onPress: async () => {
+            try {
+              await transferHost(team.id, member.user_id);
+              invalidate(team.id);
+              refetch();
+            } catch (error) {
+              showAlert('Failed', friendlyError(error));
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleMemberAction = (member: TeamMember) => {
     if (!isHostOrCoHost || member.team_role === 'HOST') return;
     const options: { text: string; onPress?: () => void; style?: 'destructive' | 'cancel' }[] = [];
+    if (myMembership?.team_role === 'HOST') {
+      options.push({ text: 'Make Host', onPress: () => handleTransferHost(member) });
+    }
     if (member.team_role !== 'CO_HOST' && myMembership?.team_role === 'HOST') {
       options.push({
         text: 'Make Co-Host',

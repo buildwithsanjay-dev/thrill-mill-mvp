@@ -44,6 +44,8 @@ const RULES: [RegExp, string][] = [
   [/INVALID_TEAM_NAME/, 'Enter a team name (at least 3 characters).'],
   [/TEAM_FULL/, 'This team already has the maximum of 10 members.'],
   [/MEMBER_ALREADY_ON_TEAM/, 'This person is already on the team or has a pending invite.'],
+  [/MEMBER_NOT_ACTIVE/, 'This person is not an active member of this team.'],
+  [/ALREADY_HOST/, 'This person is already the Host.'],
   [/MEMBERSHIP_ALREADY_ACTIVE/, 'This membership is already active, so it can no longer be flagged.'],
   [/TEAM_ALREADY_FINALIZED/, 'This team has already been submitted, so it can no longer be discarded.'],
   [/LAST_ADMIN/, "You're the only Admin left. Add or promote another Admin before deleting this account, otherwise nobody could run the club."],
