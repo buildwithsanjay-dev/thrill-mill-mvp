@@ -16,3 +16,16 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Marketing/design one-off outputs — not part of the app, never needed in an
+# EAS build upload. marketing/brag-video/ alone was ~161MB and, with no
+# .easignore present, EAS archives from the git root and follows .gitignore —
+# so this was silently riding along on every `eas build`, ballooning the
+# upload from ~94MB to 135MB+ and causing repeated ECONNRESET failures on a
+# transfer that large.
+/marketing/brag-video/
+/marketing/app-store-screenshots/public/screenshots/uploaded/
+/assets/app screens/
+/assets/thrill-mill-club-android-store bundle/
+/assets/thrill-mill-club-android-store bundle.zip
+/.agents/
