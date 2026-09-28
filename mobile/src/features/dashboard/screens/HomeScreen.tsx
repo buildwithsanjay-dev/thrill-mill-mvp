@@ -237,7 +237,10 @@ function DashboardContent({
           style={styles.bookingCard}
           onPress={() => router.push(`/(app)/booking/${upcomingBooking.id}`)}
         >
-          <Badge label="CONFIRMED" tone="active" />
+          <Badge
+            label={upcomingBooking.status === 'PENDING_REVIEW' ? 'PENDING APPROVAL' : 'CONFIRMED'}
+            tone={upcomingBooking.status === 'PENDING_REVIEW' ? 'pending' : 'active'}
+          />
           <Text style={styles.bookingTitle}>Slot Booking</Text>
           <Text style={styles.bookingMeta}>
             {formatBookingDate(upcomingBooking.booking_date)} • {formatSlotTime(upcomingBooking.start_time)}

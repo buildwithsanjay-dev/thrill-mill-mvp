@@ -57,7 +57,7 @@ export function AdminTeamDetailsScreen() {
   const isPendingActivation = membership && membership.status !== 'ACTIVE';
   const isArchived = team.status === 'ARCHIVED';
   const upcomingBooking = bookings?.find(
-    (b) => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS'
+    (b) => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS' || b.status === 'PENDING_REVIEW'
   );
 
   const goToUpcoming = () => {

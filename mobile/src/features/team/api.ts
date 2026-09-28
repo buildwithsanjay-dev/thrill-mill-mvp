@@ -3,7 +3,7 @@ import { decode } from 'base64-arraybuffer';
 
 import { supabase } from '@/lib/supabase';
 import { localDateIso, localTimeHms } from '@/features/booking/api';
-import type { MembershipRequestStatus, Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
+import type { BookingStatus, MembershipRequestStatus, Team, TeamMember, TeamMembership, TeamRole, TeamWallet } from '@/types/db';
 
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getUser();
@@ -21,6 +21,7 @@ export type MyTeamSummary = {
     booking_date: string;
     start_time: string;
     end_time: string;
+    status: BookingStatus;
   } | null;
   // Latest membership request's status, so the Teams list can flag a Team
   // whose membership isn't ACTIVE yet (still under Admin review, payment
@@ -94,9 +95,12 @@ export async function getMyTeams(): Promise<MyTeamSummary[]> {
               .eq('status', 'PENDING'),
             supabase
               .from('bookings')
-              .select('id, booking_date, start_time, end_time')
+              .select('id, booking_date, start_time, end_time, status')
               .eq('team_id', team.id)
-              .eq('status', 'CONFIRMED')
+              // A booking still awaiting Admin review is also something the
+              // Team has "coming up" — just not final yet (the client shows
+              // it labelled Pending, never Confirmed, from this same status).
+              .in('status', ['CONFIRMED', 'PENDING_REVIEW'])
               // Future date, OR today but not yet ended — a plain
               // `.gte('booking_date', todayIso)` alone would keep showing a
               // same-day session as "upcoming" all day even after it ended.

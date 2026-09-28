@@ -26,7 +26,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .eq('booking_date', today)
-      .in('status', ['CONFIRMED', 'IN_PROGRESS']),
+      // A booking still awaiting Admin review is still scheduled today.
+      .in('status', ['CONFIRMED', 'IN_PROGRESS', 'PENDING_REVIEW']),
   ]);
   return {
     activeTeams: activeTeams ?? 0,

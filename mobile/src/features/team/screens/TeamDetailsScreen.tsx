@@ -56,7 +56,9 @@ export function TeamDetailsScreen() {
   // fn_set_team_banner and the team-banners storage RLS both independently
   // enforce this server-side; hiding the affordance here is UX only.
   const isHost = myMembership?.team_role === 'HOST';
-  const upcoming = bookings?.find((b) => b.status === 'CONFIRMED');
+  // A booking still awaiting Admin review is also an upcoming game for this
+  // Team — just not final yet (the badge below reflects the real status).
+  const upcoming = bookings?.find((b) => b.status === 'CONFIRMED' || b.status === 'PENDING_REVIEW');
 
   // react-native's built-in Share sheet (SMS/WhatsApp/anything) needs no
   // extra native module — unlike expo-clipboard, this works on an
@@ -335,7 +337,10 @@ export function TeamDetailsScreen() {
           <>
             <Text style={styles.sectionTitle}>Upcoming Game</Text>
             <Pressable style={styles.upcomingCard} onPress={() => router.push(`/(app)/booking/${upcoming.id}`)}>
-              <Badge label="CONFIRMED" tone="active" />
+              <Badge
+                label={upcoming.status === 'PENDING_REVIEW' ? 'PENDING APPROVAL' : 'CONFIRMED'}
+                tone={upcoming.status === 'PENDING_REVIEW' ? 'pending' : 'active'}
+              />
               <Text style={styles.upcomingTitle}>{upcoming.turf?.name ?? 'Slot Booking'}</Text>
               <Text style={styles.upcomingMeta}>
                 {formatBookingDate(upcoming.booking_date)} • {formatSlotTime(upcoming.start_time)}–

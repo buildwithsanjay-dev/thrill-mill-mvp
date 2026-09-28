@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/Avatar';
@@ -20,6 +22,10 @@ import {
   useInvalidateBookingQueries,
 } from '../useBooking';
 import { showAlert } from '@/components/AppDialog';
+
+// Same real turf photo as the Book screen's hero card (BookTurfScreen.tsx) —
+// this was previously a plain colour block instead.
+const TURF_HERO = require('../../../../assets/turf-hero.webp');
 
 const STATUS_TONE = {
   CONFIRMED: 'active',
@@ -202,12 +208,15 @@ export function ManageBookingScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.heroCard}>
+          <Image source={TURF_HERO} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="center" />
+          {/* Dark fade under the text so it reads on the photo in light AND dark mode. */}
+          <LinearGradient colors={['rgba(5,12,28,0.05)', 'rgba(5,12,28,0.88)']} style={StyleSheet.absoluteFill} />
           <View style={styles.heroBadge}>
             <Badge label={STATUS_LABEL[booking.status] ?? booking.status} tone={STATUS_TONE[booking.status] ?? 'neutral'} />
           </View>
           <Text style={styles.heroTitle}>{booking.turf?.name ?? 'Football Turf'}</Text>
           <Text style={styles.heroLocation}>
-            <Ionicons name="location-outline" size={12} color={colors.textFaint} /> Thrill Mill Arena
+            <Ionicons name="location-outline" size={12} color="#FFFFFF" /> Thrill Mill Arena
           </Text>
         </View>
 
@@ -378,10 +387,17 @@ const styles = themedStyles(() => ({
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  heroCard: { height: 130, borderRadius: radii.lg, backgroundColor: colors.success, padding: spacing.lg, justifyContent: 'flex-end' },
+  heroCard: {
+    height: 130,
+    borderRadius: radii.lg,
+    overflow: 'hidden',
+    backgroundColor: colors.hero,
+    padding: spacing.lg,
+    justifyContent: 'flex-end',
+  },
   heroBadge: { position: 'absolute', top: spacing.md, right: spacing.md },
   heroTitle: { fontSize: 18, fontWeight: '800', color: '#FFFFFF' },
-  heroLocation: { fontSize: 12, color: colors.primaryBorder, marginTop: 4 },
+  heroLocation: { fontSize: 12, color: '#FFFFFF', marginTop: 4 },
 
   sectionTitle: { fontSize: 15, fontWeight: '800', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.xl },
