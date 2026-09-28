@@ -34,10 +34,26 @@ Register/Login → Create/Join Team → Add Members → Select Membership Plan
 → Confirm Membership Request → Admin Review → Admin Contacts Host/Co-host
 → Payment Collected & Verified Externally → Membership Approved
 → Credits Loaded to Team Wallet → Turf Availability → 1-Minute Hold
-→ Select Participants → Booking Confirmed (credits deducted atomically)
-→ Session Completes → Final Participants Locked → Usage Attribution
-→ Team/Member Analytics → Weekly Leaderboards
+→ Select Participants → Booking Submitted, Pending Admin Review (credits deducted atomically)
+→ Admin Cross-Checks External System (e.g. TurfTown) & Approves/Declines
+→ Booking Confirmed (or Declined + Refunded) → Session Completes
+→ Final Participants Locked → Usage Attribution → Team/Member Analytics
+→ Weekly Leaderboards
 ```
+
+A Host/Co-host's own booking (via `fn_confirm_multi_slot_booking`) lands as `PENDING_REVIEW`, not
+`CONFIRMED` — added 2026-09-28 at the owner's request, because the club also runs bookings through a
+separate external system (e.g. TurfTown) that this app has no visibility into, so a slot must be
+cross-checked there before it's genuinely confirmed. Credits are still deducted immediately (owner's
+explicit choice) and the slot is still locked from every other booking either way — only whether the
+booking is actually final, and whether the customer-facing "Booking Confirmed" push fires, waits on
+`fn_admin_review_booking` (Approve → `CONFIRMED`, sends that push; Decline → full refund regardless of
+timing, slot reopens, customer is told why). Admin can also withdraw/cancel a pending booking
+themselves via the existing `fn_cancel_booking` (also always a full refund while pending). **An Admin
+creating a booking directly is unaffected and stays immediately `CONFIRMED`** — see the immediately
+following paragraph; they're presumably the one who'd be cross-checking anyway, so gating their own
+booking behind their own approval would be pointless. Do not extend this pending step to Admin-created
+bookings without the same kind of explicit approval.
 
 Admin can also create Teams and bookings on behalf of customers, using the exact same
 underlying engine/rules as a Host/Co-host would.
@@ -242,8 +258,13 @@ decided.
   pushes, so the two can't diverge): membership approved / needs attention, booking confirmed /
   cancelled, added to a booking, game reminder (~2h, pg_cron every 5 min), join request approved /
   declined, team invite, team poll, and for Admins: new membership request, new slot booking,
-  booking cancelled by a team. Most are DB triggers (`20260920120000_complete_notification_set.sql`),
-  so they fire regardless of which RPC caused the event. Admin-bound ones carry `audience: 'ADMIN'`.
+  booking cancelled by a team, **booking needs review** (`BOOKING_PENDING_REVIEW`, a Host/Co-host's own
+  booking landing as `PENDING_REVIEW` — see Core User Flow above; taps route the Admin straight to
+  Bookings, not a booking-details page, via `data.open === 'bookings'`). For a `PENDING_REVIEW`
+  booking, `BOOKING_CONFIRMED` fires only once an Admin actually approves it
+  (`fn_admin_review_booking`), never at the moment of booking. Most are DB triggers
+  (`20260920120000_complete_notification_set.sql`), so they fire regardless of which RPC caused the
+  event. Admin-bound ones carry `audience: 'ADMIN'`.
   **An Admin's session can READ every user's notifications (RLS), so the client must always filter
   `user_id = me`** (`getMyNotifications`). A push token belongs to one profile at a time (DB trigger;
   cleared on sign-out); every push carries `recipient_id` + `notification_id`, and a push for another

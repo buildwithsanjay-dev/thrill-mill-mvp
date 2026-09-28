@@ -14,6 +14,7 @@ type Kind = 'success' | 'brand' | 'danger' | 'warning';
 const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; kind: Kind }> = {
   BOOKING_CONFIRMED: { icon: 'calendar', kind: 'success' },
   SLOT_BOOKED: { icon: 'football', kind: 'brand' },
+  BOOKING_PENDING_REVIEW: { icon: 'help-circle', kind: 'warning' },
   ADDED_TO_BOOKING: { icon: 'person-add', kind: 'brand' },
   BOOKING_CANCELLED: { icon: 'close-circle', kind: 'danger' },
   GAME_REMINDER: { icon: 'alarm', kind: 'warning' },

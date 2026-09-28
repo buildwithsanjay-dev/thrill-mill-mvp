@@ -15,7 +15,9 @@ export type NotificationData = {
   notification_id?: string;
   // 'home' = nothing to open beyond the dashboard (e.g. a team invite, where
   // the pending invite card lives, or a declined join request).
-  open?: 'home';
+  // 'bookings' = an Admin-only "needs review" notification (BOOKING_PENDING_
+  // REVIEW) -- opens the Admin's Bookings screen, not a booking_id route.
+  open?: 'home' | 'bookings';
 } | null;
 
 export type AppNotification = {
@@ -58,6 +60,10 @@ export function resolveNotificationRoute(data: NotificationData, isAdmin = false
   // Never send an Admin to the customer home / customer team pages — those
   // treat the Admin as a brand-new member.
   if (data?.open === 'home') return isAdmin ? '/(admin)/(tabs)' : '/(app)/(tabs)';
+  // The "needs review" admin notification -- send the Admin straight to the
+  // Bookings screen's Review tab, not the customer-side booking-details page
+  // its booking_id would otherwise resolve to below.
+  if (data?.open === 'bookings' && isAdmin) return '/(admin)/(tabs)/bookings';
   const bookingId = data?.booking_id ?? data?.booking_ids?.[0];
   if (bookingId) return `/(app)/booking/${bookingId}`;
   if (data?.team_id) {

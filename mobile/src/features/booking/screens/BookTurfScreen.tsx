@@ -355,8 +355,15 @@ export function BookTurfScreen() {
       invalidateBooking({ teamId: activeTeam.team.id, turfId: turf?.id });
       setHeldSlots(new Map());
       setSelectedParticipantIds([]);
+      // Not "Confirmed" -- an Admin still has to cross-check the slot(s)
+      // against the club's other booking system before this is actually
+      // confirmed (see fn_confirm_multi_slot_booking -> PENDING_REVIEW). The
+      // booking details screen this navigates to shows the real status.
       if (bookingIds.length > 1) {
-        showAlert('Booking confirmed', `${bookingIds.length} slots were booked successfully.`);
+        showAlert(
+          'Booking submitted',
+          `${bookingIds.length} slots submitted for booking. They'll show as Pending until the Admin approves them.`
+        );
       }
       if (bookingIds[0]) {
         router.push(`/(app)/booking/${bookingIds[0]}`);

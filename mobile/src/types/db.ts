@@ -15,6 +15,7 @@ export type MembershipRequestStatus =
   | 'ACTIVE';
 export type BookingStatus =
   | 'HOLDING'
+  | 'PENDING_REVIEW'
   | 'CONFIRMED'
   | 'IN_PROGRESS'
   | 'COMPLETED'

@@ -244,6 +244,24 @@ export async function adminCancelBooking(bookingId: string, reason?: string): Pr
   return data as string;
 }
 
+// A PENDING_REVIEW booking's only real disposition: Approve (cross-checked
+// against TurfTown, becomes CONFIRMED, fires the customer's "Booking
+// Confirmed" push) or Decline (full refund regardless of timing, slot
+// reopens, customer is told why). Returns 'APPROVED' | 'DECLINED'.
+export async function adminReviewBooking(
+  bookingId: string,
+  approve: boolean,
+  reason?: string
+): Promise<string> {
+  const { data, error } = await supabase.rpc('fn_admin_review_booking', {
+    p_booking_id: bookingId,
+    p_approve: approve,
+    p_reason: reason ?? null,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
 // -- Revenue analytics ---------------------------------------------------------
 
 export type RevenueAnalyticsDay = {

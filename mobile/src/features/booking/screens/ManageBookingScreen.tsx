@@ -28,8 +28,15 @@ const STATUS_TONE = {
   EXPIRED: 'danger',
   FAILED: 'danger',
   HOLDING: 'pending',
+  PENDING_REVIEW: 'pending',
   IN_PROGRESS: 'pending',
 } as const;
+
+// PENDING_REVIEW is a real (not yet approved by an Admin) state the customer
+// needs a plain label for -- the raw enum value reads badly as a Badge.
+const STATUS_LABEL: Partial<Record<string, string>> = {
+  PENDING_REVIEW: 'Pending Approval',
+};
 
 export function ManageBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -110,14 +117,18 @@ export function ManageBookingScreen() {
     }
   };
 
+  const isPendingReview = booking.status === 'PENDING_REVIEW';
+
   const handleCancel = () => {
     showAlert(
-      'Cancel this booking?',
-      'Full refund if cancelled 24 hours or more before the slot. No refund if cancelled within 24 hours — decided by server time.',
+      isPendingReview ? 'Withdraw this request?' : 'Cancel this booking?',
+      isPendingReview
+        ? "This hasn't been approved yet, so the Team gets a full credit refund regardless of timing."
+        : 'Full refund if cancelled 24 hours or more before the slot. No refund if cancelled within 24 hours — decided by server time.',
       [
-        { text: 'Keep booking', style: 'cancel' },
+        { text: isPendingReview ? 'Keep request' : 'Keep booking', style: 'cancel' },
         {
-          text: 'Cancel booking',
+          text: isPendingReview ? 'Withdraw request' : 'Cancel booking',
           style: 'destructive',
           onPress: async () => {
             setIsCancelling(true);
@@ -136,7 +147,7 @@ export function ManageBookingScreen() {
               ]);
               invalidate({ teamId: booking.team_id, bookingId: booking.id, turfId: booking.turf_id });
               showAlert(
-                'Booking cancelled',
+                isPendingReview ? 'Request withdrawn' : 'Booking cancelled',
                 outcome.includes('REFUND') ? 'Full credits were refunded to the Team wallet.' : 'No refund — cancelled within 24 hours of the slot.'
               );
               router.back();
@@ -145,7 +156,7 @@ export function ManageBookingScreen() {
                 error instanceof Error && error.message === 'CANCEL_TIMEOUT'
                   ? 'This is taking longer than expected — check your connection and try again.'
                   : mapBookingError(error);
-              showAlert('Could not cancel', message);
+              showAlert(isPendingReview ? 'Could not withdraw' : 'Could not cancel', message);
             } finally {
               setIsCancelling(false);
             }
@@ -156,6 +167,9 @@ export function ManageBookingScreen() {
   };
 
   const canManage = booking.status === 'CONFIRMED';
+  // Cancel/Withdraw is offered for a still-pending booking too (participant
+  // editing is deliberately not -- that stays CONFIRMED-only via canManage).
+  const canCancelOrWithdraw = canManage || isPendingReview;
 
   // Cancel Booking / Update Participants are Host, Co-host, or Admin-only
   // actions — a plain Team member must never see these affordances.
@@ -189,7 +203,7 @@ export function ManageBookingScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.heroCard}>
           <View style={styles.heroBadge}>
-            <Badge label={booking.status} tone={STATUS_TONE[booking.status] ?? 'neutral'} />
+            <Badge label={STATUS_LABEL[booking.status] ?? booking.status} tone={STATUS_TONE[booking.status] ?? 'neutral'} />
           </View>
           <Text style={styles.heroTitle}>{booking.turf?.name ?? 'Football Turf'}</Text>
           <Text style={styles.heroLocation}>
@@ -304,24 +318,25 @@ export function ManageBookingScreen() {
           </Text>
         </View>
 
-        {canManage && (
+        {canCancelOrWithdraw && (
           <View style={styles.policyCard}>
             <Ionicons name="alert-circle" size={16} color={colors.danger} />
             <Text style={styles.policyText}>
-              Cancellation Policy: Full refund if cancelled 24 hours or more before the slot.
-              Cancellations within 24 hours receive no refund.
+              {isPendingReview
+                ? 'This booking is awaiting Admin approval. Withdrawing it now refunds the Team in full, regardless of timing.'
+                : 'Cancellation Policy: Full refund if cancelled 24 hours or more before the slot. Cancellations within 24 hours receive no refund.'}
             </Text>
           </View>
         )}
       </ScrollView>
 
-      {canManage && isTeamManager && !isEditing && (
+      {canCancelOrWithdraw && isTeamManager && !isEditing && (
         <View style={styles.footer}>
           <Pressable style={styles.cancelBookingButton} onPress={handleCancel} disabled={isCancelling}>
             {isCancelling ? (
               <ActivityIndicator size="small" color={colors.text} />
             ) : (
-              <Text style={styles.cancelBookingText}>Cancel Booking</Text>
+              <Text style={styles.cancelBookingText}>{isPendingReview ? 'Withdraw Request' : 'Cancel Booking'}</Text>
             )}
           </Pressable>
           {canEditParticipants && !participantsError && (

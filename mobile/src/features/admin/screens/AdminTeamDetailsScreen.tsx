@@ -25,6 +25,7 @@ const BOOKING_STATUS_TONE = {
   EXPIRED: 'danger',
   FAILED: 'danger',
   HOLDING: 'pending',
+  PENDING_REVIEW: 'pending',
   IN_PROGRESS: 'pending',
 } as const;
 

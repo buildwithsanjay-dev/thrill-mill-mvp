@@ -34,6 +34,8 @@ const RULES: [RegExp, string][] = [
   [/NO_PARTICIPANTS/, 'Pick at least one player for this session.'],
   [/PARTICIPANTS_LOCKED/, 'This session has already started, so its players can no longer be changed.'],
   [/CANCELLATION_NOT_ALLOWED/, 'This booking can no longer be cancelled.'],
+  [/BOOKING_NOT_PENDING/, 'This booking has already been reviewed.'],
+  [/BOOKING_SESSION_PASSED/, "This slot's time has already passed, so it can only be declined and refunded now, not approved."],
   [/TEAM_ARCHIVED/, 'This team has been archived by the club Admin, so it can no longer make bookings.'],
   [/MEMBERSHIP_INACTIVE/, "This team's membership isn't active yet. Bookings open once the club Admin verifies your payment and loads your credits."],
 
