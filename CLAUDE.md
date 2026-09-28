@@ -101,8 +101,14 @@ underlying engine/rules as a Host/Co-host would.
   atomic step and demotes the caller to Member; it does not touch the Team's wallet/bookings/history.
   Before this existed the only way to clear `HOST_MUST_TRANSFER` was an Admin archiving the whole Team,
   which stranded every other member and the Team's credits just so one person could leave — avoid
-  reintroducing that as the only path. Admins can delete their own account too: it is audited, demotes
-  the account to MEMBER immediately, and is blocked for the last remaining Admin (`LAST_ADMIN`).
+  reintroducing that as the only path. `fn_delete_my_account` itself still supports an Admin deleting
+  their own account (audited, demotes to MEMBER immediately, blocked for the last remaining Admin via
+  `LAST_ADMIN`) — but as of 2026-09-28 (owner request) the Admin-facing Profile screen no longer calls
+  it. An Admin's "Delete account" button now calls `fn_request_admin_account_deletion` instead, which
+  only writes an `admin_audit_logs` entry (`ADMIN_ACCOUNT_DELETION_REQUESTED`) and changes nothing else
+  — no anonymising, no sign-out. A one-tap, no-recovery self-delete for an Admin was judged too risky
+  (no in-app undo; a developer had to fix a similar situation by hand this same week). Completing an
+  actual Admin deletion is a deliberate, out-of-app step (developer/another Admin acting on the log).
 - **Every failure shown to a user states the real reason in plain language** (e.g. membership still
   under review, only Host/Co-host can book, slot already passed) via `lib/errors.ts` and
   `features/booking/reasons.ts` — never a generic "could not …" or raw DB text. The app uses one

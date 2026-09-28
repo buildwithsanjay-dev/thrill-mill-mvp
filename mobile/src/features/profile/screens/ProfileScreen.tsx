@@ -27,6 +27,7 @@ import {
   isPhoneAvailable,
   removeAvatar,
   removeAvatarFiles,
+  requestAdminAccountDeletion,
   updateMyProfile,
   uploadAvatar,
   type Profile,
@@ -171,13 +172,12 @@ function ProfileForm({ profile }: { profile: Profile }) {
     }
   };
 
+  // Member-only: this is the real, self-executing deletion. An Admin never
+  // reaches this — see handleRequestAdminAccountDeletion below.
   const handleDeleteAccount = () => {
-    const isAdmin = profile.platform_role === 'ADMIN';
     showAlert(
-      isAdmin ? 'Delete this Admin account?' : 'Delete your account?',
-      isAdmin
-        ? 'This removes your Admin access immediately and signs you out everywhere. The club\'s bookings, wallets and audit history are kept, and your past Admin actions will show as "Deleted user". If you are the only Admin left, deletion is blocked. This cannot be undone.'
-        : 'This signs you out everywhere and removes your name, phone number, photo and chat messages. Your team keeps its bookings and wallet history, shown under "Deleted user". This cannot be undone.',
+      'Delete your account?',
+      'This signs you out everywhere and removes your name, phone number, photo and chat messages. Your team keeps its bookings and wallet history, shown under "Deleted user". This cannot be undone.',
       [
         { text: 'Keep my account', style: 'cancel' },
         {
@@ -203,6 +203,38 @@ function ProfileForm({ profile }: { profile: Profile }) {
               );
             } catch (error) {
               showAlert('Could not delete your account', friendlyError(error));
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Admin-only: an Admin tapping this used to delete their own account
+  // immediately and irreversibly, with no in-app way back if that was a
+  // mistake or done by the wrong person on a shared login. It now only logs
+  // a request in the Admin audit trail — nothing about the account changes,
+  // nobody is signed out, and completing an actual deletion is left to a
+  // developer/another Admin reviewing that log deliberately.
+  const handleRequestAdminAccountDeletion = () => {
+    showAlert(
+      'Request account deletion?',
+      "This won't delete your Admin account right now. It logs a request for the developer to review and complete manually, and you'll stay signed in until then.",
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Send Request',
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              await requestAdminAccountDeletion();
+              showAlert('Request sent', 'Your account deletion request has been logged for review.', undefined, {
+                variant: 'success',
+              });
+            } catch (error) {
+              showAlert('Could not send the request', friendlyError(error));
+            } finally {
               setIsDeleting(false);
             }
           },
@@ -343,9 +375,18 @@ function ProfileForm({ profile }: { profile: Profile }) {
           )}
         </Pressable>
 
-        <Pressable style={styles.deleteRow} onPress={handleDeleteAccount} disabled={isDeleting}>
+        <Pressable
+          style={styles.deleteRow}
+          onPress={profile.platform_role === 'ADMIN' ? handleRequestAdminAccountDeletion : handleDeleteAccount}
+          disabled={isDeleting}
+        >
           {isDeleting ? (
             <ActivityIndicator size="small" color={colors.danger} />
+          ) : profile.platform_role === 'ADMIN' ? (
+            <>
+              <Ionicons name="flag-outline" size={18} color={colors.danger} />
+              <Text style={styles.deleteText}>Request account deletion</Text>
+            </>
           ) : (
             <>
               <Ionicons name="trash-outline" size={18} color={colors.danger} />

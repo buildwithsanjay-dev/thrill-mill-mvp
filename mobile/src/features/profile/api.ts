@@ -98,3 +98,12 @@ export async function deleteMyAccount(): Promise<void> {
   const { error } = await supabase.rpc('fn_delete_my_account');
   if (error) throw error;
 }
+
+// Admin-only: logs a deletion request in the Admin audit trail instead of
+// actually deleting anything. Deliberately narrower than deleteMyAccount --
+// see fn_request_admin_account_deletion for why an Admin's own "delete
+// account" button no longer self-executes.
+export async function requestAdminAccountDeletion(): Promise<void> {
+  const { error } = await supabase.rpc('fn_request_admin_account_deletion', { p_reason: null });
+  if (error) throw error;
+}
