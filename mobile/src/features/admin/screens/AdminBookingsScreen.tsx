@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -34,10 +34,20 @@ const STATUS_LABEL: Record<string, string> = {
   PENDING_REVIEW: 'PENDING REVIEW',
 };
 
+const FILTER_VALUES: Filter[] = ['ALL', 'REVIEW', 'TODAY', 'UPCOMING', 'COMPLETED'];
+
 export function AdminBookingsScreen() {
   const router = useRouter();
   const { data: bookings, isPending } = useAllBookings();
-  const [filter, setFilter] = useState<Filter>('ALL');
+  // Lets the "Review Bookings" card on the Admin dashboard land here already
+  // filtered to what needs action, instead of the Admin having to tap the
+  // chip themselves every time. Read once at mount, same as any other
+  // initial-state-from-route-param case — the chips still work normally
+  // after that.
+  const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
+  const [filter, setFilter] = useState<Filter>(() =>
+    FILTER_VALUES.includes(filterParam as Filter) ? (filterParam as Filter) : 'ALL'
+  );
   const [query, setQuery] = useState('');
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
@@ -206,7 +216,7 @@ export function AdminBookingsScreen() {
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow}>
-          {(['ALL', 'REVIEW', 'TODAY', 'UPCOMING', 'COMPLETED'] as Filter[]).map((f) => (
+          {FILTER_VALUES.map((f) => (
             <Pressable key={f} style={[styles.filterChip, filter === f && styles.filterChipActive]} onPress={() => setFilter(f)}>
               <Text style={[styles.filterChipLabel, filter === f && styles.filterChipLabelActive]}>
                 {f.charAt(0) + f.slice(1).toLowerCase()}

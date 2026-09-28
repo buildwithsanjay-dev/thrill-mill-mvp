@@ -48,6 +48,7 @@ export function AdminHomeScreen() {
   const { data: analytics, isPending: analyticsPending } = useAdminRevenueAnalytics(activeRangeDays);
 
   const firstPending = pendingTeams?.[0];
+  const pendingBookings = (bookings ?? []).filter((b) => b.status === 'PENDING_REVIEW');
   const upcomingBookings = (bookings ?? []).filter((b) => b.status === 'CONFIRMED').slice(0, 1);
 
   return (
@@ -99,6 +100,64 @@ export function AdminHomeScreen() {
           <Button title="Block Turf Slot" iconLeft="ban" variant="accent" onPress={() => router.push('/(admin)/block-slot')} />
         </View>
 
+        {/* Everything an Admin actually needs to act on, in priority order —
+            Block Turf Slot above, then membership review, then booking
+            review — before anything read-only (analytics, upcoming list). */}
+        {(firstPending || pendingBookings.length > 0) && (
+          <>
+            <View style={styles.sectionHeaderRow}>
+              <Ionicons name="alert-circle" size={16} color={colors.accentText} />
+              <Text style={styles.sectionTitle}>Action Required</Text>
+            </View>
+
+            {firstPending && (
+              <Pressable
+                style={styles.actionCard}
+                onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)}
+              >
+                <Badge label="MEMBERSHIP REQUEST PENDING" tone="pending" />
+                <Text style={styles.actionCardTitle}>{firstPending.team.name}</Text>
+                <Text style={styles.actionCardMeta}>Team ID: {firstPending.team.join_code}</Text>
+                <View style={styles.actionCardRow}>
+                  <View>
+                    <Text style={styles.actionCardLabel}>PLAN</Text>
+                    <Text style={styles.actionCardValue}>
+                      ₹{firstPending.membership?.plan?.price_inr.toLocaleString()} ({firstPending.memberCount} Members)
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <Text style={styles.actionCardLabel}>STATUS</Text>
+                    <Text style={styles.actionCardValueMuted}>⏳ Awaiting Activation</Text>
+                  </View>
+                </View>
+                <View style={{ marginTop: spacing.md }}>
+                  <Button title="Review Team" iconRight="arrow-forward" onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)} />
+                </View>
+              </Pressable>
+            )}
+
+            {pendingBookings.length > 0 && (
+              <Pressable
+                style={[styles.actionCard, firstPending && { marginTop: spacing.md }]}
+                onPress={() => router.push('/(admin)/(tabs)/bookings?filter=REVIEW')}
+              >
+                <Badge label="BOOKING NEEDS REVIEW" tone="pending" />
+                <Text style={styles.actionCardTitle}>
+                  {pendingBookings.length} {pendingBookings.length === 1 ? 'slot' : 'slots'} awaiting approval
+                </Text>
+                <Text style={styles.actionCardMeta}>Cross-check against TurfTown before approving.</Text>
+                <View style={{ marginTop: spacing.md }}>
+                  <Button
+                    title="Review Bookings"
+                    iconRight="arrow-forward"
+                    onPress={() => router.push('/(admin)/(tabs)/bookings?filter=REVIEW')}
+                  />
+                </View>
+              </Pressable>
+            )}
+          </>
+        )}
+
         <View style={styles.sectionHeaderRow2}>
           <Text style={styles.sectionTitle2}>Revenue Analytics</Text>
           <View style={styles.rangeChipRow}>
@@ -121,38 +180,6 @@ export function AdminHomeScreen() {
           <RevenueAnalyticsSection analytics={analytics} rangeLabel={RANGE_PRESETS.find((p) => p.key === rangePreset)!.label} />
         ) : (
           <Text style={styles.emptyText}>Analytics unavailable right now.</Text>
-        )}
-
-        {firstPending && (
-          <>
-            <View style={styles.sectionHeaderRow}>
-              <Ionicons name="alert-circle" size={16} color={colors.accentText} />
-              <Text style={styles.sectionTitle}>Action Required</Text>
-            </View>
-            <Pressable
-              style={styles.actionCard}
-              onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)}
-            >
-              <Badge label="MEMBERSHIP REQUEST PENDING" tone="pending" />
-              <Text style={styles.actionCardTitle}>{firstPending.team.name}</Text>
-              <Text style={styles.actionCardMeta}>Team ID: {firstPending.team.join_code}</Text>
-              <View style={styles.actionCardRow}>
-                <View>
-                  <Text style={styles.actionCardLabel}>PLAN</Text>
-                  <Text style={styles.actionCardValue}>
-                    ₹{firstPending.membership?.plan?.price_inr.toLocaleString()} ({firstPending.memberCount} Members)
-                  </Text>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={styles.actionCardLabel}>STATUS</Text>
-                  <Text style={styles.actionCardValueMuted}>⏳ Awaiting Activation</Text>
-                </View>
-              </View>
-              <View style={{ marginTop: spacing.md }}>
-                <Button title="Review Team" iconRight="arrow-forward" onPress={() => router.push(`/(admin)/team/${firstPending.team.id}`)} />
-              </View>
-            </Pressable>
-          </>
         )}
 
         <View style={styles.sectionHeaderRow2}>
