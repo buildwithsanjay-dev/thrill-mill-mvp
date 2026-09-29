@@ -13,7 +13,10 @@ import type { LiveLeaderboardRow } from '@/types/db';
 
 type Scope = 'TEAM' | 'MEMBER';
 
-const PODIUM_COLORS = ['#D1D5DB', '#F59E0B', '#B45309'];
+// Index 0 = 1st place, 1 = 2nd, 2 = 3rd — gold/silver/bronze in that order.
+// Was ['#D1D5DB', '#F59E0B', ...] (silver, gold, ...), which put silver on
+// 1st place and gold on 2nd.
+const PODIUM_COLORS = ['#F59E0B', '#D1D5DB', '#B45309'];
 
 export function LeaderboardScreen() {
   const [scope, setScope] = useState<Scope>('TEAM');
