@@ -1,0 +1,39 @@
+{
+  "$comment": "Contract between STORY and RENDER. Facts come only from the facts sheet; shots reference real source timestamps. This is also the future Memory Engine's renderer input (an LLM may draft 'shots'/'text', never 'facts').",
+  "version": 1,
+  "facts": {
+    "tournament": "Thrill Mill Night League",
+    "date": "2026-10-04",
+    "venue": "Thrill Mill Turf, Arena 1",
+    "sport": "FOOTBALL",
+    "format": "KNOCKOUT",
+    "teams": ["Red Wolves", "Night Riders", "Turf Kings", "Blue Storm"],
+    "matches": [
+      { "label": "Semi-final 1", "home": "Red Wolves", "away": "Turf Kings", "score": [3, 1] },
+      { "label": "Semi-final 2", "home": "Night Riders", "away": "Blue Storm", "score": [2, 2], "note": "Night Riders won 4–3 on penalties" },
+      { "label": "Final", "home": "Red Wolves", "away": "Night Riders", "score": [2, 1] }
+    ],
+    "champion": "Red Wolves",
+    "runnerUp": "Night Riders",
+    "awards": [{ "title": "MVP", "name": "Arjun K." }]
+  },
+  "output": { "width": 1080, "height": 1920, "fps": 30, "durationSec": 35 },
+  "style": { "preset": "luxury-noir", "accent": "#C9A45C", "signatureTransition": "luma-wipe" },
+  "music": { "file": "music/bed.wav", "bpm": 88, "dropAtSec": 17.2, "license": "club-owned" },
+  "shots": [
+    { "id": "s01", "beat": "HOOK",    "src": "input/07.mp4", "in": 41.2, "out": 43.0, "speed": 0.4, "reframe": "crop", "cropX": 0.62, "why": "winning strike, slow-mo" },
+    { "id": "s02", "beat": "ARRIVAL", "src": "input/01.mp4", "in": 3.0,  "out": 5.0,  "speed": 1.0, "reframe": "none", "why": "floodlights wide" },
+    { "id": "s03", "beat": "BATTLE",  "src": "input/04.mp4", "in": 12.4, "out": 13.6, "speed": 1.0, "reframe": "fill", "why": "slide tackle" },
+    { "id": "s04", "beat": "PEAK",    "src": "input/07.mp4", "in": 40.6, "out": 44.5, "speed": [1.0, 0.3, 1.0], "reframe": "crop", "cropX": 0.6, "why": "final winning goal + eruption" },
+    { "id": "s05", "beat": "BOND",    "src": "input/15.jpg", "hold": 3.0, "kenBurns": [1.0, 1.06], "why": "group photo, both teams" }
+  ],
+  "text": [
+    { "at": 1.6,  "dur": 2.2, "role": "title",      "value": "{facts.tournament}" },
+    { "at": 4.2,  "dur": 2.0, "role": "lowerThird", "value": "4 Oct 2026 · Arena 1" },
+    { "at": 23.5, "dur": 3.2, "role": "scoreCard",  "match": "Final" },
+    { "at": 27.0, "dur": 2.0, "role": "title",      "value": "Champions — {facts.champion}" },
+    { "at": 33.5, "dur": 1.5, "role": "tag",        "value": "Thrill Mill Club" }
+  ],
+  "narration": { "enabled": false, "lines": [] },
+  "audio": { "realSoundMoments": [{ "src": "input/07.mp4", "in": 42.5, "out": 45.0, "at": 18.4, "gainDb": -2 }] }
+}

@@ -29,3 +29,11 @@ Thumbs.db
 /assets/thrill-mill-club-android-store bundle/
 /assets/thrill-mill-club-android-store bundle.zip
 /.agents/
+
+# Tournament Memory Engine experiments: raw club footage, intermediates and
+# renders are large and private — keep scene plans/notes, not media.
+tournament-memory/**/input/
+tournament-memory/**/work/
+tournament-memory/**/*.mp4
+tournament-memory/**/*.mov
+tournament-memory/**/*.wav
