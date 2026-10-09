@@ -15,6 +15,18 @@ truth for anything not covered here or in `docs/`) and the condensed dev-facing 
 **Core principle:** the Team is the financial unit; the individual member is the participation and
 analytics unit. Credits belong to Teams, never to individual members.
 
+**Phase 2 (planned, not started):** two related efforts, deliberately kept out of a separate
+conversation thread so they don't mix with this app's coding context — (1) integrating with
+**RizzFit** (rizzfitt.com), a live external platform that hosts multi-club tournaments (teams pay
+RizzFit directly; fixtures/scoring happen on their side) — waiting on their Swagger/API docs before
+any design work; (2) a **Tournament Memory Engine** — auto-generating one 30–40s highlight video per
+completed tournament from real photos + scores (Supabase + Cloudflare Queues/Containers + an LLM for
+planning/narration only, never for generating video pixels). Full detail/handoff doc:
+`docs/phase2-tournament-memory-engine.md`. Both assume tournament/match/score data this app doesn't
+model yet — directly touches the "no verified match results/tournaments" boundary above, which is
+why it's Phase 2, not something to fold into the current MVP without reopening that boundary
+deliberately.
+
 ## User Roles
 
 Two-level role model — do not conflate these:
@@ -155,41 +167,6 @@ backend is always authoritative for: final price, slot availability, hold validi
 booking confirmation, refund eligibility, usage attribution, and leaderboard scores. Multi-step
 financial/booking operations (booking confirm, cancel+refund, membership activate) must be
 atomic — implement as Postgres transactions/RPC, not sequential client-side writes.
-
-## Project Structure
-
-Scaffolded as of 2026-09-04:
-
-```
-thrill-mill-mvp/
-├── mobile/                  # Expo React Native app (Android-first, iOS-scalable)
-│   ├── app/                 # Expo Router — file-based routes/screens
-│   ├── src/
-│   │   ├── components/      # Shared, presentational UI components
-│   │   ├── features/        # Feature-sliced modules: booking/, team/, membership/, wallet/, admin/
-│   │   ├── lib/              # supabase.ts (client init), queryClient.ts (TanStack Query)
-│   │   ├── stores/           # Zustand — client-only UI state, never permission/financial state
-│   │   ├── hooks/
-│   │   ├── types/            # Shared TS types mirroring the DB schema
-│   │   └── constants/
-│   ├── assets/               # Expo icons/splash/fonts (distinct from repo-root assets/)
-│   ├── app.json               # Expo config (expo-router, expo-status-bar, expo-splash-screen plugins)
-│   ├── .env.example            # committed — documents required EXPO_PUBLIC_* vars
-│   ├── .env                    # gitignored — real Supabase URL/anon key, filled in locally
-│   └── package.json
-├── supabase/                 # Backend: source of truth for DB schema
-│   ├── migrations/            # SQL migrations (schema, RLS policies, RPC functions) — supabase CLI
-│   ├── functions/             # Edge Functions (if/when needed)
-│   └── config.toml
-├── assets/                   # unchanged — source blueprint PDF
-├── docs/                      # unchanged — architecture.md, product-spec.md
-└── CLAUDE.md
-```
-
-Full DB schema (the 18 tables listed under Database Conventions below) is intentionally not yet
-implemented — `supabase/migrations/` currently holds only a placeholder migration proving the
-`supabase db push` pipeline works. Schema + RLS + RPCs are a dedicated next step, not bundled
-into initial scaffolding.
 
 ## Coding Conventions
 
