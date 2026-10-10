@@ -30,7 +30,7 @@ layers** that the app places *around* the real UI:
 | Consistency | Attach the reference images listed per prompt | Same — use "ingredients"/reference upload |
 
 **Style reference:** attach your favourite home-screen mockup (the richer purple one) to every prompt
-as a style reference, plus the mascot sheet (M0) to every mascot prompt. This is what keeps 19 separate
+as a style reference, This is what keeps the separate
 generations looking like one set.
 
 **Where to save:** drop every output into `assets/seasons-raw/halloween/` (repo root, gitignored so the
@@ -60,94 +60,15 @@ background with no gradient, texture or vignette, and do not use magenta anywher
 
 ---
 
-## A. Mascot (do these first — everything else references M0)
+## A. Mascot — see [mascot.md](mascot.md)
 
-The app has no mascot yet; the panther cub from the mockup is the working candidate. **Get the
-manager's sign-off on M0 before generating M1–M7** — it becomes the face of every festival.
+The mascot now has its own doc: one base character derived from the club logo, 7 base poses, and an
+"edit only the outfit" prompt per festival. For Halloween, follow mascot.md step 4 with the
+**Halloween** outfit row (pumpkin mask pushed up like a visor + purple cape) on each of the 7 base
+poses, saving to `assets/seasons-raw/halloween/P1-wave.png` … `P7-resting.png`.
 
-### M0 — Base character sheet (no costume) → `M0-mascot-sheet.png`
-Attach: the mockup with the panther cub.
-```
-[STYLE LOCK]
-Character design reference sheet for the club mascot: a chubby, friendly black panther cub
-(the character in the attached image), big expressive amber eyes, small rounded ears, short
-whiskers, a confident cheeky smile. Wears a teal #0E7C86 football jersey with orange #EA5F14
-sleeve trims and a plain round football emblem on the chest — no numbers or letters on the
-jersey — navy shorts and orange-and-white football boots.
-Show the SAME character three times side by side at the same scale, standing, evenly spaced
-with clear gaps: front view, three-quarter view, side view. Neutral relaxed pose, arms at sides.
-No costume, no hat, no props. Identical proportions and colours in all three views.
-Square image.
-```
-
-### M1 — Peek & wave (Home hero) → `M1-peek-wave.png`
-Attach: M0 + style reference.
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, now wearing a small orange
-#EA5F14 witch hat with a purple #3B1E54 band tilted on his head. Half-turned towards the
-viewer, leaning in from the right as if peeking around a corner, waving one paw high,
-big happy grin, other paw resting on a glowing jack-o'-lantern beside him.
-Full body visible (I will crop it). Single character, centered, square image.
-```
-
-### M2 — Celebrate (success: Booking Confirmed, team created, membership approved) → `M2-celebrate.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing a carved
-jack-o'-lantern helmet pushed up on his head like a visor (face fully visible). Mid-jump,
-both arms up in celebration, holding a football painted as a jack-o'-lantern (orange ball with
-a carved smiling face) high in one paw. Eyes closed with joy, wide open-mouth smile.
-A few small bats and candy-corn pieces bursting outward around him.
-Single character, centered, square image.
-```
-
-### M3 — Waiting (info / Booking Requested — pending admin review) → `M3-waiting.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing the small orange witch
-hat. Standing calmly holding a small glowing orange lantern in one paw and a round
-pocket watch in the other, looking at the watch with a patient, hopeful smile.
-A single small bat perched on the brim of the hat.
-Single character, centered, square image.
-```
-
-### M4 — Oops (error: e.g. not enough credits, slot taken) → `M4-oops.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing the small orange witch
-hat drooping to one side. Sympathetic, apologetic expression — gentle "oops" face, ears down,
-small sweat drop — shrugging while holding an empty orange pumpkin candy bucket tipped
-upside down. Sweet and sorry, not sad or crying, not comedic.
-Single character, centered, square image.
-```
-
-### M5 — Careful (warning: cancel within 24h, confirm actions) → `M5-careful.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing the small orange witch
-hat. One paw raised palm-out in a friendly "wait a second" gesture, other paw holding a glowing
-lantern, eyebrows slightly raised, attentive and caring expression.
-Single character, centered, square image.
-```
-
-### M6 — Champion (Leaderboard) → `M6-trophy.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing a tiny purple #3B1E54
-witch cape and the orange witch hat, proudly holding up a golden trophy cup shaped like a
-carved jack-o'-lantern with two handles. Big proud smile, chest out.
-Single character, centered, square image.
-```
-
-### M7 — Resting (Profile: "No games played this week yet") → `M7-resting.png`
-```
-[STYLE LOCK]
-The mascot from the attached character sheet, identical design, wearing the orange witch hat
-pulled over one eye, lying lazily on top of a large pumpkin, one leg dangling, a football
-resting on his belly, relaxed sleepy smile with one eye open.
-Single character, centered, square image.
-```
+Pose → where it's used: P1 Home hero · P2 success pop-ups · P3 info / booking requested ·
+P4 error pop-ups · P5 warning pop-ups · P6 Leaderboard · P7 empty "no games yet".
 
 ---
 
@@ -311,14 +232,14 @@ form fields, sport chips) stay untouched. Respect the phone's Reduce Motion sett
 | Screen | Free space observed | Assets |
 |---|---|---|
 | **App header** (every tab) | Thin bar, empty between title and bell | Twilight gradient (code), 1–3 bats (SP1) flying across every ~20–40 s, tiny witch hat (SP5-2) perched on the logo badge |
-| **Home** | Big gap above + below greeting; empty-state card; navy credits card | S1/S2 hero behind greeting with M1 peeking at right; 🎃 replaces 👋 (emoji, code); crows (SP2) occasionally; ghost (SP3-1) + cobweb corner (SP6-1) in "No upcoming events"; cobweb + SP4 cluster + sparkles (SP6) on credits card; jack-o'-lantern football (SP5-1) as Book-a-Slot icon; faint bat/star page pattern (composed from SP6) |
+| **Home** | Big gap above + below greeting; empty-state card; navy credits card | S1/S2 hero behind greeting with P1 peeking at right; 🎃 replaces 👋 (emoji, code); crows (SP2) occasionally; ghost (SP3-1) + cobweb corner (SP6-1) in "No upcoming events"; cobweb + SP4 cluster + sparkles (SP6) on credits card; jack-o'-lantern football (SP5-1) as Book-a-Slot icon; faint bat/star page pattern (composed from SP6) |
 | **Book a Slot** | Gap above title, gap between team card and "Select Sport", venue photo | Hero band (S1/S2, shorter crop) behind title; dangling spider (SP5-4) dropping from the top right on a slow loop; cobweb corner over the venue photo; date/slot grid untouched |
 | **My Teams** | Gap under "Your sports communities"; navy team cards with faded football watermark | Hero band behind title; pumpkin-football (SP5-1) replaces the faded watermark on each navy card; bunting (SP10) under the stats card |
 | **Team detail** | Team photo banner; navy credits card | Cobweb corner + 2 bats over the photo; SP4 cluster on credits card |
 | **Team chat** | Huge empty middle area | Faint doodle wallpaper (SP7, tinted at ~6% opacity); optional seasonal quick-reply "Happy Halloween 🎃" (text, code) |
-| **Leaderboard** | Gap above title; space around podium | Hero band with M6 (trophy) on the right; trophy icon → pumpkin trophy (SP5-6); graveyard strip (SP6-2) faint behind the podium; witch hat on the #1 avatar |
-| **Profile** | Avatar area; "No games played this week yet." | Pumpkin-vine ring (SP9) around the photo; M7 resting replaces the plain empty text area; "Festive decorations" toggle row in Appearance |
-| **Pop-ups** (`AppDialog`, used everywhere) | Icon circle at the top of every dialog | Mascot replaces the icon circle: success → M2 + confetti (SP8) burst, info/pending → M3, error → M4, warning → M5. A small coloured badge (tick / ! / ×) stays on the mascot's corner so the meaning is clear without the art |
+| **Leaderboard** | Gap above title; space around podium | Hero band with P6 (trophy) on the right; trophy icon → pumpkin trophy (SP5-6); graveyard strip (SP6-2) faint behind the podium; witch hat on the #1 avatar |
+| **Profile** | Avatar area; "No games played this week yet." | Pumpkin-vine ring (SP9) around the photo; P7 resting replaces the plain empty text area; "Festive decorations" toggle row in Appearance |
+| **Pop-ups** (`AppDialog`, used everywhere) | Icon circle at the top of every dialog | Mascot replaces the icon circle: success → P2 + confetti (SP8) burst, info/pending → P3, error → P4, warning → P5. A small coloured badge (tick / ! / ×) stays on the mascot's corner so the meaning is clear without the art |
 | **Empty states** (Notifications, Wallet activity, Leaderboard, Teams, Book) | Grey circle icon | Matching ghost from SP3 |
 | **Welcome / onboarding** | Turf photo, logo badge | Bats (SP1) crossing the photo, witch hat on the logo badge, SP4 cluster at the sheet's top edge |
 | **Tab bar** | Line above the tabs | Bunting (SP10) strung along the top edge; witch hat on the active tab icon |
@@ -328,6 +249,6 @@ form fields, sport chips) stay untouched. Respect the phone's Reduce Motion sett
 
 ## Checklist
 
-- [ ] M0 approved by manager
-- [ ] M1–M7 · S1–S2 · SP1–SP10 generated (19 prompts) and saved to `assets/seasons-raw/halloween/`
+- [ ] Mascot concept + base sheet approved by manager (mascot.md steps 1–3)
+- [ ] Halloween outfit on P1–P7 (mascot.md step 4) · S1–S2 · SP1–SP10 generated and saved to `assets/seasons-raw/halloween/`
 - [ ] Hand back to Claude for cut-out, optimisation, and implementation

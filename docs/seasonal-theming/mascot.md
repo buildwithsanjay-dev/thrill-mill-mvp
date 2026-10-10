@@ -1,0 +1,162 @@
+# Club mascot — base character + seasonal outfits
+
+One mascot, used in every festival. **The character never changes — only outfit, accessories and
+props do.** Halloween = pumpkin mask, Pongal = veshti and shirt, and so on.
+
+## The rule that keeps him consistent
+
+AI image tools redraw a character slightly differently every time you ask from scratch. So:
+
+1. Generate the **base character once** (step 1–2) and get it approved.
+2. Generate the **7 base poses once**, in the plain base outfit (step 3).
+3. For every festival, **edit each base pose image** with the outfit-swap prompt (step 4) — always
+   starting from the *base* pose file, never from last festival's costume version (copies of copies
+   drift).
+
+Use image **editing**, not generation, for step 4: in ChatGPT attach the base pose and ask for the
+change; in Google Flow use the base pose as the reference/ingredient image. Both tools are good at
+"keep everything, change only X" edits.
+
+Save files to `assets/seasons-raw/mascot/` (base) and `assets/seasons-raw/<season>/` (outfits),
+same background rules as the asset prompt pack: transparent in ChatGPT, flat magenta `#FF00FF` in Flow.
+
+---
+
+## Step 1 — Concept round (pick one with the manager)
+
+All three are derived from the logo: lime pickleball, navy "TM" athlete figure, teal/orange/amber speed
+lines, bowling pin, arcade joystick, orange paddle. Attach the logo to each prompt.
+
+**Recommended: A.** The lime pickleball is the most distinctive thing in the logo, nobody else owns it,
+and a round ball head takes masks, hats and turbans easily.
+
+### Concept A — "the Pickleball buddy" → `C-A-pickleball.png`
+```
+Mascot character design for a sports & gaming club app, derived from the attached logo.
+A cute, energetic, chibi-proportioned character (about 2.5 heads tall) whose head IS the lime-green
+pickleball from the logo — bright lime #C6E03A with the small round holes of a pickleball spread
+around the top and sides, leaving the face area clean. Big expressive dark eyes with white
+highlights, bold eyebrows, a cheeky confident grin. Small rounded arms and legs, white gloves-like
+hands with 4 fingers.
+Outfit (this is the BASE outfit): navy #0B2545 sporty jersey with teal #0E7C86, orange #EA5F14 and
+amber #F5A524 speed-line stripes across the chest like the logo's motion lines, teal wristbands,
+navy shorts, orange-and-white sneakers. No letters, numbers or logos on the clothes.
+Holding an orange #EA5F14 pickleball paddle like the one in the logo.
+Polished 2D vector illustration, clean rounded shapes, soft shading, subtle outline, friendly and
+modern like an Indian sports/fintech app mascot. Full body, front three-quarter view, standing in a
+confident pose. Single character, centered, nothing cropped, no text anywhere.
+Transparent background (or flat pure magenta #FF00FF if transparency isn't available).
+```
+
+### Concept B — "the TM athlete" → `C-B-athlete.png`
+```
+Mascot character design for a sports & gaming club app, derived from the attached logo.
+Bring the logo's running athlete figure (formed by the "T" and "M" strokes, with a round head) to
+life as a cute chibi character about 2.5 heads tall: a round head with big expressive eyes and a
+cheeky grin, a navy #0B2545 body with sporty shapes echoing the angular "TM" strokes, teal
+#0E7C86 and orange #EA5F14 speed-line trails behind him as if always in motion.
+BASE outfit: navy sporty jersey with teal/orange/amber speed-line stripes, teal wristbands,
+orange-and-white sneakers. No letters, numbers or logos on the clothes.
+Balancing the lime-green pickleball from the logo on one finger.
+Polished 2D vector illustration, clean rounded shapes, soft shading, subtle outline, friendly.
+Full body, front three-quarter view. Single character, centered, nothing cropped, no text.
+Transparent background (or flat pure magenta #FF00FF).
+```
+
+### Concept C — "the Panther" (from the earlier mockup) → `C-C-panther.png`
+```
+Mascot character design for a sports & gaming club app, using the colours of the attached logo.
+A chubby, friendly black panther cub, chibi proportions about 2.5 heads tall, big amber eyes,
+small rounded ears, short whiskers, cheeky confident smile.
+BASE outfit: navy #0B2545 sporty jersey with teal #0E7C86, orange #EA5F14 and amber #F5A524
+speed-line stripes across the chest like the logo's motion lines, teal wristbands, navy shorts,
+orange-and-white sneakers. No letters, numbers or logos on the clothes.
+Holding the lime-green pickleball from the logo.
+Polished 2D vector illustration, clean rounded shapes, soft shading, subtle outline, friendly.
+Full body, front three-quarter view. Single character, centered, nothing cropped, no text.
+Transparent background (or flat pure magenta #FF00FF).
+```
+
+Generate each 2–3 times; send the best of each to the manager.
+
+---
+
+## Step 2 — Lock the base character → `BASE-sheet.png`
+
+Attach the approved concept image.
+```
+Character reference sheet. Redraw the EXACT character from the attached image — identical face,
+head, colours, proportions and base outfit — three times side by side at the same scale, evenly
+spaced with clear gaps: front view, three-quarter view, side view. Neutral standing pose, arms
+relaxed, no props. Same flat-shaded vector style. No text, no labels.
+Transparent background (or flat pure magenta #FF00FF). Landscape 3:2.
+```
+
+**Character bible** (write the final details here once approved, and paste this line into every later
+prompt so the tools keep him on-model):
+`Character: [concept], [head], [eye colour], [base outfit], chibi ~2.5 heads tall.`
+
+---
+
+## Step 3 — The 7 base poses (base outfit, generated once)
+
+Attach `BASE-sheet.png` to each. Prefix each with:
+```
+Same character as the attached reference sheet — identical face, head, colours, proportions and
+base outfit. Same vector style. Single character, centered, full body, nothing cropped, no text.
+Transparent background (or flat pure magenta #FF00FF). Square image.
+```
+
+| File | Used for | Pose (append to the prefix) |
+|---|---|---|
+| `P1-wave.png` | Home hero (peeks in from the right) | Half-turned to the viewer, leaning in from the right as if peeking around a corner, one hand waving high, big happy grin. |
+| `P2-celebrate.png` | Success pop-ups (booking confirmed, team created, membership approved) | Mid-jump, both arms up, holding a football high in one hand, eyes closed with joy, wide open-mouth smile. |
+| `P3-waiting.png` | Info / "Booking requested" (awaiting admin review) | Standing calmly, looking at a wristwatch on one raised wrist with a patient, hopeful smile, other hand on hip. |
+| `P4-oops.png` | Error pop-ups (not enough credits, slot taken…) | Apologetic "oops" face, small sweat drop, shrugging with both palms up. Sweet and sorry — not crying, not comedic. |
+| `P5-careful.png` | Warning pop-ups (cancel within 24h, confirm actions) | One hand raised palm-out in a friendly "wait a second" gesture, eyebrows raised, attentive caring expression. |
+| `P6-trophy.png` | Leaderboard | Proudly holding a golden trophy cup above his head, chest out, big proud smile. |
+| `P7-resting.png` | Empty states ("No games played this week yet") | Sitting relaxed on the ground leaning back on one hand, football resting beside him, sleepy content half-smile. |
+
+These base poses are also the **everyday mascot** for days with no festival.
+
+---
+
+## Step 4 — Seasonal outfit swap (edit each base pose)
+
+Attach the **base pose** (e.g. `P2-celebrate.png`), paste the template, fill in the season's outfit.
+Save as `<season>/P2-celebrate.png` etc.
+
+```
+Edit the attached image. Keep the character EXACTLY the same: same face, eyes, expression, head
+shape and markings, body proportions, colours, pose, hand and finger positions, camera angle, size
+and position in the frame. Keep the same vector style and the same background.
+Change ONLY the outfit and accessories:
+[OUTFIT FOR THIS SEASON]
+[PROP SWAP FOR THIS POSE, if any]
+Clothes must fit naturally around the existing pose. No text, letters or numbers anywhere.
+```
+
+### Outfits per season (paste into `[OUTFIT FOR THIS SEASON]`)
+
+| Season | Outfit | Prop swaps |
+|---|---|---|
+| **Navratri / Dussehra** | Bright orange-and-teal kediyu-style jacket with small round mirror-work embroidery over the jersey, a colourful bandhani-print pagdi (turban) on the head. | Hands that are free hold a pair of decorated dandiya sticks. P2: dandiya sticks raised instead of the football. |
+| **Halloween** | A carved jack-o'-lantern pumpkin mask — **worn pushed up on top of the head like a visor so the face stays fully visible** — and a short purple #3B1E54 cape with an orange lining. | P2: football painted as a jack-o'-lantern. P4: shrugging over an empty pumpkin candy bucket at his feet. P6: trophy shaped like a carved pumpkin. P7: sitting on a large pumpkin instead of the ground. |
+| **Diwali** | Festive amber-and-orange silk kurta with gold border embroidery over the base, a marigold garland around the neck. | P3: holding a lit clay diya instead of checking the watch (still patient smile). P2: a lit sparkler (phuljhadi) in the raised hand. |
+| **Christmas** | Red Santa cap with white fur trim, a red-and-white knitted scarf. | P2: a wrapped gift box instead of the football. |
+| **New Year** (Dec 31 – Jan 1) | Shiny orange party cone hat, star-shaped sunglasses pushed up on the head. | P2: a party popper bursting confetti. |
+| **Pongal / Sankranti** | Traditional white veshti (dhoti) with a teal-and-gold border, a crisp white half-sleeve shirt, a small angavastram (shoulder cloth) with gold border, a tilak dot on the forehead. Barefoot or simple sandals. | P2: holding a stalk of sugarcane high. P3: standing beside a clay pongal pot overflowing with rice. |
+| **Holi** | A plain white kurta covered in splashes of pink, yellow, green and blue gulal; colour powder smudges on the cheeks. | P2: a pichkari (water gun) squirting a colour stream. |
+| **Cricket season** (Mar–May) | A teal-and-orange cricket jersey and a cricket helmet (or cap), batting gloves. **No team names, no league logos** (avoid using a real league's branding). | P2: cricket bat raised in celebration. P6: holding a cricket trophy. |
+
+Halloween note: you asked for a pumpkin mask. A mask over the face hides the expression, and the
+pop-ups depend on that expression (happy vs. sorry). Hence "pushed up like a visor". For P1 (the
+Home hero peek) you can do one version with the mask fully on as a fun reveal, and I'll animate it
+lifting.
+
+---
+
+## File checklist per season
+
+`P1-wave` · `P2-celebrate` · `P3-waiting` · `P4-oops` · `P5-careful` · `P6-trophy` · `P7-resting`
+(7 edits per season × 8 outfits = 56 edits; the base set is 1 sheet + 7 poses.)
