@@ -20,6 +20,12 @@ input space explicitly: zscale fails with "no path between colorspaces" otherwis
 ```bash
 -vf "zscale=tin=arib-std-b67:pin=bt2020:min=bt2020nc:t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p"
 ```
+**Then tag the output as SDR** — FFmpeg otherwise copies the source's bt2020/HLG tags onto
+the SDR pixels, every player shows wrong colours, and HyperFrames renders via its slow HDR
+path into 10-bit HEVC. Output flags alone are NOT enough (frame side-data overrides them) —
+end the filter chain with `setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv`
+AND pass `-color_primaries bt709 -color_trc bt709 -colorspace bt709 -color_range tv`.
+Verify with `ffprobe -show_entries stream=color_transfer` → must read `bt709`.
 For PQ (`smpte2084`) sources use `tin=smpte2084`. Hable can look slightly flat;
 the grade afterwards adds contrast back. Prepend this chain to the normalize filters below.
 

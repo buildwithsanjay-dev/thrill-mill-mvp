@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "E:/SANJAY PC OFFICIAL FILES/SANJAY pc/SEMESTER 7/thrill mill application development/thrill-mill-mvp/tournament-memory/trial-01/comp/index.html"
+        ],
+        "createdAt": "2026-10-10T15:40:06.683Z",
+        "reason": "agent decision: soft text glow reproduces the Thrill Mill club's own reference reel (video overlay, not UI)"
+      },
+      {
+        "rule": "clipped-overflow-container",
+        "value": "*",
+        "files": [
+          "E:/SANJAY PC OFFICIAL FILES/SANJAY pc/SEMESTER 7/thrill mill application development/thrill-mill-mvp/tournament-memory/trial-01/comp/index.html"
+        ],
+        "createdAt": "2026-10-10T15:40:06.902Z",
+        "reason": "agent decision: video composition root must clip to the 1080x1920 frame; no popovers exist"
+      }
+    ]
+  }
+}

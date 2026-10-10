@@ -41,3 +41,12 @@ tournament-memory/**/*.wav
 # Raw AI-generated seasonal art (large PNGs straight from ChatGPT/Flow) — only
 # the cut-out, optimised WebPs under mobile/assets/seasons/ ship in the app.
 /assets/seasons-raw/
+# Tournament-memory libraries/derivatives: licensed media + fonts are re-downloadable, keep them out of git/EAS
+tournament-memory/**/*.mp3
+tournament-memory/**/*.ttf
+tournament-memory/**/*.png
+tournament-memory/**/*.jpg
+tournament-memory/**/snapshots/
+tournament-memory/**/out/
+tournament-memory/**/_analysis/
+tournament-memory/**/assets/gsap.min.js

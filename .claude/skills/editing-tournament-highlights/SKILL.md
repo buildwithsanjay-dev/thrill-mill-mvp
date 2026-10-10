@@ -109,6 +109,12 @@ must-exclude (injury, argument, minors' faces if the club says so).
 | Mix | music −16 to −18 LUFS under VO; duck 8–10 dB; master −14 LUFS, −1 dBTP | cutting-craft |
 | Score display | exact, from facts sheet, never from the LLM/script | — |
 
+## Render gotchas (Windows)
+
+- HyperFrames' own chrome-headless-shell may fail to start (exit 3221225595). Set `HYPERFRAMES_BROWSER_PATH` to the puppeteer shell in `~/.cache/puppeteer/chrome-headless-shell/...`.
+- `hasHdrContent: true` / `capture_hdr_layered` in the render log = a mis-tagged base video. Re-tag it as SDR (see ffmpeg-recipes) — renders went 8m49s → 1m42s.
+- Copyrighted trending songs: edit to the song's beat grid, deliver an `-instagram-NO-MUSIC` file, and have the poster add the song in Instagram at a stated start time.
+
 ## Common Mistakes
 
 | Mistake | Fix |
@@ -126,7 +132,10 @@ must-exclude (injury, argument, minors' faces if the club says so).
 
 ## Files
 
-- `scripts/triage-footage.mjs`: contact sheets, scene cuts, loudness peaks, specs
+- `scripts/triage-footage.mjs`: contact sheets, scene cuts, loudness peaks, specs, HDR flag (run it on reference reels too: cut list = their pacing)
+- `scripts/analyze-music.mjs`: tempo, drift-free beat grid, energy lifts. Put the peak shot on a lift, cuts on beats
+- `scripts/build-edit.mjs <edit-plan.json>`: frame-exact shots (tone-map → reframe → speed → grade → SDR tags), `work/base.mp4` + `work/mix.wav` (-14 LUFS). Text/transitions go on top in HyperFrames; mux mix after render
+- Worked example: `tournament-memory/trial-01/` (`edit-plan.json` + `comp/index.html`)
 - `references/story-and-pacing.md`: arcs, beat sheets, shot-scoring rubric, script writing
 - `references/cutting-craft.md`: cuts, transitions, speed ramps, reframing, typography motion, grade, sound
 - `references/style-presets.md`: four complete looks (fonts, palette, motion, music, grade)

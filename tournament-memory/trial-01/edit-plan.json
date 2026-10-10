@@ -1,0 +1,31 @@
+{
+  "$comment": "Trial 01 — Thrill Mill 'Sunday' community event (same event as the club's 'happy weekend' reference). Beat grid: 90 BPM (beat 0.667s). Music offset puts a beat on t=0 and the track's lift (8.68s) on t=6.0 = ENERGY beat.",
+  "sourceDir": "../../../video editing engine- thrill mill/raw footages",
+  "output": { "width": 1080, "height": 1920, "fps": 30 },
+  "grade": "eq=contrast=1.08:saturation=1.14:brightness=0.012:gamma=0.98,colorbalance=rs=0.025:bs=-0.025:rh=0.035:gh=0.01:bh=-0.03,vignette=PI/6",
+  "shots": [
+    { "id": "s01", "beat": "HOOK",     "src": "IMG_3746.MOV", "in": 0.0,  "speed": 0.75, "dur": 2.667, "why": "joyful dancer in black, crowd behind; title SUNDAY" },
+    { "id": "s02", "beat": "ARRIVAL",  "src": "IMG_3777.MOV", "in": 0.0,  "speed": 1.0,  "dur": 1.333, "why": "climbing the stairs up to the rooftop — arriving" },
+    { "id": "s03", "beat": "ARRIVAL",  "src": "IMG_3763.MOV", "in": 0.4,  "speed": 1.0,  "dur": 2.0,   "why": "the whole crowd on the blue turf, establishing" },
+    { "id": "s04", "beat": "ENERGY",   "src": "IMG_3756.MOV", "in": 0.0,  "speed": 1.0,  "dur": 2.0,   "why": "dance circle wide — lands on the music lift" },
+    { "id": "s05", "beat": "ENERGY",   "src": "IMG_3746.MOV", "in": 1.9,  "speed": 1.0,  "dur": 1.333, "why": "dancer again, full speed, energy" },
+    { "id": "s06", "beat": "ENERGY",   "src": "IMG_3756.MOV", "in": 1.9,  "speed": 0.75, "dur": 1.333, "why": "circle, slight slow-mo to breathe before the chits" },
+    { "id": "s07", "beat": "SURPRISE", "src": "IMG_3785.MOV", "in": 0.0,  "speed": 0.65, "dur": 3.333, "why": "opening chits from the jar, laughing — slow-mo warmth" },
+    { "id": "s08", "beat": "BOND",     "src": "IMG_3767.MOV", "in": 0.0,  "speed": 0.8,  "dur": 2.0,   "why": "Infinity Dance Studio tee — the reveal before the group" },
+    { "id": "s09", "beat": "BOND",     "src": "IMG_3767.MOV", "in": 2.2,  "speed": 1.0,  "dur": 4.0,   "why": "the group photo forms — happy ending, longest hold" }
+  ],
+  "tail": { "dur": 1.667, "color": "0xF3EEE4" },
+  "music": {
+    "file": "../_library/music/mixkit-813-magical-moment.mp3",
+    "license": "Mixkit Stock Music Free License (social media OK) — placeholder until the Tamil song arrives",
+    "bpm": 90,
+    "offset": 2.677,
+    "gainDb": 0,
+    "fadeIn": 0.1,
+    "fadeOut": 1.8,
+    "duckDb": -5
+  },
+  "realAudio": [
+    { "src": "IMG_3767.MOV", "in": 2.2, "dur": 1.2, "at": 16.0, "gainDb": -10, "why": "group cheer as the photo forms" }
+  ]
+}
