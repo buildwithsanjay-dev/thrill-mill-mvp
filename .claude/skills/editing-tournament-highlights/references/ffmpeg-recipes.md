@@ -11,6 +11,18 @@ ffmpeg -ss 41.0 -i "clip.mp4" -t 2 -vf "fps=5,scale=480:-2,tile=5x2" -frames:v 1
 ffmpeg -ss 42.3 -i "clip.mp4" -frames:v 1 -q:v 2 frame.jpg         # single still (also for thumbnails)
 ```
 
+## iPhone HDR → SDR (do this FIRST if triage flags HDR)
+
+iPhones record HLG (Dolby Vision) HEVC by default. Untreated, it looks grey and
+washed out in every SDR player and Instagram. Tone-map before any grade. State the
+input space explicitly: zscale fails with "no path between colorspaces" otherwise.
+
+```bash
+-vf "zscale=tin=arib-std-b67:pin=bt2020:min=bt2020nc:t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p"
+```
+For PQ (`smpte2084`) sources use `tin=smpte2084`. Hable can look slightly flat;
+the grade afterwards adds contrast back. Prepend this chain to the normalize filters below.
+
 ## Normalize selects (do this before assembling)
 
 Trim + convert every select to the same 1080×1920 / 30fps / yuv420p

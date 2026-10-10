@@ -54,6 +54,10 @@ function probe(file) {
     orientation: h > w ? 'portrait' : h === w ? 'square' : 'landscape',
     fps: fd ? Math.round((fn / fd) * 100) / 100 : 0,
     codec: v?.codec_name ?? null,
+    // iPhones record HLG / Dolby Vision HDR by default; unconverted it renders washed-out.
+    hdr: ['arib-std-b67', 'smpte2084'].includes(v?.color_transfer),
+    colorTransfer: v?.color_transfer ?? null,
+    rotation: rot,
     hasAudio: Boolean(a),
     sizeMB: Math.round((Number(j.format.size ?? 0) / 1048576) * 10) / 10,
   };
@@ -154,6 +158,7 @@ files.forEach((f, i) => {
   if (meta.height < 1080 && meta.width < 1080) flags.push('below 1080p');
   if (meta.fps >= 50) flags.push('high fps → slow-mo capable');
   if (!meta.hasAudio) flags.push('no audio track');
+  if (meta.hdr) flags.push(`HDR (${meta.colorTransfer}) → tone-map to SDR`);
   report.clips.push({ id, file: f, ...meta, sheet: `contact-sheets/${sheetName}`, sheetInfo: sheet, sceneCuts: cuts, loudness: loud, flags });
 });
 
