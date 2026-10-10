@@ -23,15 +23,16 @@ layers** that the app places *around* the real UI:
 
 | | ChatGPT (image gen) | Google Flow (Nano Banana / Imagen) |
 |---|---|---|
-| Background | Ask for **transparent PNG** | Can't do transparency → **solid flat magenta `#FF00FF`** (I key it out) |
+| Background | **Plain white** (same as the mascot sheets — I cut it out) | **Plain white** |
 | Square sheets | 1024×1024 | 1:1 |
 | Scenes | 1536×1024 (landscape) | 16:9 |
 | Mascot poses | 1024×1024 | 1:1 |
 | Consistency | Attach the reference images listed per prompt | Same — use "ingredients"/reference upload |
 
-**Style reference:** attach your favourite home-screen mockup (the richer purple one) to every prompt
-as a style reference, This is what keeps the separate
-generations looking like one set.
+**Style reference (attach to every prompt):**
+- Sprites SP1–SP10 → `assets/seasons-raw/halloween/indie-halloween-sheet.webp`, so the props are drawn
+  with the same outline, flat shading and colours as Indie and sit naturally next to him.
+- Scenes S1/S2 → `assets/seasons-raw/halloween/mockup-home-rich.webp` for the mood and palette.
 
 **Where to save:** drop every output into `assets/seasons-raw/halloween/` (repo root, gitignored so the
 big raw PNGs never ride along in an EAS build upload) using the file name given per prompt. If you
@@ -43,17 +44,18 @@ I'll cut out, trim, resize to @1x/@2x/@3x WebP and place the final set under
 
 ```
 STYLE LOCK (Thrill Mill Club — Halloween asset set):
-Polished 2D vector illustration for a mobile sports-club app, matching the attached style reference:
-clean rounded shapes, soft gradient shading with one highlight and one shadow tone, gentle warm glow
-on lit objects, subtle darker outline. Friendly and playful Halloween — cute, never scary: no blood,
-no gore, no realistic skulls, no horror faces.
+Flat 2D sticker illustration in EXACTLY the style of the attached mascot sheet: chunky rounded
+shapes, the same warm dark-brown outline, solid flat colour fills with one soft darker shade per
+colour, gentle glow only on lit objects (candles, jack-o'-lanterns). Do NOT draw the mascot — only the
+objects asked for. Friendly and playful Halloween — cute, never scary: no blood, no gore, no
+realistic skulls, no horror faces.
 Palette only: navy #0B2545, deep navy #0A1220, teal #0E7C86, pumpkin orange #EA5F14, amber #F5A524,
 moon yellow #F6D365, deep purple #3B1E54, lavender #CDBFE6, off-white #F4F7FB, near-black #1A1A2E.
 Absolutely no text, letters, numbers, logos or watermarks anywhere in the image.
 Every object fully inside the frame with ~10% empty margin; nothing cropped at the edges; no drop
 shadow on the background, no floor, no ground plane unless the prompt asks for one.
-BACKGROUND: transparent PNG. If transparency is not supported, use a solid flat pure magenta #FF00FF
-background with no gradient, texture or vignette, and do not use magenta anywhere in the artwork.
+BACKGROUND: plain pure white #FFFFFF, no gradient, texture, vignette or ground shadow. When there are
+several objects, keep wide clear gaps of white between them so each can be cut out separately.
 ```
 
 (For the two scene prompts S1/S2 ignore the BACKGROUND line — scenes are full-bleed.)
@@ -205,8 +207,9 @@ evenly spaced with wide gaps, identical size and body position, side view flying
 frame 1 wings up, frame 2 wings level, frame 3 wings down. Square image.
 ```
 
-### SP3 — Empty-state ghosts → `SP3-ghosts.png`
-Replaces the grey circle icon on every "nothing here yet" state.
+### SP3 — Empty-state ghosts → `SP3-ghosts.png` — ❌ DROPPED
+Not needed any more: Indie covers the empty states (`napping`, `welcome-open-arms`, `face-thinking`).
+Kept below for reference only — skip it.
 ```
 [STYLE LOCK]
 Sprite sheet of 6 small, cute, friendly white ghosts (soft off-white #F4F7FB with lavender
@@ -243,11 +246,11 @@ consistent scale and style:
 Square image.
 ```
 
-### SP6 — White silhouettes (recoloured in code) → `SP6-silhouettes.png`
+### SP6 — Silhouettes (recoloured in code) → `SP6-silhouettes.png`
 ```
-[STYLE LOCK — override the palette: draw everything in pure flat white #FFFFFF only,
-no shading, no outline, no other colours]
-Sprite sheet of separate flat white silhouette shapes, each with wide gaps:
+[STYLE LOCK — override the style: draw everything as pure flat BLACK #000000 shapes only,
+no shading, no outline, no other colours. I recolour them in code.]
+Sprite sheet of separate flat black silhouette shapes, each with wide gaps:
 1) a delicate corner spiderweb filling a quarter-circle, anchored to the top-left corner of its
    cell (thin clean lines),
 2) a long, low horizontal strip: graveyard fence with three rounded tombstones and a bare
@@ -261,8 +264,8 @@ Square image.
 ### SP7 — Chat wallpaper doodles → `SP7-chat-doodles.png`
 For a faint WhatsApp-style doodle pattern behind Team Chat. I'll compose the seamless tile myself.
 ```
-[STYLE LOCK — override the palette: pure white #FFFFFF line art only, uniform 3px stroke,
-outline style, no fills, no shading]
+[STYLE LOCK — override the style: pure BLACK #000000 line art only, uniform thick stroke,
+outline style, no fills, no shading. I recolour and fade them in code.]
 Sprite sheet of 12 simple doodle icons in a 4×3 grid with wide gaps, same line weight and size:
 pumpkin, bat, ghost, witch hat, candy corn, crescent moon with star, spiderweb, cauldron,
 football, pickleball paddle with ball, lantern, wrapped candy. Square image.
@@ -284,7 +287,7 @@ Ring around the profile photo (Profile screen; small version around the header a
 [STYLE LOCK]
 A circular decorative frame / wreath: a thin ring of curling green-and-purple pumpkin vines
 with small orange pumpkins at the bottom, a few leaves, and one tiny bat hanging from the top.
-THE CENTER OF THE RING MUST BE COMPLETELY EMPTY (transparent / magenta) — it is a frame for a
+THE CENTER OF THE RING MUST BE COMPLETELY EMPTY PLAIN WHITE — it is a frame for a
 round photo. Ring is perfectly circular, thin (about 10% of the diameter), centered.
 Square image.
 ```
@@ -329,5 +332,6 @@ form fields, sport chips) stay untouched. Respect the phone's Reduce Motion sett
 ## Checklist
 
 - [ ] Mascot concept + base sheet approved by manager (mascot.md steps 1–3)
-- [ ] Mascot H1 + H2 (+ optional H3) · S1–S2 · SP1–SP10 generated and saved to `assets/seasons-raw/halloween/`
+- [x] Mascot H1 + H2 sliced into `mobile/assets/mascot/halloween/`
+- [ ] S1–S2 · SP1, SP2, SP4–SP10 generated (SP3 dropped) and saved to `assets/seasons-raw/halloween/`
 - [ ] Hand back to Claude for cut-out, optimisation, and implementation
