@@ -37,3 +37,7 @@ tournament-memory/**/work/
 tournament-memory/**/*.mp4
 tournament-memory/**/*.mov
 tournament-memory/**/*.wav
+
+# Raw AI-generated seasonal art (large PNGs straight from ChatGPT/Flow) — only
+# the cut-out, optimised WebPs under mobile/assets/seasons/ ship in the app.
+/assets/seasons-raw/
