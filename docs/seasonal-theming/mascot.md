@@ -22,6 +22,108 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 
 ---
 
+## ✅ Chosen (2026-10-10): "Indie" — redraw the approved 3D concept as a flat 2D sticker character
+
+Approved: the 3D Concept D render (Indie with the lime pickleball). Final art is **2D**, in the style
+of the manager's reference sheet (the 3×3 grid of chunky blue monsters in seasonal outfits). Save the
+3D render as `assets/seasons-raw/mascot/indie-3d-approved.png` and the reference sheet as
+`assets/seasons-raw/mascot/style-reference.png` — both are attached to every prompt below.
+
+Unlike the reference sheet (where the monster turns orange for the pumpkin, black for the bat),
+**Indie's body never changes colour — costumes only go on top.**
+
+**Character bible — paste into every mascot prompt:**
+```
+CHARACTER: "Indie", an Indian Pariah dog pup standing upright — warm tan/fawn coat; cream blaze
+between the eyes, cream muzzle, cheeks and chest; tall upright pointed ears with pink insides; big
+round brown eyes with white highlights; dark brown nose; small pink tongue tip; curled tail with a
+cream tip. BASE OUTFIT: navy sleeveless jersey with teal, orange and amber speed-line stripes
+across the chest; teal bandana knotted at the side of the neck; teal wristbands; navy track pants
+with an orange-and-teal side stripe; orange-and-white sneakers. No badge, collar tag, backpack,
+letters, numbers or logos.
+```
+
+**2D style lock — paste into every mascot prompt:**
+```
+STYLE: flat 2D vector sticker illustration matching the attached style reference sheet — simple,
+chunky, rounded shapes; solid flat colour fills with just one soft darker shade per colour; no
+gradients, no textures, no glossy highlights, no 3D rendering; clean edges with no outline (or a very
+subtle same-hue outline); a soft light-grey oval ground shadow under the feet. Slightly chunkier,
+cuter proportions than the 3D concept (bigger head, shorter body) so he reads clearly at small
+sizes, but the same face, markings, colours and outfit. No text anywhere.
+Transparent background (or flat pure magenta #FF00FF if transparency isn't available).
+```
+
+### 2D-1 — Base character, flat 2D → `BASE-2d.png`
+Attach: `indie-3d-approved.png` (the character) + `style-reference.png` (the style only).
+```
+Redraw the character from the FIRST attached image as a flat 2D sticker illustration in the style
+of the SECOND attached image. Keep his identity exactly: face, markings, ear shape, eye colour,
+curled tail, outfit and colours. Only the rendering style changes from 3D to flat 2D.
+[CHARACTER BIBLE]
+[2D STYLE LOCK]
+Pose: standing, front three-quarter view, holding the lime-green pickleball (with its small holes)
+in one raised paw, other paw on hip, friendly confident smile. Single character, centered,
+nothing cropped. Square image.
+```
+Generate 3–4 times, pick one with the manager. **Everything below is edited from or references this
+file.**
+
+### 2D-2 — Base pose sheet (3×3) → `BASE-poses-sheet.png`
+Like the top row of the reference sheet: same outfit, different moods. One image keeps all 9
+consistent; I'll slice it into single files.
+Attach: `BASE-2d.png` + `style-reference.png`.
+```
+A character sheet of the SAME character as the attached BASE image, identical design and outfit,
+drawn 9 times in a 3×3 grid, each in its own cell with wide even gaps, all the same size, each with
+its own small grey oval ground shadow:
+row 1: (1) peeking and waving one paw high, big happy grin; (2) jumping with both arms up holding a
+football, eyes closed with joy; (3) patient smile looking at a wristwatch on one raised wrist;
+row 2: (4) apologetic "oops" shrug with palms up and a small sweat drop; (5) one paw raised
+palm-out in a friendly "wait a second" gesture, eyebrows raised; (6) holding a golden trophy above
+his head, proud smile;
+row 3: (7) sitting relaxed, leaning back, football beside him, sleepy half-smile; (8) hugging the
+lime pickleball with little floating hearts around his head; (9) thinking, paw on chin, one
+eyebrow raised.
+[CHARACTER BIBLE]
+[2D STYLE LOCK]
+Square image, high resolution.
+```
+Poses 1–7 = P1–P7 in step 3 below. 8 = "love" (join request approved, added to a team);
+9 = "thinking" (loading / empty search).
+
+### 2D-3 — Seasonal outfit overview (3×3) → `SEASONS-overview-sheet.png`
+The equivalent of your reference sheet: one image showing Indie in all 9 looks. It's for the
+manager to approve the costumes before the per-pose edits.
+Attach: `BASE-2d.png` + `style-reference.png`.
+```
+A character sheet of the SAME character as the attached BASE image — identical face, markings,
+body colour and proportions in every cell; only the outfit and props change. 9 versions in a 3×3
+grid, each in its own cell with wide even gaps, same size, each with a small grey oval ground
+shadow, all in the same cheerful standing pose with one paw waving:
+(1) base sports outfit with the lime pickleball;
+(2) Navratri: orange-and-teal mirror-work kediyu jacket, bandhani turban, dandiya sticks;
+(3) Halloween: carved jack-o'-lantern pumpkin mask pushed up on top of his head like a visor (face
+visible), short purple cape with orange lining, pumpkin candy bucket;
+(4) Diwali: amber-and-orange silk kurta with gold border, marigold garland, holding a lit clay diya;
+(5) Christmas: red Santa cap with white trim, red-and-white knitted scarf, small gift box;
+(6) New Year: shiny orange party cone hat, star-shaped sunglasses on his head, party popper with
+confetti;
+(7) Pongal: white veshti with teal-and-gold border, white half-sleeve shirt, gold-bordered shoulder
+cloth, holding a stalk of sugarcane;
+(8) Holi: white kurta splashed with pink, yellow, green and blue colour powder, colour smudges on
+his cheeks, a pichkari water gun;
+(9) Cricket: teal-and-orange cricket jersey with no team names or logos, cricket cap, cricket bat.
+[CHARACTER BIBLE — keep his body colours; ignore the base outfit where a costume replaces it]
+[2D STYLE LOCK]
+Square image, high resolution.
+```
+
+Once the manager approves 2D-2 and 2D-3, continue with **step 4** below (edit each base pose with
+that season's outfit) to get every pose in every costume. Steps 1–2 below are superseded.
+
+---
+
 ## Step 1 — Concept round (pick one with the manager)
 
 All three are derived from the logo: lime pickleball, navy "TM" athlete figure, teal/orange/amber speed
