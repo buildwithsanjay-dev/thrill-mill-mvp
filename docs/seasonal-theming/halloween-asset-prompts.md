@@ -35,7 +35,7 @@ generations looking like one set.
 
 **Where to save:** drop every output into `assets/seasons-raw/halloween/` (repo root, gitignored so the
 big raw PNGs never ride along in an EAS build upload) using the file name given per prompt. If you
-generate in both tools, suffix `-gpt` / `-flow` (e.g. `P2-celebrate-gpt.png`) and I'll pick per asset.
+generate in both tools, suffix `-gpt` / `-flow` (e.g. `indie-halloween-sheet-gpt.webp`) and I'll pick per asset.
 I'll cut out, trim, resize to @1x/@2x/@3x WebP and place the final set under
 `mobile/assets/seasons/halloween/`.
 
@@ -60,15 +60,94 @@ background with no gradient, texture or vignette, and do not use magenta anywher
 
 ---
 
-## A. Mascot — see [mascot.md](mascot.md)
+## A. Mascot — Indie in Halloween costume
 
-The mascot now has its own doc: one base character derived from the club logo, 7 base poses, and an
-"edit only the outfit" prompt per festival. For Halloween, follow mascot.md step 4 with the
-**Halloween** outfit row (pumpkin mask pushed up like a visor + purple cape) on each of the 7 base
-poses, saving to `assets/seasons-raw/halloween/P1-wave.png` … `P7-resting.png`.
+Base art (saved): `assets/seasons-raw/mascot/indie-2d-sheet.webp` (hero, turnaround, A1–A4, F1–F6)
+and `indie-2d-sheet-2.webp` (N1–N7, F7–F9). Pose IDs and where each is used: [mascot.md](mascot.md).
 
-Pose → where it's used: P1 Home hero · P2 success pop-ups · P3 info / booking requested ·
-P4 error pop-ups · P5 warning pop-ups · P6 Leaderboard · P7 empty "no games yet".
+**Rule:** edit the base sheets — Indie's body, face and colours never change; only the costume and
+props are added. Attach the base sheet and ask for an *edit*, not a new image.
+
+**The Halloween costume (same on every pose):**
+- A carved jack-o'-lantern pumpkin mask worn **pushed up on top of his head like a visor**, between
+  his ears, so his face and expression stay fully visible.
+- A short deep-purple (#3B1E54) cape with orange (#EA5F14) lining, tied at the neck over the teal
+  bandana.
+- Jersey, bandana, wristbands, track pants and sneakers stay exactly as they are.
+- Wherever the lime pickleball appears it becomes a **pumpkin pickleball**: orange, same size, the
+  holes arranged as a smiling jack-o'-lantern face.
+
+### H1 — Halloween edit of sheet 1 → `halloween/indie-halloween-sheet.webp`
+Attach `indie-2d-sheet.webp`.
+```
+Edit the attached character sheet. Keep EVERYTHING exactly the same — the same character, every
+figure in the same position, pose, size, expression, face, markings, body colours, outfit, line
+style, flat shading and grey ground shadows, and the same white background. Add a Halloween
+costume to EVERY figure, drawn in the same flat 2D style:
+1) a carved jack-o'-lantern pumpkin mask worn pushed up on top of his head like a visor, sitting
+between his ears, with the face fully visible underneath — friendly carved smile on the pumpkin;
+2) a short deep-purple (#3B1E54) cape with orange (#EA5F14) lining, tied at the neck over the teal
+bandana, flowing naturally with each pose (seen from behind in the back views);
+3) every lime-green pickleball becomes an orange pumpkin pickleball of the same size, its holes
+arranged as a little smiling jack-o'-lantern face.
+On the head-and-shoulders busts in the bottom row, show the pumpkin mask on top of the head and
+the cape collar at the shoulders.
+Do not change anything else. No text, no new background, no extra characters.
+```
+
+### H2 — Halloween edit of sheet 2 → `halloween/indie-halloween-sheet-2.webp`
+Attach `indie-2d-sheet-2.webp`.
+```
+Edit the attached character sheet. Keep EVERYTHING exactly the same — the same character, every
+figure in the same position, pose, size, expression, face, markings, body colours, outfit, line
+style, flat shading and grey ground shadows, and the same white background. Add a Halloween
+costume to EVERY figure, drawn in the same flat 2D style:
+1) a carved jack-o'-lantern pumpkin mask worn pushed up on top of his head like a visor, between
+his ears, face fully visible underneath;
+2) a short deep-purple (#3B1E54) cape with orange (#EA5F14) lining, tied at the neck over the teal
+bandana;
+3) every lime-green pickleball becomes an orange pumpkin pickleball with a smiling jack-o'-lantern
+face made of its holes.
+Pose-specific changes, keeping each pose itself unchanged:
+- waving figure (top row, 1st): add two tiny friendly bats fluttering near his raised paw;
+- "oops" figure (top row, 2nd): replace the dropped ball with a tipped-over orange pumpkin candy
+  bucket and a few wrapped sweets spilled on the ground;
+- watch-checking figure (top row, 3rd): a small orange pumpkin candy bucket hangs from the arm that
+  holds the ball;
+- "hold on" figure (top row, 4th): no extra props;
+- trophy figure (middle row, 1st): the trophy becomes a golden cup shaped like a carved
+  jack-o'-lantern;
+- napping figure (middle row, 2nd): he naps with his head on a large pumpkin instead of the ball,
+  and the pumpkin mask has slipped down over one ear;
+- welcome figure (middle row, 3rd): a few candy-corn pieces and small stars bursting around his
+  open arms;
+- sad bust (bottom row, 1st): the pumpkin mask droops to one side;
+- worried bust (bottom row, 2nd): no extra props;
+- sleepy bust (bottom row, 3rd): the pumpkin mask tilted down over one eye.
+Do not change anything else. No text, no new background, no extra characters.
+```
+
+### H3 (optional) — the Home "reveal" → `halloween/indie-halloween-masked-wave.webp`
+For the Home hero: he peeks in wearing the mask fully down, then I animate it lifting.
+Attach `indie-halloween-sheet-2.webp`.
+```
+Using the waving character in the top-left of the attached sheet as the exact reference — same
+pose, outfit, cape, proportions and flat 2D style — draw him with the carved jack-o'-lantern mask
+pulled fully DOWN over his face (his ears poke out through the top of the pumpkin, the carved face
+smiling), still waving one paw high. Single character, centered, soft grey oval ground shadow,
+white background, no text. Square image.
+```
+
+### If a figure comes out wrong
+Sheet edits sometimes drop or redraw a figure. Redo just that one:
+```
+Edit the attached image of this character. Keep him exactly the same — face, markings, colours,
+pose, expression, outfit, flat 2D style and ground shadow. Add only: a carved jack-o'-lantern
+mask pushed up on top of his head like a visor (face visible), a short deep-purple #3B1E54 cape
+with orange #EA5F14 lining tied at the neck, and [the pose-specific change from H2, if any].
+No text, white background.
+```
+(Crop the single figure out of the base sheet first and attach that crop.)
 
 ---
 
@@ -232,14 +311,14 @@ form fields, sport chips) stay untouched. Respect the phone's Reduce Motion sett
 | Screen | Free space observed | Assets |
 |---|---|---|
 | **App header** (every tab) | Thin bar, empty between title and bell | Twilight gradient (code), 1–3 bats (SP1) flying across every ~20–40 s, tiny witch hat (SP5-2) perched on the logo badge |
-| **Home** | Big gap above + below greeting; empty-state card; navy credits card | S1/S2 hero behind greeting with P1 peeking at right; 🎃 replaces 👋 (emoji, code); crows (SP2) occasionally; ghost (SP3-1) + cobweb corner (SP6-1) in "No upcoming events"; cobweb + SP4 cluster + sparkles (SP6) on credits card; jack-o'-lantern football (SP5-1) as Book-a-Slot icon; faint bat/star page pattern (composed from SP6) |
+| **Home** | Big gap above + below greeting; empty-state card; navy credits card | S1/S2 hero behind greeting with N1 (or the H3 masked reveal) peeking at right; 🎃 replaces 👋 (emoji, code); crows (SP2) occasionally; ghost (SP3-1) + cobweb corner (SP6-1) in "No upcoming events"; cobweb + SP4 cluster + sparkles (SP6) on credits card; jack-o'-lantern football (SP5-1) as Book-a-Slot icon; faint bat/star page pattern (composed from SP6) |
 | **Book a Slot** | Gap above title, gap between team card and "Select Sport", venue photo | Hero band (S1/S2, shorter crop) behind title; dangling spider (SP5-4) dropping from the top right on a slow loop; cobweb corner over the venue photo; date/slot grid untouched |
 | **My Teams** | Gap under "Your sports communities"; navy team cards with faded football watermark | Hero band behind title; pumpkin-football (SP5-1) replaces the faded watermark on each navy card; bunting (SP10) under the stats card |
 | **Team detail** | Team photo banner; navy credits card | Cobweb corner + 2 bats over the photo; SP4 cluster on credits card |
 | **Team chat** | Huge empty middle area | Faint doodle wallpaper (SP7, tinted at ~6% opacity); optional seasonal quick-reply "Happy Halloween 🎃" (text, code) |
-| **Leaderboard** | Gap above title; space around podium | Hero band with P6 (trophy) on the right; trophy icon → pumpkin trophy (SP5-6); graveyard strip (SP6-2) faint behind the podium; witch hat on the #1 avatar |
-| **Profile** | Avatar area; "No games played this week yet." | Pumpkin-vine ring (SP9) around the photo; P7 resting replaces the plain empty text area; "Festive decorations" toggle row in Appearance |
-| **Pop-ups** (`AppDialog`, used everywhere) | Icon circle at the top of every dialog | Mascot replaces the icon circle: success → P2 + confetti (SP8) burst, info/pending → P3, error → P4, warning → P5. A small coloured badge (tick / ! / ×) stays on the mascot's corner so the meaning is clear without the art |
+| **Leaderboard** | Gap above title; space around podium | Hero band with N5 (trophy) on the right; trophy icon → pumpkin trophy (SP5-6); graveyard strip (SP6-2) faint behind the podium; witch hat on the #1 avatar |
+| **Profile** | Avatar area; "No games played this week yet." | Pumpkin-vine ring (SP9) around the photo; N6 napping replaces the plain empty text area; "Festive decorations" toggle row in Appearance |
+| **Pop-ups** (`AppDialog`, used everywhere) | Icon circle at the top of every dialog | Mascot replaces the icon circle: big success → A2 + confetti (SP8) burst, small success → A3, pending → N3, error → N2, confirmation → N4, nudge → F5 (full map in mascot.md). A small coloured badge (tick / ! / ×) stays on the mascot's corner so the meaning is clear without the art |
 | **Empty states** (Notifications, Wallet activity, Leaderboard, Teams, Book) | Grey circle icon | Matching ghost from SP3 |
 | **Welcome / onboarding** | Turf photo, logo badge | Bats (SP1) crossing the photo, witch hat on the logo badge, SP4 cluster at the sheet's top edge |
 | **Tab bar** | Line above the tabs | Bunting (SP10) strung along the top edge; witch hat on the active tab icon |
@@ -250,5 +329,5 @@ form fields, sport chips) stay untouched. Respect the phone's Reduce Motion sett
 ## Checklist
 
 - [ ] Mascot concept + base sheet approved by manager (mascot.md steps 1–3)
-- [ ] Halloween outfit on P1–P7 (mascot.md step 4) · S1–S2 · SP1–SP10 generated and saved to `assets/seasons-raw/halloween/`
+- [ ] Mascot H1 + H2 (+ optional H3) · S1–S2 · SP1–SP10 generated and saved to `assets/seasons-raw/halloween/`
 - [ ] Hand back to Claude for cut-out, optimisation, and implementation

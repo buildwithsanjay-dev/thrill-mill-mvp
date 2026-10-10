@@ -24,7 +24,7 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 
 ## ✅ Final 2D sheet (2026-10-10) and where each pose is used
 
-Approved sheet: save as `assets/seasons-raw/mascot/indie-2d-sheet.png`. It contains:
+Approved sheet: save as `assets/seasons-raw/mascot/indie-2d-sheet.webp`. It contains:
 
 | ID | On the sheet | Mood |
 |---|---|---|
@@ -63,8 +63,8 @@ Why `N3` matters: today "Booking submitted" is styled as a success. A Host's boo
 *pending* until an Admin approves it, so it must not show the big celebration (`A2`). `A2` is kept
 for the moment it's actually confirmed.
 
-### Prompt — missing moods sheet → `indie-2d-sheet-2.png`
-Attach `indie-2d-sheet.png`.
+### Prompt — missing moods sheet → `indie-2d-sheet-2.webp`
+Attach `indie-2d-sheet.webp`.
 ```
 Using the attached character sheet as the exact reference, draw NEW poses of the SAME character —
 identical face, markings, ear shape, eye colour, curled tail, outfit, colours, proportions, line
@@ -151,7 +151,7 @@ notification list can, as a small round face on each row:
 
 Approved: the 3D Concept D render (Indie with the lime pickleball). Final art is **2D**, in the style
 of the manager's reference sheet (the 3×3 grid of chunky blue monsters in seasonal outfits). Save the
-3D render as `assets/seasons-raw/mascot/indie-3d-approved.png` and the reference sheet as
+3D render as `assets/seasons-raw/mascot/indie-3d-approved.webp` and the reference sheet as
 `assets/seasons-raw/mascot/style-reference.png` — both are attached to every prompt below.
 
 Unlike the reference sheet (where the monster turns orange for the pumpkin, black for the bat),
@@ -180,7 +180,7 @@ Transparent background (or flat pure magenta #FF00FF if transparency isn't avail
 ```
 
 ### 2D-1 — Base character, flat 2D → `BASE-2d.png`
-Attach: `indie-3d-approved.png` (the character) + `style-reference.png` (the style only).
+Attach: `indie-3d-approved.webp` (the character) + `style-reference.png` (the style only).
 ```
 Redraw the character from the FIRST attached image as a flat 2D sticker illustration in the style
 of the SECOND attached image. Keep his identity exactly: face, markings, ear shape, eye colour,
