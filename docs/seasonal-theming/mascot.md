@@ -27,8 +27,57 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 All three are derived from the logo: lime pickleball, navy "TM" athlete figure, teal/orange/amber speed
 lines, bowling pin, arcade joystick, orange paddle. Attach the logo to each prompt.
 
-**Recommended: A.** The lime pickleball is the most distinctive thing in the logo, nobody else owns it,
-and a round ball head takes masks, hats and turbans easily.
+**Manager's direction (2026-10-10): a Paw-Patrol-*inspired* pup → Concept D below.** A–C stay as
+fallbacks.
+
+### Concept D — "Indie", the club's hero pup (manager's pick) → `C-D-pup.png`
+
+**What "inspired by" may borrow, and what it must not.** Paw Patrol is a Spin Master trademark and
+copyright. A commercial app with a lookalike pup risks a takedown or Play Store complaint. So we
+borrow the *qualities* that make it appealing, never the *specifics*:
+
+| Borrow (generic) | Never copy (Paw Patrol-specific) |
+|---|---|
+| A brave, upbeat, heroic puppy with a "job" | Any named character, or their breed + colour combo (German Shepherd in blue police gear, Dalmatian in red fire gear, Cockapoo in pink aviator gear, Bulldog in yellow construction gear…) |
+| Chunky, rounded 3D-cartoon look, big glossy eyes | The shield-shaped collar badge with an emblem, the "pup pack" backpack with gadgets, the lookout tower, the logo/lettering, the catchphrases |
+| A uniform that says what the pup does (ours: sports kit) | The words "Paw Patrol" or any character name in our app, store listing or marketing |
+| A team of pups with different roles (later, optional) | Prompts that say "Paw Patrol" or "in the style of Paw Patrol" — the tools then produce near-copies |
+
+Our pup is an **Indian Pariah ("Indie") dog** — a breed none of the show's main characters use, and a
+local touch for an Indian club.
+
+```
+Mascot character design for a sports & gaming club app, using the colours of the attached logo.
+A brave, upbeat puppy hero: an Indian Pariah ("Indie") dog pup — warm fawn/tan short coat with a
+cream chest and muzzle, tall upright pointed ears, a curled tail, big glossy brown eyes, a
+confident, friendly grin with a tiny tongue tip showing. Chunky rounded chibi proportions,
+about 2.5 heads tall, standing upright on two legs like a cartoon hero.
+BASE outfit: a navy #0B2545 sporty jersey vest with teal #0E7C86, orange #EA5F14 and amber
+#F5A524 speed-line stripes across the chest like the logo's motion lines, a teal sports bandana
+knotted around the neck, teal wristbands on the front paws, orange-and-white sneakers on the back
+paws. No badge, no collar tag, no backpack, no letters, numbers or logos anywhere.
+Holding the lime-green pickleball from the logo in one paw.
+Soft 3D cartoon render style (smooth rounded forms, gentle studio lighting, slight glossy
+highlights), cheerful family-animation feel. Full body, front three-quarter view, heroic pose.
+Single character, centered, nothing cropped, no text.
+Transparent background (or flat pure magenta #FF00FF if transparency isn't available).
+```
+
+Optional later (Leaderboard / onboarding): a crew of two more original pups, one per sport —
+```
+Same art style, two new original pups to join the attached pup as a team, each different in breed
+and colour from the attached pup and from each other: a Beagle pup in a teal turf-football kit
+with a football, and a Shih Tzu pup in an amber pickleball kit with an orange paddle. Same base
+jersey design with speed-line stripes, same bandana style in their own colour. No badges, no collar
+tags, no backpacks, no text. Standing side by side with the attached pup in the middle.
+```
+
+**Style note:** a 3D-cartoon pup next to the flat-vector decorations (bats, cobwebs, pumpkins) in the
+asset pack can look mismatched. If D is chosen, I'll update the asset pack's STYLE LOCK to "soft 3D
+cartoon" so the props match the pup.
+
+**Earlier recommendation: A.** The lime pickleball is the most distinctive thing in the logo, nobody
+else owns it, and a round ball head takes masks, hats and turbans easily.
 
 ### Concept A — "the Pickleball buddy" → `C-A-pickleball.png`
 ```
