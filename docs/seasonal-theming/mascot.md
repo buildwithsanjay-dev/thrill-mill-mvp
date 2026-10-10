@@ -24,30 +24,46 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 
 ## ✅ In-app mascot files (sliced 2026-10-10)
 
-Base set = `indie-2d-sheet-2.webp` (owner's pick). Each season is a folder with the **same file
-names**, so the app swaps season by changing only the folder:
+Cut from both 2D sheets. Each season is a folder with the **same 21 file names**, so the app swaps
+season by changing only the folder:
 
 ```
 mobile/assets/mascot/<season>/
-  wave-hello.webp        hold-on.webp            welcome-open-arms.webp
-  oops-sorry.webp        trophy-champion.webp    face-sad.webp
-  waiting-watch.webp     napping.webp            face-worried.webp
-                                                 face-sleepy.webp
+  hero-standing.webp                      (511×704 — welcome / onboarding)
+  Full body (476×518):
+    wave-hello  oops-sorry  waiting-watch  hold-on  trophy-champion  napping  welcome-open-arms
+    run-lets-go  celebrate-jump  wink-nice  throw-game-on
+  Faces (356×359):
+    face-smile  face-wink  face-excited  face-surprised  face-thinking  face-laughing
+    face-sad  face-worried  face-sleepy
 ```
-Seasons done: `base`, `halloween`. Full-body poses share one 429×518 canvas and faces one 356×349
-canvas, bottom-aligned, so swapping poses or seasons never makes Indie jump or resize. Backgrounds
-are transparent; the grey ground shadow became a soft translucent shadow that works in light and
-dark mode.
+Seasons done: `base`, `halloween`. Poses of one kind share a canvas and are bottom-aligned; sheet 1's
+smaller figures are scaled up to sheet 2's size, so swapping pose or season never makes Indie jump or
+resize. Backgrounds are transparent; the grey ground shadow became a soft translucent shadow that
+works in light and dark mode.
 
-New season: generate its edit of `indie-2d-sheet-2.webp` (same 4/3/3 layout), then run from the repo
-root (needs Python with Pillow, NumPy, SciPy):
-```
-python scripts/slice_mascot.py mobile/assets/mascot base=assets/seasons-raw/mascot/indie-2d-sheet-2.webp diwali=assets/seasons-raw/diwali/indie-diwali-sheet-2.webp
-```
-Always pass `base=` too: all seasons are cut to one shared canvas size.
+| File | Was | Main use |
+|---|---|---|
+| `hero-standing` | HERO | Welcome / onboarding |
+| `wave-hello` | N1 | Home hero peek, "Sign out?" |
+| `oops-sorry` | N2 | Error pop-ups |
+| `waiting-watch` | N3 | Pending pop-ups (booking submitted, request sent) |
+| `hold-on` | N4 | Confirmation pop-ups |
+| `trophy-champion` | N5 | Leaderboard |
+| `napping` | N6 | Empty states |
+| `welcome-open-arms` | N7 | Invites, join approved, "No Teams yet" |
+| `run-lets-go` | A1 | Game reminder |
+| `celebrate-jump` | A2 | Big success (booking confirmed, team created, membership activated) |
+| `wink-nice` | A3 | Small success (profile saved, poll posted, invite sent) |
+| `throw-game-on` | A4 | Leaderboard "compete" moments |
+| `face-*` | F1–F9 | In-app notification list, nudges inside the pop-up icon circle |
 
-**Gap:** this set has no "celebrate" (big success, e.g. Booking confirmed) and no "small win"
-pose — those are `A2`/`A3` on `indie-2d-sheet.webp`, not on sheet 2.
+New season: generate its edits of **both** sheets (same layouts), then run from the repo root
+(needs Python with Pillow, NumPy, SciPy). Always include the base sheets in the same run — all
+seasons are cut to shared canvas sizes:
+```
+python scripts/slice_mascot.py mobile/assets/mascot base=assets/seasons-raw/mascot/indie-2d-sheet-2.webp:moods base=assets/seasons-raw/mascot/indie-2d-sheet.webp:actions halloween=assets/seasons-raw/halloween/indie-halloween-sheet-2.webp:moods halloween=assets/seasons-raw/halloween/indie-halloween-sheet.webp:actions diwali=assets/seasons-raw/diwali/indie-diwali-sheet-2.webp:moods diwali=assets/seasons-raw/diwali/indie-diwali-sheet.webp:actions
+```
 
 ---
 
