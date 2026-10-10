@@ -35,7 +35,7 @@ generations looking like one set.
 
 **Where to save:** drop every output into `assets/seasons-raw/halloween/` (repo root, gitignored so the
 big raw PNGs never ride along in an EAS build upload) using the file name given per prompt. If you
-generate in both tools, suffix `-gpt` / `-flow` (e.g. `M2-celebrate-gpt.png`) and I'll pick per asset.
+generate in both tools, suffix `-gpt` / `-flow` (e.g. `P2-celebrate-gpt.png`) and I'll pick per asset.
 I'll cut out, trim, resize to @1x/@2x/@3x WebP and place the final set under
 `mobile/assets/seasons/halloween/`.
 
