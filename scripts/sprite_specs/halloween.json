@@ -1,0 +1,33 @@
+{
+  "raw_dir": "assets/seasons-raw/halloween",
+  "out_dir": "mobile/assets/seasons/halloween",
+  "scenes": [
+    { "src": "S1-hero-day.png", "out": "hero-day.webp", "erase": [[1240, 630, 1320, 712]] },
+    { "src": "S2-hero-night.png", "out": "hero-night.webp", "erase": [[1240, 630, 1320, 712]] }
+  ],
+  "sheets": [
+    { "src": "SP1-bat-frames.png", "mode": "color", "frames": true,
+      "names": ["bat-wings-up", "bat-wings-level", "bat-wings-down"] },
+    { "src": "SP2-crow-frames.png", "mode": "color", "frames": true,
+      "names": ["crow-wings-up", "crow-wings-level", "crow-wings-down"] },
+    { "src": "SP4-pumpkin-cluster.png", "mode": "color",
+      "names": ["pumpkin-cluster"] },
+    { "src": "SP5-props.webp", "mode": "color",
+      "names": ["prop-pumpkin-football", "prop-witch-hat", null, "prop-candy-corn",
+                "prop-spider", "prop-jack-o-lantern", "prop-pumpkin-purple", "prop-pumpkin-trophy"] },
+    { "src": "SP6-silhouettes.png", "mode": "mask", "merge": 6,
+      "names": ["shape-cobweb", "shape-sparkle", "shape-moon", "shape-bat", "shape-dot", "shape-graveyard"] },
+    { "src": "SP7-chat-doodles.png", "mode": "mask", "merge": 8,
+      "names": ["doodle-pumpkin", "doodle-bat", "doodle-ghost", "doodle-witch-hat",
+                "doodle-candy-corn", "doodle-moon-star", "doodle-cobweb", "doodle-cauldron",
+                "doodle-football", "doodle-pickleball", "doodle-lantern", "doodle-sweet"] },
+    { "src": "SP8-confetti.png", "mode": "color",
+      "names": ["confetti-candy-corn", "confetti-sweet-orange", "confetti-sweet-purple",
+                "confetti-bat", "confetti-star-orange", "confetti-star-yellow",
+                "confetti-curl-orange", "confetti-curl-purple", "confetti-pumpkin"] },
+    { "src": "SP9-avatar-frame.png", "mode": "color", "holes_min": 20000,
+      "names": ["avatar-ring"] },
+    { "src": "SP10-bunting.png", "mode": "color", "merge": 6, "holes_min": 1500,
+      "names": ["bunting-orange", "bunting-purple", "bunting-bat"] }
+  ]
+}

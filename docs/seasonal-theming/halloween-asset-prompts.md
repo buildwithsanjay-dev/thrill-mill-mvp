@@ -304,34 +304,62 @@ piece of string across the top of its cell, in a single row with wide gaps, same
 
 ---
 
-## Where each asset goes (screen-by-screen)
+## Final Halloween asset set (sliced 2026-10-10)
 
-Placement rules: decorations never cover a number, price, credit balance, button label or input;
-never take taps (purely visual); functional elements (date chips, time-slot grid, poll options,
-form fields, sport chips) stay untouched. Respect the phone's Reduce Motion setting and a new
-**Profile → Appearance → "Festive decorations"** on/off switch.
+Mascot: `mobile/assets/mascot/halloween/` (21 poses — see mascot.md).
+Decorations: `mobile/assets/seasons/halloween/` (49 files), cut by
+`python scripts/slice_sprites.py scripts/sprite_specs/halloween.json`.
 
-| Screen | Free space observed | Assets |
-|---|---|---|
-| **App header** (every tab) | Thin bar, empty between title and bell | Twilight gradient (code), 1–3 bats (SP1) flying across every ~20–40 s, tiny witch hat (SP5-2) perched on the logo badge |
-| **Home** | Big gap above + below greeting; empty-state card; navy credits card | S1/S2 hero behind greeting with N1 (or the H3 masked reveal) peeking at right; 🎃 replaces 👋 (emoji, code); crows (SP2) occasionally; ghost (SP3-1) + cobweb corner (SP6-1) in "No upcoming events"; cobweb + SP4 cluster + sparkles (SP6) on credits card; jack-o'-lantern football (SP5-1) as Book-a-Slot icon; faint bat/star page pattern (composed from SP6) |
-| **Book a Slot** | Gap above title, gap between team card and "Select Sport", venue photo | Hero band (S1/S2, shorter crop) behind title; dangling spider (SP5-4) dropping from the top right on a slow loop; cobweb corner over the venue photo; date/slot grid untouched |
-| **My Teams** | Gap under "Your sports communities"; navy team cards with faded football watermark | Hero band behind title; pumpkin-football (SP5-1) replaces the faded watermark on each navy card; bunting (SP10) under the stats card |
-| **Team detail** | Team photo banner; navy credits card | Cobweb corner + 2 bats over the photo; SP4 cluster on credits card |
-| **Team chat** | Huge empty middle area | Faint doodle wallpaper (SP7, tinted at ~6% opacity); optional seasonal quick-reply "Happy Halloween 🎃" (text, code) |
-| **Leaderboard** | Gap above title; space around podium | Hero band with N5 (trophy) on the right; trophy icon → pumpkin trophy (SP5-6); graveyard strip (SP6-2) faint behind the podium; witch hat on the #1 avatar |
-| **Profile** | Avatar area; "No games played this week yet." | Pumpkin-vine ring (SP9) around the photo; N6 napping replaces the plain empty text area; "Festive decorations" toggle row in Appearance |
-| **Pop-ups** (`AppDialog`, used everywhere) | Icon circle at the top of every dialog | Mascot replaces the icon circle: big success → A2 + confetti (SP8) burst, small success → A3, pending → N3, error → N2, confirmation → N4, nudge → F5 (full map in mascot.md). A small coloured badge (tick / ! / ×) stays on the mascot's corner so the meaning is clear without the art |
-| **Empty states** (Notifications, Wallet activity, Leaderboard, Teams, Book) | Grey circle icon | Matching ghost from SP3 |
-| **Welcome / onboarding** | Turf photo, logo badge | Bats (SP1) crossing the photo, witch hat on the logo badge, SP4 cluster at the sheet's top edge |
-| **Tab bar** | Line above the tabs | Bunting (SP10) strung along the top edge; witch hat on the active tab icon |
-| **Push notifications** | System-drawn, can't be illustrated | Text only: 🎃 prefix on the title. No financial detail in the body (unchanged rule) |
-| **Admin screens** | — | Header bats + gradient only; Admin work screens stay plain |
-| **App icon / splash** | — | Not themed — needs a new store build each time; out of scope for server-switched seasons |
+| Files | What |
+|---|---|
+| `hero-day`, `hero-night` | Background scenes (1376×768), watermark removed |
+| `bat-wings-up/-level/-down` | Bat flap frames, one shared canvas (bodies aligned) |
+| `crow-wings-up/-level/-down` | Crow flap frames, same |
+| `pumpkin-cluster` | Two jack-o'-lanterns + candle |
+| `prop-pumpkin-football`, `prop-witch-hat`, `prop-candy-corn`, `prop-spider`, `prop-jack-o-lantern`, `prop-pumpkin-trophy`, `prop-pumpkin-purple` | Props (`prop-pumpkin-purple` has a slightly menacing face — not planned for use) |
+| `confetti-*` (9) | Burst pieces for success pop-ups |
+| `bunting-orange/-purple/-bat` | Bunting flags |
+| `avatar-ring` | Ring for the profile photo (centre transparent) |
+| `shape-cobweb`, `shape-sparkle`, `shape-moon`, `shape-bat`, `shape-dot`, `shape-graveyard` | **White** masks — tint in code (`tintColor`) per theme |
+| `doodle-*` (12) | **White** line-art masks for the chat wallpaper — tint + fade in code |
+
+## Screen coverage — every route in the app (37)
+
+Three layers reach every screen without per-screen work: **pop-ups** (one `AppDialog` → mascot),
+**empty states** (one `EmptyState` → mascot), and a **faint page pattern** (shape-bat / sparkle / dot,
+~5% opacity) behind every screen's background. On top of that:
+
+| Screen(s) | Halloween treatment |
+|---|---|
+| Home | `hero-day/-night` behind the greeting + `wave-hello` peeking; bats across the header, an occasional crow; 🎃 in the greeting; `shape-cobweb` + `pumpkin-cluster` + sparkles on the credits card; `prop-pumpkin-football` as the Book-a-Slot icon |
+| Book | Shorter hero band behind the title; `prop-spider` dropping on a thread; cobweb corner on the venue photo. Date chips and slot grid untouched |
+| My Teams | Hero band behind the title; `prop-pumpkin-football` replaces the faded football watermark on the navy cards; bunting under the stats card |
+| Leaderboard | Hero band with `trophy-champion`; `prop-pumpkin-trophy` next to the title; `shape-graveyard` faint behind the podium; `prop-witch-hat` on the #1 avatar |
+| Profile | `avatar-ring` around the photo; `napping` for "No games played yet"; new "Festive decorations" on/off switch under Appearance |
+| Team details | Cobweb corner + bats over the team photo; `pumpkin-cluster` on the credits card |
+| Team chat | Doodle wallpaper (`doodle-*`, tinted, ~6%) |
+| Booking details | Cobweb corner on the turf photo |
+| Wallet activity | `pumpkin-cluster` on the balance card; `napping` when empty |
+| Notifications | Mascot face per notification type; `napping` when empty |
+| Create team (4 steps) / add members / join team | `confetti-pumpkin` as the active step dot; page pattern |
+| Team created | `celebrate-jump` + confetti burst (replaces the plain tick animation) |
+| Welcome | Bats crossing the turf photo; `prop-witch-hat` on the logo badge; `hero-standing` |
+| Sign in / profile setup | `wave-hello`; page pattern |
+| Permissions | `face-surprised` beside the notifications ask |
+| Ready to play | `celebrate-jump` + confetti burst |
+| Tab bar (both apps) | Bunting along the top edge; `prop-witch-hat` on the active tab |
+| Admin screens (12) | Header bats + page pattern + pop-ups only — work screens stay plain |
+| Push notifications | Text only: 🎃 in the title |
+
+**Verdict: the asset set is complete for Halloween — nothing more to generate.**
+Known limits, handled in code rather than new art: the near-black bats/crows are low-contrast on the
+dark-mode header, so they get a faint moonlight glow there; the hero scenes are 1376 px wide, sharp
+up to full phone width.
 
 ## Checklist
 
 - [ ] Mascot concept + base sheet approved by manager (mascot.md steps 1–3)
 - [x] Mascot H1 + H2 sliced into `mobile/assets/mascot/halloween/`
-- [ ] S1–S2 · SP1, SP2, SP4–SP10 generated (SP3 dropped) and saved to `assets/seasons-raw/halloween/`
+- [x] S1–S2 · SP1, SP2, SP4–SP10 generated and sliced into `mobile/assets/seasons/halloween/`
+- [ ] Build: season engine, mascot pop-ups, decorations per the coverage table and saved to `assets/seasons-raw/halloween/`
 - [ ] Hand back to Claude for cut-out, optimisation, and implementation
