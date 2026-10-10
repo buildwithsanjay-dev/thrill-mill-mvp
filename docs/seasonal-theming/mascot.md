@@ -22,6 +22,131 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 
 ---
 
+## ✅ Final 2D sheet (2026-10-10) and where each pose is used
+
+Approved sheet: save as `assets/seasons-raw/mascot/indie-2d-sheet.png`. It contains:
+
+| ID | On the sheet | Mood |
+|---|---|---|
+| `HERO` | Big top figure, ball in hand, paw on hip | Confident, friendly |
+| `T1–T5` | Turnaround row (front, ¾, side, back, back-¾) | Reference only — not shown in the app |
+| `A1` | Running with the ball, motion lines | Eager, "let's go" |
+| `A2` | Jumping, eyes closed, ball raised | Big celebration |
+| `A3` | Wink with the ball and a star | Small win, "done!" |
+| `A4` | Determined throw | Competitive, game on |
+| `F1` | Face: smile | Pleased |
+| `F2` | Face: wink | Friendly, inviting |
+| `F3` | Face: fists up, eyes closed | Excited |
+| `F4` | Face: open mouth + "!" | Heads-up, attention |
+| `F5` | Face: paw on chin + "?" | Thinking, explaining |
+| `F6` | Face: laughing + sparkle lines | Delighted |
+
+### Missing moods (generate these — prompts below)
+
+The app's most frequent pop-ups are errors and pending reviews, and the sheet is all positive moods.
+These are missing:
+
+| ID | Pose | Why it's needed |
+|---|---|---|
+| `N1` | Waving hello / goodbye | Home hero (cropped as a peek), welcome screen, "Sign out?" |
+| `N2` | Apologetic "oops" | Every error: "Could not…", "Booking failed", "Hold expired", "Team is full", "Message not sent"… (~45 pop-ups) |
+| `N3` | Waiting patiently, checking a watch | "Booking submitted" (pending Admin review), "Request sent", membership under review |
+| `N4` | "Hold on" paw raised | Confirmations: "Cancel this booking?", "Withdraw this request?", "Delete your account?", "Make X the Host?" |
+| `N5` | Holding a trophy high | Leaderboard header, #1 team |
+| `N6` | Napping / resting | Empty states: "No upcoming events", "No games played yet", "No notifications yet", "No activity yet" |
+| `N7` | Open-arms welcome | Team invite, join request approved, "No Teams yet — create one" |
+| `F7` | Face: sad / sorry | Notifications: booking declined/cancelled, join request declined, no-refund cancellation |
+| `F8` | Face: worried | Notification: membership needs attention |
+| `F9` | Face: sleepy | Small empty states |
+
+Why `N3` matters: today "Booking submitted" is styled as a success. A Host's booking is only
+*pending* until an Admin approves it, so it must not show the big celebration (`A2`). `A2` is kept
+for the moment it's actually confirmed.
+
+### Prompt — missing moods sheet → `indie-2d-sheet-2.png`
+Attach `indie-2d-sheet.png`.
+```
+Using the attached character sheet as the exact reference, draw NEW poses of the SAME character —
+identical face, markings, ear shape, eye colour, curled tail, outfit, colours, proportions, line
+style, flat shading and soft grey oval ground shadows as in the attached sheet. Do not redesign
+anything; only the pose and expression change. White background, no text or labels.
+Portrait 2:3 layout, evenly spaced with wide gaps, same scale as the small full-body figures on the
+attached sheet.
+ROW 1 (full body): (N1) standing, waving one paw high in a friendly hello, big smile;
+(N2) apologetic "oops" — ears drooping slightly, small sweat drop, sheepish smile, shrugging with
+both paws up, the pickleball dropped at his feet — sorry but not crying;
+(N3) standing patiently, looking at a wristwatch on his raised wrist with a calm hopeful smile, ball
+tucked under the other arm; (N4) one paw raised palm-out in a gentle "hold on a second" gesture,
+eyebrows raised, kind attentive expression.
+ROW 2 (full body): (N5) proudly holding a golden trophy cup above his head with both paws, chest
+out, eyes closed with pride; (N6) curled up napping on the ground with his head resting on the
+pickleball, eyes closed, a small "z" bubble; (N7) arms wide open in a warm welcome, happy open-mouth
+smile.
+ROW 3 (head-and-shoulders busts, same framing and size as the bottom row of the attached sheet):
+(F7) sad, sorry face — ears down, eyes glossy, small frown; (F8) worried face — eyebrows up and
+together, a small sweat drop, slightly gritted smile; (F9) sleepy face — half-closed eyes, small yawn.
+```
+
+If one pose comes out off-model, redo just that one:
+```
+Using the attached character sheet as the exact reference, draw ONE new pose of the SAME character —
+identical face, markings, outfit, colours, proportions and flat style, with the same soft grey
+oval ground shadow. Only the pose and expression change. White background, no text.
+Pose: [copy the pose line from the table above]. Single character, centered, square image.
+```
+
+### Pop-ups → mascot
+
+Pop-ups are the single `AppDialog`, so this covers every screen (including Admin's).
+
+| Pop-up kind | Examples from the app | Mascot |
+|---|---|---|
+| Big success | Booking confirmed, Booking approved, Team created, Membership activated | `A2` jump |
+| Small success | Profile saved, Poll posted, Invite sent, Slot blocked, Team notified | `A3` wink |
+| **Pending (new kind)** | Booking submitted, Request sent (join / account deletion), membership request submitted | `N3` waiting |
+| Error | Could not …, Booking failed, Sign in failed, Hold expired, Team is full, Message not sent, Search failed | `N2` oops |
+| Confirmation | Cancel this booking?, Withdraw this request?, Delete your account?, Make X the Host?, Unblock this slot? | `N4` hold on |
+| Sign out? | Sign out? | `N1` wave |
+| Nudge / explanation | Slot already passed, membership under review, only Host/Co-host can book, Missing details, Enter a code, Permission needed | `F5` thinking (in the icon circle) |
+| Outcome with bad news | Booking cancelled — no refund, Booking declined | `F7` sad (in the icon circle) |
+
+The current coloured tick / ! / × badge stays on the mascot's corner, so the meaning is still clear
+without the art.
+
+### In-app notification list (bell) → small face per type
+
+Push notifications in the phone's tray are drawn by Android and can't show the mascot. The in-app
+notification list can, as a small round face on each row:
+
+| Notification | Face |
+|---|---|
+| Booking confirmed | `F3` excited |
+| Booking declined / cancelled | `F7` sad |
+| Added to a booking | `F2` wink |
+| Game reminder (~2h before) | `A1` run (cropped) |
+| Membership approved | `F6` delighted |
+| Membership needs attention | `F8` worried |
+| Join request approved | `F6` delighted |
+| Join request declined | `F7` sad |
+| Team invite | `F2` wink |
+| Team poll | `F5` thinking |
+| Host transferred / role changed | `F4` heads-up |
+| Admin: new membership request, new slot booking, booking needs review, booking cancelled by a team | `F4` heads-up |
+
+### Screens and empty states → mascot
+
+| Where | Mascot |
+|---|---|
+| Home hero (peeking in from the right) | `N1` wave, cropped |
+| Welcome / onboarding | `HERO` |
+| Ready-to-play (end of sign-up) | `A2` jump |
+| Leaderboard header | `N5` trophy |
+| Empty: no upcoming events, no games played, no notifications, no activity | `N6` napping |
+| Empty: no Teams yet | `N7` welcome |
+| Empty search: no matching activity, no bookings found, no teams found | `F5` thinking |
+
+---
+
 ## ✅ Chosen (2026-10-10): "Indie" — redraw the approved 3D concept as a flat 2D sticker character
 
 Approved: the 3D Concept D render (Indie with the lime pickleball). Final art is **2D**, in the style
