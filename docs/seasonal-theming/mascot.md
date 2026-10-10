@@ -22,6 +22,35 @@ same background rules as the asset prompt pack: transparent in ChatGPT, flat mag
 
 ---
 
+## ✅ In-app mascot files (sliced 2026-10-10)
+
+Base set = `indie-2d-sheet-2.webp` (owner's pick). Each season is a folder with the **same file
+names**, so the app swaps season by changing only the folder:
+
+```
+mobile/assets/mascot/<season>/
+  wave-hello.webp        hold-on.webp            welcome-open-arms.webp
+  oops-sorry.webp        trophy-champion.webp    face-sad.webp
+  waiting-watch.webp     napping.webp            face-worried.webp
+                                                 face-sleepy.webp
+```
+Seasons done: `base`, `halloween`. Full-body poses share one 429×518 canvas and faces one 356×349
+canvas, bottom-aligned, so swapping poses or seasons never makes Indie jump or resize. Backgrounds
+are transparent; the grey ground shadow became a soft translucent shadow that works in light and
+dark mode.
+
+New season: generate its edit of `indie-2d-sheet-2.webp` (same 4/3/3 layout), then run from the repo
+root (needs Python with Pillow, NumPy, SciPy):
+```
+python scripts/slice_mascot.py mobile/assets/mascot base=assets/seasons-raw/mascot/indie-2d-sheet-2.webp diwali=assets/seasons-raw/diwali/indie-diwali-sheet-2.webp
+```
+Always pass `base=` too: all seasons are cut to one shared canvas size.
+
+**Gap:** this set has no "celebrate" (big success, e.g. Booking confirmed) and no "small win"
+pose — those are `A2`/`A3` on `indie-2d-sheet.webp`, not on sheet 2.
+
+---
+
 ## ✅ Final 2D sheet (2026-10-10) and where each pose is used
 
 Approved sheet: save as `assets/seasons-raw/mascot/indie-2d-sheet.webp`. It contains:
