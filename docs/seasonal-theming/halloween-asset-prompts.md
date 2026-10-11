@@ -307,7 +307,7 @@ piece of string across the top of its cell, in a single row with wide gaps, same
 ## Final Halloween asset set (sliced 2026-10-10)
 
 Mascot: `mobile/assets/mascot/halloween/` (21 poses — see mascot.md).
-Decorations: `mobile/assets/seasons/halloween/` (49 files), cut by
+Decorations: `mobile/assets/seasons/halloween/` (47 files), cut by
 `python scripts/slice_sprites.py scripts/sprite_specs/halloween.json`.
 
 | Files | What |
