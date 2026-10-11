@@ -51,7 +51,8 @@ AI-generated frame. If a fact is missing, ask. Don't fill the gap with a guess.
 3. **Story.** Pick the arc + beat sheet for the target length
    (`references/story-and-pacing.md`), write the on-screen text and narration
    lines, choose a style preset (`references/style-presets.md`). **Choose the music with
-   `references/music-selection.md` (REQUIRED): lane → top-3 scored songs from `music-catalogue.json` → user
+   `references/music-selection.md` (REQUIRED): lane → **fresh web research for this edit** (current month's
+   trending + new releases, ≥10 candidates) merged with the catalogue → score → final pick + 2 backups → user
    supplies the chosen file → hook window.** Produce `scene-plan.json` (shape: `scene-plan.example.json`).
    Present it to the user as a readable shot list + script. **Stop and wait for approval.**
 4. **Rough cut.** Trim and normalize selects with FFmpeg (`references/ffmpeg-recipes.md`),

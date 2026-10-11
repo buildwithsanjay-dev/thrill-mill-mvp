@@ -1,29 +1,342 @@
 {
-  "$comment": "Working memory for music selection (see references/music-selection.md). Facts only: bpm/hook_start stay null until measured or checked on Instagram; lyric_safe is 'yes' only when the song's theme is well established, otherwise 'check' (ask the user). status: trending | evergreen | fading. Update 'verified' and 'feedback' after every trial.",
+  "$comment": "MEMORY, not the menu: every edit runs fresh web research first (references/music-selection.md Step 0) and writes new verified songs back here with source URLs. Facts only: bpm/hook_start stay null until measured or checked on Instagram; lyric_safe is 'yes' only when the song's theme is well established, otherwise 'check'. status: trending | evergreen | fading. Update 'verified' and 'feedback' after every trial.",
   "updated": "2026-10-11",
   "songs": [
-    { "title": "One Name", "film": "Jailer 2", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2026, "lanes": ["mass"], "status": "trending", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Promo single. Film releases 2026-10-15 → expect reel peak through Oct–Nov.", "feedback": null },
-    { "title": "One Sun, One Moon", "film": "Jailer 2", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2026, "lanes": ["mass"], "status": "trending", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Second single, late Sept 2026.", "feedback": null },
-    { "title": "Bindaas", "film": "Jailer 2", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2026, "lanes": ["celebration"], "status": "trending", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Upbeat party number (feat. Nora Fatehi). Party song: check lyrics before family/kids events.", "feedback": null },
-    { "title": "(user's Jailer 2 pick, name to confirm)", "film": "Jailer 2", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2026, "lanes": ["celebration", "mass"], "status": "trending", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "The user laid this over Trial 01 and it worked; record the exact title.", "feedback": "Trial 01: worked well over the Sunday community edit (user, 2026-10-11)" },
-
-    { "title": "Singappenney", "film": "Bigil", "composer": "A. R. Rahman", "lang": "ta", "year": 2019, "lanes": ["empowering", "stadium"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Women-in-sport anthem from a film about a women's football team. First pick for women's events/teams.", "feedback": null },
-    { "title": "Verithanam", "film": "Bigil", "composer": "A. R. Rahman", "lang": "ta", "year": 2019, "lanes": ["mass", "stadium"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Sung by Vijay; football-film mass number.", "feedback": null },
-    { "title": "Whistle Podu", "film": "CSK anthem", "composer": null, "lang": "ta", "year": null, "lanes": ["stadium"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Chennai Super Kings fan anthem: instant crowd recognition for cricket/box-cricket in Tamil Nadu. Several versions exist; confirm which one.", "feedback": null },
-    { "title": "Hukum – Thalaivar Alappara", "film": "Jailer", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2023, "lanes": ["mass"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Hero walk-out energy: tournament entries, captains, trophy lift. Jailer 2 release will revive it.", "feedback": null },
-    { "title": "Kaavaalaa", "film": "Jailer", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2023, "lanes": ["celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Massive dance-reel trend in 2023; risk of feeling overused, so prefer the Jailer 2 songs while they're fresh.", "feedback": null },
-    { "title": "Vaathi Coming", "film": "Master", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2021, "lanes": ["celebration", "mass"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Signature dance hook; great for group dance moments.", "feedback": null },
-    { "title": "Arabic Kuthu", "film": "Beast", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2022, "lanes": ["celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Kuthu dance anthem; very recognisable intro hook.", "feedback": null },
-    { "title": "Rowdy Baby", "film": "Maari 2", "composer": "Yuvan Shankar Raja", "lang": "ta", "year": 2018, "lanes": ["celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Dance favourite; romantic-playful lyrics.", "feedback": null },
-    { "title": "Enjoy Enjaami", "film": "Independent (Dhee ft. Arivu)", "composer": "Santhosh Narayanan (prod.)", "lang": "ta", "year": 2021, "lanes": ["feel-good", "celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Joyful, rooted, community feel. Strong fit for wholesome community days.", "feedback": null },
-    { "title": "Megham Karukatha", "film": "Thiruchitrambalam", "composer": "Anirudh Ravichander", "lang": "ta", "year": 2022, "lanes": ["feel-good"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Bright, relaxed, dance-able melody; long-running reel favourite.", "feedback": null },
-    { "title": "Mustafa Mustafa", "film": "Kadhal Desam", "composer": "A. R. Rahman", "lang": "ta", "year": 1996, "lanes": ["friendship"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "The Tamil friendship anthem; nostalgic, every generation knows it. Friends' turf nights, farewells.", "feedback": null },
-    { "title": "Aasa Kooda", "film": "Independent (Think Indie)", "composer": "Sai Abhyankkar", "lang": "ta", "year": 2024, "lanes": ["feel-good", "celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Viral dance steps; light, youthful.", "feedback": null },
-    { "title": "Katchi Sera", "film": "Independent", "composer": "Sai Abhyankkar", "lang": "ta", "year": 2024, "lanes": ["celebration"], "status": "fading", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Huge 2024 dance trend; may now read as last season's. Check before use.", "feedback": null },
-    { "title": "Naatu Naatu", "film": "RRR", "composer": "M. M. Keeravani", "lang": "te", "year": 2022, "lanes": ["celebration"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "yes", "bpm": null, "hook_start": null, "notes": "Pan-South crossover (Oscar winner); explosive dance energy.", "feedback": null },
-    { "title": "Illuminati", "film": "Aavesham", "composer": "Sushin Shyam", "lang": "ml", "year": 2024, "lanes": ["mass"], "status": "evergreen", "verified": "2026-10-11", "lyric_safe": "check", "bpm": null, "hook_start": null, "notes": "Pan-South reel phenomenon; swagger energy for team intros.", "feedback": null }
+    {
+      "title": "One Name",
+      "film": "Jailer 2",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass"
+      ],
+      "status": "trending",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Promo single. Film releases 2026-10-15 → expect reel peak through Oct–Nov.",
+      "feedback": null
+    },
+    {
+      "title": "One Sun, One Moon",
+      "film": "Jailer 2",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass"
+      ],
+      "status": "trending",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Second single, late Sept 2026.",
+      "feedback": null
+    },
+    {
+      "title": "Bindaas",
+      "film": "Jailer 2",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "trending",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Upbeat party number (feat. Nora Fatehi). Party song: check lyrics before family/kids events.",
+      "feedback": null
+    },
+    {
+      "title": "(user's Jailer 2 pick, name to confirm)",
+      "film": "Jailer 2",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "celebration",
+        "mass"
+      ],
+      "status": "trending",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "The user laid this over Trial 01 and it worked; record the exact title.",
+      "feedback": "Trial 01: worked well over the Sunday community edit (user, 2026-10-11)"
+    },
+    {
+      "title": "Singappenney",
+      "film": "Bigil",
+      "composer": "A. R. Rahman",
+      "lang": "ta",
+      "year": 2019,
+      "lanes": [
+        "empowering",
+        "stadium"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Women-in-sport anthem from a film about a women's football team. First pick for women's events/teams.",
+      "feedback": null
+    },
+    {
+      "title": "Verithanam",
+      "film": "Bigil",
+      "composer": "A. R. Rahman",
+      "lang": "ta",
+      "year": 2019,
+      "lanes": [
+        "mass",
+        "stadium"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Sung by Vijay; football-film mass number.",
+      "feedback": null
+    },
+    {
+      "title": "Whistle Podu",
+      "film": "CSK anthem",
+      "composer": null,
+      "lang": "ta",
+      "year": null,
+      "lanes": [
+        "stadium"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Chennai Super Kings fan anthem: instant crowd recognition for cricket/box-cricket in Tamil Nadu. Several versions exist; confirm which one.",
+      "feedback": null
+    },
+    {
+      "title": "Hukum – Thalaivar Alappara",
+      "film": "Jailer",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2023,
+      "lanes": [
+        "mass"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Hero walk-out energy: tournament entries, captains, trophy lift. Jailer 2 release will revive it.",
+      "feedback": null
+    },
+    {
+      "title": "Kaavaalaa",
+      "film": "Jailer",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2023,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Massive dance-reel trend in 2023; risk of feeling overused, so prefer the Jailer 2 songs while they're fresh.",
+      "feedback": null
+    },
+    {
+      "title": "Vaathi Coming",
+      "film": "Master",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2021,
+      "lanes": [
+        "celebration",
+        "mass"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Signature dance hook; great for group dance moments.",
+      "feedback": null
+    },
+    {
+      "title": "Arabic Kuthu",
+      "film": "Beast",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2022,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Kuthu dance anthem; very recognisable intro hook.",
+      "feedback": null
+    },
+    {
+      "title": "Rowdy Baby",
+      "film": "Maari 2",
+      "composer": "Yuvan Shankar Raja",
+      "lang": "ta",
+      "year": 2018,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Dance favourite; romantic-playful lyrics.",
+      "feedback": null
+    },
+    {
+      "title": "Enjoy Enjaami",
+      "film": "Independent (Dhee ft. Arivu)",
+      "composer": "Santhosh Narayanan (prod.)",
+      "lang": "ta",
+      "year": 2021,
+      "lanes": [
+        "feel-good",
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Joyful, rooted, community feel. Strong fit for wholesome community days.",
+      "feedback": null
+    },
+    {
+      "title": "Megham Karukatha",
+      "film": "Thiruchitrambalam",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2022,
+      "lanes": [
+        "feel-good"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Bright, relaxed, dance-able melody; long-running reel favourite.",
+      "feedback": null
+    },
+    {
+      "title": "Mustafa Mustafa",
+      "film": "Kadhal Desam",
+      "composer": "A. R. Rahman",
+      "lang": "ta",
+      "year": 1996,
+      "lanes": [
+        "friendship"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "The Tamil friendship anthem; nostalgic, every generation knows it. Friends' turf nights, farewells.",
+      "feedback": null
+    },
+    {
+      "title": "Aasa Kooda",
+      "film": "Independent (Think Indie)",
+      "composer": "Sai Abhyankkar",
+      "lang": "ta",
+      "year": 2024,
+      "lanes": [
+        "feel-good",
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Viral dance steps; light, youthful.",
+      "feedback": null
+    },
+    {
+      "title": "Katchi Sera",
+      "film": "Independent",
+      "composer": "Sai Abhyankkar",
+      "lang": "ta",
+      "year": 2024,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "fading",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Huge 2024 dance trend; may now read as last season's. Check before use.",
+      "feedback": null
+    },
+    {
+      "title": "Naatu Naatu",
+      "film": "RRR",
+      "composer": "M. M. Keeravani",
+      "lang": "te",
+      "year": 2022,
+      "lanes": [
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Pan-South crossover (Oscar winner); explosive dance energy.",
+      "feedback": null
+    },
+    {
+      "title": "Illuminati",
+      "film": "Aavesham",
+      "composer": "Sushin Shyam",
+      "lang": "ml",
+      "year": 2024,
+      "lanes": [
+        "mass"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-11",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Pan-South reel phenomenon; swagger energy for team intros.",
+      "feedback": null
+    }
   ],
   "rejected": [
-    { "title": "Magical Moment (Mixkit stock)", "reason": "Trial 01: 'not good at all, the vibe is very bad'. Anonymous Western stock music doesn't land with a Tamil audience.", "date": "2026-10-11" }
+    {
+      "title": "Magical Moment (Mixkit stock)",
+      "reason": "Trial 01: 'not good at all, the vibe is very bad'. Anonymous Western stock music doesn't land with a Tamil audience.",
+      "date": "2026-10-11"
+    }
   ]
 }

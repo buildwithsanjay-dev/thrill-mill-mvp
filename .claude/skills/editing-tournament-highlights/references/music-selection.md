@@ -20,6 +20,45 @@ outright, while the same cut with a new Jailer 2 song worked.)
 5. **Never source the audio ourselves.** Film songs are copyrighted. The user/club supplies a
    legally obtained file for timing; posting uses Instagram's licensed audio (see Licensing).
 
+## Step 0: Fresh research for EVERY edit (required)
+
+The catalogue is **memory, not the menu**. Trends move weekly, so every edit starts with new web
+research, and the recommendation is built from what that research finds *today*. Picking straight from
+`music-catalogue.json` without researching first is a failed step.
+
+1. **Read the brief first** (Step 1 lane, audience, event date). It decides what to search for.
+2. **Search, using the current month and year in every query.** At minimum:
+   - `trending Tamil songs Instagram reels <Month Year>` and `viral Tamil reels audio <Month Year>`
+   - `new Tamil movie songs released <Month Year>` and `Tamil movies releasing <Month Year>` (an upcoming release's songs are about to peak)
+   - `<lane> Tamil song` + reels (e.g. "kuthu song trending reels", "friendship song Tamil reels", "women empowerment Tamil song")
+   - latest releases from the hit-makers: `<composer> latest song <Year>` for Anirudh Ravichander, A. R. Rahman, Sai Abhyankkar, Yuvan Shankar Raja, G. V. Prakash Kumar, Santhosh Narayanan, Harris Jayaraj (extend this list as new names trend)
+   - pan-South crossovers: `trending Telugu song reels <Month Year>`, `trending Malayalam song reels <Month Year>`
+3. **Prefer sources that show real listening:** streaming charts and playlists (Spotify Tamil viral/top lists,
+   YouTube Music India charts, JioSaavn/Gaana Tamil trending), official label channels (Sun TV / Sun Pictures, Think Music,
+   Sony Music South, Saregama Tamil, Lahari), film audio-launch news. Roundup blogs are leads only; confirm them elsewhere.
+4. **Collect at least 10 candidates**, at least 5 of them released or trending **within the last ~60 days**. Then add the
+   evergreen catalogue songs that fit the lane, and score the combined pool (Step 2).
+5. **Verify before recommending:** confirm title, film and composer in 2 independent sources. Never invent a song or credit.
+   Check what the hook line means (lyric or translation pages); if it's unclear, mark `lyric_safe: "check"` and ask.
+6. **Freshness rule:** the final top 3 must include **at least one current song** (last ~60 days or peaking now) unless
+   research finds none that passes lyrics and fits the lane. Say so explicitly when that happens.
+7. **Write back:** add every new verified song to `music-catalogue.json` with `source` URLs, `status` and `verified` date.
+   Mark songs the research shows are past their peak as `fading`.
+
+### The finalised music decision (goes into the edit plan and the delivery note)
+
+```
+music:
+  final:   "<Song> — <Film> (<Composer>, <year>)", lane, score/13, why it fits this footage
+  backups: 2 more songs with score + one-line reason
+  research: date, the queries run, the 2–4 sources that settled it
+  section: hook / drop / riff to use (hook_start once the file is analysed or the Instagram snippet is checked)
+  posting: "add in Instagram, start at mm:ss", account-type caveat if relevant
+```
+
+The user approves the final pick and supplies the file (or swaps in a backup). After the edit, record the
+client's reaction in the catalogue's `feedback`. That's how the engine learns this club's taste over time.
+
 ## Step 1: Read the brief → pick a lane
 
 | Event / footage | Lane | What it sounds like | Avoid |
@@ -46,7 +85,7 @@ reels when the song itself shifts (melodic opening → big chorus). Prefer one s
 | **Hook usable in the reel length** | No clear hook in ≤ 40 s | — | Yes | — |
 | **Lyric safety** | **FAIL = reject** | | PASS | |
 
-Max 13. Recommend only songs that score ≥ 9 and pass on lyrics. Present the top 3 as:
+Score the whole pool from Step 0 (fresh research + matching catalogue songs). Max 13. Recommend only songs that score ≥ 9 and pass on lyrics. Present the top 3 as:
 `Song (Film, Composer, year): lane, why it fits this footage, which part to use`.
 
 **Trend timing:** new film songs spike around the audio launch and peak in the **2–4 weeks after
@@ -94,8 +133,8 @@ Then fit the window to the edit:
 
 ## Keeping the catalogue fresh
 
-`music-catalogue.json` (next to this skill) is the working memory. Refresh it at the start of every
-trial, or weekly:
+`music-catalogue.json` (next to this skill) is the working memory: evergreen songs, past verdicts and
+client feedback. Step 0 adds to it on every edit. Between edits it can also be refreshed weekly:
 
 1. Check Spotify's Tamil viral/trending playlists and new film audio launches (search: "<film> songs", "trending Tamil reels").
 2. Ask the user/manager what's trending in Instagram's Reels audio. It's the real source of truth, and Claude can't see it.
