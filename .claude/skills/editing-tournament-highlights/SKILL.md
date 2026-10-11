@@ -50,8 +50,9 @@ AI-generated frame. If a fact is missing, ask. Don't fill the gap with a guess.
    When you are unsure of a moment, extract frames at 0.2s steps around it, and look at them before you decide.
 3. **Story.** Pick the arc + beat sheet for the target length
    (`references/story-and-pacing.md`), write the on-screen text and narration
-   lines, choose a style preset (`references/style-presets.md`) and music
-   direction. Produce `scene-plan.json` (shape: `scene-plan.example.json`).
+   lines, choose a style preset (`references/style-presets.md`). **Choose the music with
+   `references/music-selection.md` (REQUIRED): lane → top-3 scored songs from `music-catalogue.json` → user
+   supplies the chosen file → hook window.** Produce `scene-plan.json` (shape: `scene-plan.example.json`).
    Present it to the user as a readable shot list + script. **Stop and wait for approval.**
 4. **Rough cut.** Trim and normalize selects with FFmpeg (`references/ffmpeg-recipes.md`),
    assemble in HyperFrames, render `--quality draft`. Judge timing and order only.
@@ -125,7 +126,8 @@ must-exclude (injury, argument, minors' faces if the club says so).
 | Text too small / in the bottom UI zone | Respect safe zones; min 64px for body text, 120px+ for titles |
 | Wrong/missing score or misspelled name | Facts sheet is the only source; QC every text frame |
 | Music fights the narration | Duck music; carve 1–4 kHz under VO (hyperframes-audio) |
-| Copyrighted pop song | Club-owned, licensed, or royalty-free only. Ask before using any song |
+| Generic stock/royalty-free track as the main music | Rejected by the client. Pick a known/trending South Indian song via music-selection.md; the user supplies the file, posting uses Instagram audio at the plan's offset |
+| Song starts on its slow intro | Start 1–2 bars before the famous hook/drop; recognisable in 2 s |
 | Landscape clip letterboxed with black bars | Reframe (crop on action) or blurred-fill background |
 | Rendering final quality while still iterating | `--quality draft` until timing is approved |
 | Judging a clip from one frame | Read the contact sheet and the loudness peaks, and check frames around the moment |
@@ -138,6 +140,8 @@ must-exclude (injury, argument, minors' faces if the club says so).
 - Worked example: `tournament-memory/trial-01/` (`edit-plan.json` + `comp/index.html`)
 - `references/story-and-pacing.md`: arcs, beat sheets, shot-scoring rubric, script writing
 - `references/cutting-craft.md`: cuts, transitions, speed ramps, reframing, typography motion, grade, sound
-- `references/style-presets.md`: four complete looks (fonts, palette, motion, music, grade)
+- `references/music-selection.md`: how to choose music for South Indian reels (lanes, scoring, hook window, licensing, trend refresh)
+- `music-catalogue.json`: trending + evergreen song list with lanes, lyric-safety, hook times and client feedback
+- `references/style-presets.md`: four complete looks (fonts, palette, motion, music lane, grade)
 - `references/ffmpeg-recipes.md`: trimming, normalizing, reframe, ramps, grade, loudness, delivery
 - `scene-plan.example.json`: the contract between story and render (future Memory Engine input)

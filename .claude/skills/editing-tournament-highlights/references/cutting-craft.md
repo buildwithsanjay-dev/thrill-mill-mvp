@@ -95,10 +95,10 @@ Layers (bottom → top): music bed → ambience (real crowd/turf audio) → SFX
 
 ## Music selection
 
-- Use music the club owns, music licensed for this use, or royalty-free/AI-generated music. Ask before using any song.
-- Tempo by style: Luxury 70–95 BPM (orchestral/piano/cinematic hybrid);
-  Energy 120–150 BPM (trap/drill/phonk-free sports anthems); Film 85–110 BPM (indie/acoustic build).
-- The track needs a clear **build → drop** that lands near the 17–20s mark for the peak.
+**REQUIRED:** follow `references/music-selection.md` and `music-catalogue.json`. For this audience the
+song is chosen first (known/trending South Indian song, right lane, safe lyrics), then the edit is
+cut to it. Stock/royalty-free music is a flagged last resort only.
+- Use the song's famous section (hook / drop / signature riff), with its drop landing on the energy shot.
   Cut the track (edit at bar boundaries) to fit the video length rather than
   stretching the video to fit the track.
 - Detect beats: `npx hyperframes beats <project>` (see hyperframes-cli).

@@ -21,7 +21,7 @@ palette (from the app): navy `#0B2545` / `#0B1F3F`, teal `#0E7C86`, orange
 - **Motion:** slow, confident. Entries 0.6s `power3.out`, mask reveals, letter-spacing
   collapse, thin gold rules drawing in (line draw 0.5s). Gentle Ken Burns on stills (1.00→1.06).
 - **Signature transition:** luma/gradient wipe or mask reveal through type. Use it 3×.
-- **Music:** cinematic piano/strings + soft pulse, 75–95 BPM, big swell at the peak.
+- **Music lane:** feel-good melody or empowering celebration (see music-selection.md). Pick a song with a big swell for the peak.
 - **Frame details:** thin gold frame line 24px in from the edges on title cards; small
   caps "EST. THRILL MILL CLUB" tag.
 
@@ -38,7 +38,7 @@ palette (from the app): navy `#0B2545` / `#0B1F3F`, teal `#0E7C86`, orange
 - **Motion:** snappy. Entries 0.25–0.35s `expo.out`, kinetic words on beats,
   shake on impact (2–4px, 6 frames), zoom punch-ins on beats, speed ramps on every big action.
 - **Signature transition:** whip pan + zoom punch-through. Up to 4×, plus 2 flash frames max.
-- **Music:** 130–150 BPM sports anthem with a hard drop; impact SFX on title slams.
+- **Music lane:** mass / stadium anthem with a hard drop (see music-selection.md); impact SFX on title slams.
 - **Frame details:** a big ghost number or team initial behind the subject; stripe/slash graphics in orange.
 
 ## 3. Golden Hour Film: "the memory reel"
@@ -53,7 +53,7 @@ palette (from the app): navy `#0B2545` / `#0B1F3F`, teal `#0E7C86`, orange
 - **Motion:** organic and gentle. Fades + soft blur entries (0.5–0.7s), polaroid
   stills dropping in with a slight rotation (±3°), slow push-ins.
 - **Signature transition:** light leak/film burn. 2–3×, plus dip-to-white once before BOND.
-- **Music:** acoustic/indie build, 90–110 BPM, hand claps, uplifting.
+- **Music lane:** feel-good melody or friendship (see music-selection.md), warm and singable.
 - **Frame details:** rounded-corner polaroid frames for the group photo; date stamp
   in the corner like an old camcorder ("SAT · 12 OCT").
 
@@ -69,7 +69,7 @@ palette (from the app): navy `#0B2545` / `#0B1F3F`, teal `#0E7C86`, orange
 - **Motion:** precise. Slide + fade 0.4s `power2.out`, scoreboard-style flip
   digits, lower-thirds with a teal bar wipe.
 - **Signature transition:** navy panel wipe carrying the logo mark. 2–3×.
-- **Music:** modern upbeat electronic/pop instrumental, 110–125 BPM.
+- **Music lane:** kuthu / celebration or current trending hit (see music-selection.md).
 - **Frame details:** consistent lower-third template (team name + match label),
   logo bug top-right at 70% opacity.
 
