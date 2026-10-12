@@ -358,8 +358,8 @@ up to full phone width.
 
 ## Checklist
 
-- [ ] Mascot concept + base sheet approved by manager (mascot.md steps 1–3)
+- [x] Mascot concept + base sheet approved by manager (mascot.md steps 1–3) — confirmed verbally 2026-10-12
 - [x] Mascot H1 + H2 sliced into `mobile/assets/mascot/halloween/`
 - [x] S1–S2 · SP1, SP2, SP4–SP10 generated and sliced into `mobile/assets/seasons/halloween/`
-- [ ] Build: season engine, mascot pop-ups, decorations per the coverage table and saved to `assets/seasons-raw/halloween/`
-- [ ] Hand back to Claude for cut-out, optimisation, and implementation
+- [x] Build: season engine, mascot pop-ups, decorations for Home/Profile/Leaderboard — see `docs/superpowers/plans/2026-10-12-halloween-seasonal-theming.md`; remaining ~15 screens from the coverage table are a follow-up plan
+- [x] Hand back to Claude for cut-out, optimisation, and implementation
