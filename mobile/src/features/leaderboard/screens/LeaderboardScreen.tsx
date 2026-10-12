@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader } from '@/components/AppHeader';
 import { Avatar } from '@/components/Avatar';
 import { EmptyState } from '@/components/EmptyState';
+import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { LeaderboardPeriod } from '../api';
 import { useLeaderboard } from '../useLeaderboard';
@@ -21,6 +25,7 @@ const PODIUM_COLORS = ['#F59E0B', '#D1D5DB', '#B45309'];
 export function LeaderboardScreen() {
   const [scope, setScope] = useState<Scope>('TEAM');
   const [period, setPeriod] = useState<LeaderboardPeriod>('WEEK');
+  const { season } = useSeason();
   const { data: rows, isPending } = useLeaderboard(scope, period);
 
   const top3 = (rows ?? []).slice(0, 3);
@@ -33,11 +38,17 @@ export function LeaderboardScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={styles.titleRow}>
-          <Text style={styles.subtitle}>Leaderboard</Text>
-          <Ionicons name="trophy" size={18} color={colors.warning} />
-        </View>
-        <Text style={styles.tagline}>Compete. Play. Climb.</Text>
+        <SeasonHeroBand>
+          <View style={styles.titleRow}>
+            <Text style={styles.subtitle}>Leaderboard</Text>
+            {season === 'halloween' ? (
+              <Image source={HALLOWEEN_DECOR.propPumpkinTrophy} style={{ width: 20, height: 20 }} contentFit="contain" />
+            ) : (
+              <Ionicons name="trophy" size={18} color={colors.warning} />
+            )}
+          </View>
+          <Text style={styles.tagline}>Compete. Play. Climb.</Text>
+        </SeasonHeroBand>
 
         <View style={styles.periodTabs}>
           <PeriodTab label="THIS WEEK" active={period === 'WEEK'} onPress={() => setPeriod('WEEK')} />
@@ -79,6 +90,13 @@ export function LeaderboardScreen() {
 
             {top3.length > 0 && (
               <View style={styles.podiumRow}>
+                {season === 'halloween' && (
+                  <Image
+                    source={HALLOWEEN_DECOR.shapeGraveyard}
+                    style={styles.podiumGraveyard}
+                    tintColor={colors.textFaint}
+                  />
+                )}
                 {[1, 0, 2].map((podiumIndex) =>
                   top3[podiumIndex] ? (
                     <PodiumSlot key={podiumIndex} row={top3[podiumIndex]} rank={podiumIndex + 1} scope={scope} />
@@ -129,12 +147,22 @@ function PeriodTab({ label, active, onPress }: { label: string; active: boolean;
 }
 
 function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: number; scope: Scope }) {
+  const { season } = useSeason();
   const height = rank === 1 ? 88 : rank === 2 ? 64 : 52;
   const name = row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member');
 
   return (
     <View style={styles.podiumSlot}>
-      {rank === 1 && <Ionicons name="trophy" size={16} color={colors.warning} style={{ marginBottom: 4 }} />}
+      {rank === 1 && season === 'halloween' && (
+        <Image
+          source={HALLOWEEN_DECOR.propWitchHat}
+          style={{ width: 22, height: 22, marginBottom: -6, zIndex: 1 }}
+          contentFit="contain"
+        />
+      )}
+      {rank === 1 && season !== 'halloween' && (
+        <Ionicons name="trophy" size={16} color={colors.warning} style={{ marginBottom: 4 }} />
+      )}
       <Avatar uri={scope === 'MEMBER' ? row.avatar_url : undefined} name={name} size={rank === 1 ? 52 : 44} />
       <Text style={styles.podiumName} numberOfLines={1}>
         {name}
@@ -194,7 +222,8 @@ const styles = themedStyles(() => ({
   sectionTitle: { fontSize: 16, fontWeight: '800', color: colors.text, marginTop: spacing.xl, textAlign: 'center' },
   sectionSubtitle: { fontSize: 12, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
 
-  podiumRow: { flexDirection: 'row', alignItems: 'flex-end', marginTop: spacing.xl, gap: spacing.sm },
+  podiumRow: { position: 'relative', flexDirection: 'row', alignItems: 'flex-end', marginTop: spacing.xl, gap: spacing.sm },
+  podiumGraveyard: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 24, opacity: 0.25 },
   podiumSlot: { flex: 1, alignItems: 'center' },
   podiumName: { fontSize: 12, fontWeight: '700', color: colors.text, marginTop: spacing.xs, maxWidth: 90 },
   podiumMeta: { fontSize: 11, color: colors.textMuted, marginBottom: spacing.sm },
