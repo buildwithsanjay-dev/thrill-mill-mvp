@@ -4,11 +4,17 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Image } from 'expo-image';
+
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
 import { ScrollBox } from '@/components/ScrollBox';
 import { EmptyState } from '@/components/EmptyState';
+import { Mascot } from '@/components/Mascot';
+import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { UpcomingTeamBooking } from '@/features/booking/api';
 import { useUpcomingBookingsAcrossTeams } from '@/features/booking/useBooking';
@@ -25,6 +31,7 @@ import { formatSlotTime, formatBookingDate } from '@/utils/datetime';
 
 export function HomeScreen() {
   const greeting = useGreeting();
+  const { season } = useSeason();
   const { data: profile } = useProfile();
   const { data: teams, isPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
@@ -53,10 +60,15 @@ export function HomeScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <AppHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <ScreenIntro>
-          <Text style={styles.greetingLabel}>{greeting.toUpperCase()},</Text>
-          <Text style={styles.greetingName}>{profile?.full_name?.split(' ')[0] ?? 'there'} 👋</Text>
-        </ScreenIntro>
+        <SeasonHeroBand>
+          <ScreenIntro>
+            <Text style={styles.greetingLabel}>{greeting.toUpperCase()},</Text>
+            <Text style={styles.greetingName}>
+              {profile?.full_name?.split(' ')[0] ?? 'there'} {season === 'halloween' ? '🎃' : '👋'}
+            </Text>
+          </ScreenIntro>
+          {season === 'halloween' && <Mascot pose="wave-hello" size={72} style={styles.heroMascotPeek} />}
+        </SeasonHeroBand>
 
         <PendingInvites />
 
@@ -173,6 +185,7 @@ function DashboardContent({
   onSwitchTeam: () => void;
 }) {
   const router = useRouter();
+  const { season } = useSeason();
   const { team, wallet, upcomingBooking } = summary;
   const { data: ledger } = useWalletLedger(team.id);
   const recentActivity = (ledger ?? []).slice(0, 3);
@@ -209,6 +222,13 @@ function DashboardContent({
       )}
 
       <View style={styles.creditsCard}>
+        {season === 'halloween' && (
+          <>
+            <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.creditsCardCobweb} tintColor={colors.heroAccent} />
+            <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.creditsCardSparkle} tintColor={colors.heroAccent} />
+            <Image source={HALLOWEEN_DECOR.pumpkinCluster} style={styles.creditsCardPumpkins} contentFit="contain" />
+          </>
+        )}
         <View style={styles.creditsCardTop}>
           <Text style={styles.creditsLabel}>TEAM CREDITS</Text>
           <Badge label={team.name} tone="neutral" />
@@ -255,7 +275,12 @@ function DashboardContent({
       )}
 
       <View style={styles.quickGrid}>
-        <QuickAction icon="add-circle" label="Book a Slot" onPress={() => router.push('/(app)/(tabs)/book')} />
+        <QuickAction
+          icon="add-circle"
+          image={season === 'halloween' ? HALLOWEEN_DECOR.propPumpkinFootball : undefined}
+          label="Book a Slot"
+          onPress={() => router.push('/(app)/(tabs)/book')}
+        />
         <QuickAction icon="git-network" label="Team" onPress={() => router.push(`/(app)/team/${team.id}`)} />
         <QuickAction
           icon="time"
@@ -302,11 +327,13 @@ function DashboardContent({
 
 function QuickAction({
   icon,
+  image,
   label,
   onPress,
   showDot = false,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
+  image?: number;
   label: string;
   onPress: () => void;
   showDot?: boolean;
@@ -314,7 +341,11 @@ function QuickAction({
   return (
     <Pressable style={styles.quickAction} onPress={onPress}>
       <View style={styles.quickIcon}>
-        <Ionicons name={icon} size={16} color={colors.text} />
+        {image ? (
+          <Image source={image} style={{ width: 20, height: 20 }} contentFit="contain" />
+        ) : (
+          <Ionicons name={icon} size={16} color={colors.text} />
+        )}
         {showDot && <View style={styles.notificationDot} />}
       </View>
       <Text style={styles.quickLabel} numberOfLines={2}>
@@ -433,6 +464,7 @@ const styles = themedStyles(() => ({
   brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
   greetingLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.8 },
   greetingName: { fontSize: 28, fontWeight: '800', color: colors.text, marginTop: 2 },
+  heroMascotPeek: { position: 'absolute', right: spacing.md, bottom: -8 },
 
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
@@ -487,6 +519,9 @@ const styles = themedStyles(() => ({
     padding: spacing.lg,
     marginTop: spacing.md,
   },
+  creditsCardCobweb: { position: 'absolute', top: 0, left: 0, width: 36, height: 36, opacity: 0.5 },
+  creditsCardSparkle: { position: 'absolute', top: spacing.sm, right: spacing.xl, width: 14, height: 14, opacity: 0.8 },
+  creditsCardPumpkins: { position: 'absolute', bottom: -6, right: spacing.sm, width: 56, height: 40 },
   creditsCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   creditsLabel: { fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.5 },
   creditsValue: { fontSize: 34, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.xs },
