@@ -362,7 +362,9 @@ export function BookTurfScreen() {
       if (bookingIds.length > 1) {
         showAlert(
           'Booking submitted',
-          `${bookingIds.length} slots submitted for booking. They'll show as Pending until the Admin approves them.`
+          `${bookingIds.length} slots submitted for booking. They'll show as Pending until the Admin approves them.`,
+          undefined,
+          { variant: 'pending' }
         );
       }
       if (bookingIds[0]) {

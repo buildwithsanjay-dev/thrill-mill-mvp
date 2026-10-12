@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
+import { Mascot } from './Mascot';
+import type { MascotPose } from '@/constants/mascotAssets';
 
 // App-wide replacement for React Native's `Alert.alert` (the plain Android
 // system dialog the owner flagged). Same call shape on purpose —
@@ -12,7 +13,7 @@ import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 // and button styles (see inferVariant), so "Could not …" reads as an error
 // and "Team created" as a success without touching each call site.
 
-export type DialogVariant = 'success' | 'error' | 'warning' | 'info';
+export type DialogVariant = 'success' | 'error' | 'warning' | 'info' | 'pending';
 
 export type DialogButton = {
   text: string;
@@ -26,9 +27,10 @@ type DialogState = {
   message?: string;
   buttons: DialogButton[];
   variant: DialogVariant;
+  mascotOverride?: MascotPose;
 };
 
-type ShowOptions = { variant?: DialogVariant };
+type ShowOptions = { variant?: DialogVariant; mascot?: MascotPose };
 
 let counter = 0;
 let queue: DialogState[] = [];
@@ -66,6 +68,7 @@ export function showAlert(
       message,
       buttons: resolvedButtons,
       variant: options?.variant ?? inferVariant(title, resolvedButtons),
+      mascotOverride: options?.mascot,
     },
   ];
   emit();
@@ -88,17 +91,21 @@ function getSnapshot() {
 }
 
 // Calm, brand-consistent tints (no neon): success is a muted green, info uses
-// the brand teal. Built per render so it follows light/dark.
-function variantStyle(variant: DialogVariant): { icon: keyof typeof Ionicons.glyphMap; tint: string; soft: string } {
+// the brand teal. Built per render so it follows light/dark. `pending` reuses
+// the same warning tint/soft as the existing PENDING APPROVAL Badge tone
+// (see Badge.tsx) for visual consistency across the app.
+function variantStyle(variant: DialogVariant): { pose: MascotPose; tint: string; soft: string } {
   switch (variant) {
     case 'success':
-      return { icon: 'checkmark', tint: colors.success, soft: colors.successSoft };
+      return { pose: 'celebrate-jump', tint: colors.success, soft: colors.successSoft };
     case 'error':
-      return { icon: 'close', tint: colors.danger, soft: colors.dangerSoft };
+      return { pose: 'oops-sorry', tint: colors.danger, soft: colors.dangerSoft };
     case 'warning':
-      return { icon: 'alert', tint: colors.warning, soft: colors.warningSoft };
+      return { pose: 'hold-on', tint: colors.warning, soft: colors.warningSoft };
+    case 'pending':
+      return { pose: 'waiting-watch', tint: colors.warning, soft: colors.warningSoft };
     default:
-      return { icon: 'information', tint: colors.primary, soft: colors.primarySoft };
+      return { pose: 'face-thinking', tint: colors.primary, soft: colors.primarySoft };
   }
 }
 
@@ -188,8 +195,8 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
                 { backgroundColor: style.soft, transform: [{ scale: iconScale }, { rotate: iconRotate }] },
               ]}
             >
-              <View style={[styles.iconInner, { backgroundColor: style.tint }]}>
-                <Ionicons name={style.icon} size={30} color="#FFFFFF" />
+              <View style={styles.iconInner}>
+                <Mascot pose={dialog.mascotOverride ?? style.pose} size={54} />
               </View>
             </Animated.View>
           </View>
@@ -252,7 +259,7 @@ const styles = themedStyles(() => ({
   iconStage: { width: 84, height: 84, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
   ring: { position: 'absolute', width: 64, height: 64, borderRadius: 32 },
   iconCircle: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center' },
-  iconInner: { width: 54, height: 54, borderRadius: 27, alignItems: 'center', justifyContent: 'center' },
+  iconInner: { width: 54, height: 54, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'center' },
   message: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, lineHeight: 20 },
   buttons: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg, width: '100%' },

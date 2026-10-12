@@ -230,7 +230,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
             try {
               await requestAdminAccountDeletion();
               showAlert('Request sent', 'Your account deletion request has been logged for review.', undefined, {
-                variant: 'success',
+                variant: 'pending',
               });
             } catch (error) {
               showAlert('Could not send the request', friendlyError(error));
