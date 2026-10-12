@@ -8,6 +8,7 @@ import { LogoBadge } from '@/features/auth/components/LogoBadge';
 import { useProfile } from '@/features/profile/useProfile';
 import { useHasUnreadNotifications } from '@/features/notifications/useNotifications';
 import { Avatar } from './Avatar';
+import { HeaderBats } from './season/HeaderBats';
 
 // The app's fixed top bar, shared by every tab: Thrill Mill logo + name on the
 // left, notifications bell and your avatar (opens Profile) on the right. Screens
@@ -25,6 +26,7 @@ export function AppHeader() {
 
   return (
     <View style={styles.bar}>
+      <HeaderBats />
       <View style={styles.brand}>
         <LogoBadge size={32} />
         <Text style={styles.brandText}>Thrill Mill Club</Text>
@@ -57,6 +59,7 @@ export function ScreenIntro({ children }: PropsWithChildren) {
 
 const styles = themedStyles(() => ({
   bar: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
