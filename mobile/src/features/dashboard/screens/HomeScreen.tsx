@@ -368,6 +368,7 @@ function OtherTeamsUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
         <View style={styles.noBookingCard}>
           <EmptyState
             icon="calendar-outline"
+            mascot="napping"
             title="No upcoming events"
             message="Nothing booked across your Teams yet."
           />
