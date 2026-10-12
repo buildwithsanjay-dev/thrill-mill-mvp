@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DialogHost } from '../src/components/AppDialog';
 import { AppThemeProvider, ThemedTree, useAppearance } from '../src/components/ThemeProvider';
+import { SeasonProvider } from '../src/components/SeasonProvider';
 import { ExitOnDoubleBack } from '../src/components/ExitOnDoubleBack';
 import { queryClient, registerQueryClientFocusManager } from '../src/lib/queryClient';
 import { AuthProvider } from '../src/features/auth/AuthProvider';
@@ -81,19 +82,21 @@ export default function RootLayout() {
 
   return (
     <AppThemeProvider>
-      <SafeAreaProvider>
-        <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            {/* Remounted when the theme flips so every screen rebuilds its styles. */}
-            <ThemedTree>
-              <ThemedStatusBar />
-              <ExitOnDoubleBack />
-              <ThemedStack />
-              <DialogHost />
-            </ThemedTree>
-          </QueryClientProvider>
-        </AuthProvider>
-      </SafeAreaProvider>
+      <SeasonProvider>
+        <SafeAreaProvider>
+          <AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              {/* Remounted when the theme flips so every screen rebuilds its styles. */}
+              <ThemedTree>
+                <ThemedStatusBar />
+                <ExitOnDoubleBack />
+                <ThemedStack />
+                <DialogHost />
+              </ThemedTree>
+            </QueryClientProvider>
+          </AuthProvider>
+        </SafeAreaProvider>
+      </SeasonProvider>
     </AppThemeProvider>
   );
 }
