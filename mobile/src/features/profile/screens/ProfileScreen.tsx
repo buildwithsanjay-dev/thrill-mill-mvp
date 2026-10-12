@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import * as Linking from 'expo-linking';
@@ -13,6 +13,9 @@ import { Badge } from '@/components/Badge';
 import { useAppearance, type AppearancePreference } from '@/components/ThemeProvider';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
+import { Mascot } from '@/components/Mascot';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { signOut } from '@/features/auth/api';
 import { useAuth } from '@/features/auth/AuthProvider';
@@ -54,6 +57,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { session } = useAuth();
+  const { season } = useSeason();
 
   const [fullName, setFullName] = useState(profile.full_name ?? '');
   const [phone, setPhone] = useState(profile.phone?.replace(/^\+91/, '') ?? '');
@@ -275,6 +279,9 @@ function ProfileForm({ profile }: { profile: Profile }) {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <Pressable onPress={pickImage} style={styles.avatarWrap}>
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.avatarRing} style={styles.avatarRing} contentFit="contain" />
+          )}
           <View style={styles.avatarCircle}>
             {avatarPreviewUri ? (
               <Image source={{ uri: avatarPreviewUri }} style={styles.avatarImage} contentFit="cover" />
@@ -353,6 +360,8 @@ function ProfileForm({ profile }: { profile: Profile }) {
         <NotificationPermissionRow />
 
         <AppearanceRow />
+
+        <FestiveDecorationsRow />
 
         <View style={styles.divider} />
 
@@ -484,6 +493,24 @@ function AppearanceRow() {
   );
 }
 
+// Lets a user turn off festival decorations (hero banners, header bats,
+// bunting, props) while keeping the mascot itself showing in its base
+// costume everywhere else — on by default during a festival's window.
+function FestiveDecorationsRow() {
+  const { decorationsEnabled, setDecorationsEnabled } = useSeason();
+  return (
+    <View style={styles.settingsRow}>
+      <Ionicons name="sparkles-outline" size={20} color={colors.text} />
+      <Text style={styles.settingsRowText}>Festive decorations</Text>
+      <Switch
+        value={decorationsEnabled}
+        onValueChange={setDecorationsEnabled}
+        trackColor={{ false: colors.border, true: colors.primary }}
+      />
+    </View>
+  );
+}
+
 // Per-member credit-usage log: `completed booking credits ÷ final
 // participant count` per booking the caller played in, Week/Month
 // filterable. Analytics only — this never represents a per-member wallet or
@@ -519,9 +546,12 @@ function CreditUsageSection() {
       {isPending ? (
         <ActivityIndicator color={colors.primary} style={{ marginTop: spacing.md }} />
       ) : !rows || rows.length === 0 ? (
-        <Text style={styles.usageEmpty}>
-          {period === 'WEEK' ? 'No games played this week yet.' : 'No games played this month yet.'}
-        </Text>
+        <View style={{ alignItems: 'center', marginTop: spacing.md }}>
+          <Mascot pose="napping" size={48} />
+          <Text style={[styles.usageEmpty, { marginTop: spacing.sm }]}>
+            {period === 'WEEK' ? 'No games played this week yet.' : 'No games played this month yet.'}
+          </Text>
+        </View>
       ) : (
         // The list scrolls inside its own fixed-height box (nestedScrollEnabled
         // lets Android scroll it independently of the page) so a long usage
@@ -601,6 +631,7 @@ const styles = themedStyles(() => ({
     overflow: 'hidden',
   },
   avatarImage: { width: '100%', height: '100%' },
+  avatarRing: { position: 'absolute', top: -14, left: -14, width: AVATAR_SIZE + 28, height: AVATAR_SIZE + 28 },
   avatarEditBadge: {
     position: 'absolute',
     right: 0,
