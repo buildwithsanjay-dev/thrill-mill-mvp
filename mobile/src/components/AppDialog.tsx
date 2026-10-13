@@ -90,6 +90,12 @@ function getSnapshot() {
   return queue;
 }
 
+// Prefers a small face mascot over a full-body pose wherever a face reads
+// the emotion just as clearly (owner's call) — success uses face-laughing
+// now, matching the same pose Notifications already uses for approvals.
+// error/warning/pending keep their full-body poses: oops-sorry's shrug,
+// hold-on's "wait a sec" gesture, and waiting-watch's clock-check are all
+// specific body language no single static face conveys as clearly.
 // `tint` only drives the brief pulsing ring behind the mascot now — the
 // solid tinted circle that used to sit behind it was removed so the mascot
 // itself is what's visible, not a coloured disc. `pending` reuses the same
@@ -98,7 +104,7 @@ function getSnapshot() {
 function variantStyle(variant: DialogVariant): { pose: MascotPose; tint: string } {
   switch (variant) {
     case 'success':
-      return { pose: 'celebrate-jump', tint: colors.success };
+      return { pose: 'face-laughing', tint: colors.success };
     case 'error':
       return { pose: 'oops-sorry', tint: colors.danger };
     case 'warning':

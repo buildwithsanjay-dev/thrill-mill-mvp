@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
+import { Mascot } from '@/components/Mascot';
 import { PaginationDots } from '@/components/PaginationDots';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '@/components/SeasonProvider';
@@ -35,8 +36,10 @@ export function WelcomeScreen() {
         style={styles.bottomScrim}
       />
 
-      {/* Two minimal touches, not a full treatment — crossing the hero photo
-          rather than decorating the whole screen. */}
+      {/* hero-standing — the one screen this pose was actually made for
+          (mascot.md: "Welcome / onboarding → HERO") — plus two minimal
+          seasonal touches crossing the photo, not a full treatment. */}
+      <Mascot pose="hero-standing" size={150} style={styles.welcomeMascot} />
       {season === 'halloween' && (
         <>
           <Image source={HALLOWEEN_DECOR.batWingsLevel} style={styles.welcomeBat1} contentFit="contain" />
@@ -115,6 +118,7 @@ const styles = themedStyles(() => ({
     marginTop: -46,
     marginBottom: spacing.sm,
   },
+  welcomeMascot: { position: 'absolute', bottom: '40%', left: spacing.lg },
   welcomeBat1: { position: 'absolute', top: 70, right: 50, width: 26, height: 26 },
   welcomeBat2: { position: 'absolute', top: 110, right: 90, width: 18, height: 18, opacity: 0.85 },
   welcomeWitchHat: { position: 'absolute', top: -14, right: 6, width: 26, height: 26, transform: [{ rotate: '18deg' }] },
