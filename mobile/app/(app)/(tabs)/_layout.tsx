@@ -63,12 +63,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="tournaments"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          title: 'Tournaments',
+          tabBarIcon: ({ color, size }) => <Ionicons name="trophy" size={size} color={color} />,
         }}
       />
+      {/* Not shown in the tab bar — reached via the header avatar on every
+          screen (AppHeader.tsx), which already routes here regardless of
+          whether this is a visible tab. `href: null` keeps the route itself
+          reachable without adding a sixth tab icon. */}
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }
