@@ -19,6 +19,8 @@ import { useInvalidateTeamQueries, useTeamBookingCounts, useTeamDetails } from '
 import type { TeamMember, TeamRole } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 
 const ROLE_TONE: Record<TeamRole, 'host' | 'coHost' | 'member'> = {
   HOST: 'host',
@@ -29,6 +31,7 @@ const ROLE_TONE: Record<TeamRole, 'host' | 'coHost' | 'member'> = {
 export function TeamDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { season } = useSeason();
   const { session } = useAuth();
   const { data, isPending, refetch } = useTeamDetails(id);
   const { data: bookings } = useTeamBookings(id);
@@ -254,6 +257,9 @@ export function TeamDetailsScreen() {
               {isHost && <Text style={styles.bannerPlaceholderText}>Add a Team banner</Text>}
             </View>
           )}
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.bannerCobweb} tintColor="#FFFFFF" />
+          )}
           {isHost && (
             <View style={styles.bannerEditBadge}>
               {isUploadingBanner ? (
@@ -464,6 +470,7 @@ const styles = themedStyles(() => ({
     marginBottom: spacing.md,
   },
   bannerImage: { width: '100%', height: '100%' },
+  bannerCobweb: { position: 'absolute', top: 0, left: 0, width: 36, height: 36, opacity: 0.4 },
   bannerPlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
   bannerPlaceholderText: { fontSize: 12, fontWeight: '600', color: colors.heroMuted },
   bannerEditBadge: {

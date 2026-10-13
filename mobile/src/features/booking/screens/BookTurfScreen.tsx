@@ -22,6 +22,8 @@ import { whySlotNotBookable, whyTeamCannotHold } from '../reasons';
 import { useTurfResources, useInvalidateBookingQueries, useTurfSlots } from '../useBooking';
 import type { MembershipPlan, Sport, TurfSlot } from '@/types/db';
 import { showAlert } from '@/components/AppDialog';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 
 const TURF_HERO = require('../../../../assets/turf-hero.webp');
 
@@ -111,6 +113,7 @@ function computeBookingPreview(
 
 export function BookTurfScreen() {
   const router = useRouter();
+  const { season } = useSeason();
   const { session } = useAuth();
   const { data: teams, isPending: teamsPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
@@ -442,6 +445,11 @@ export function BookTurfScreen() {
               colors={['rgba(5,12,28,0.05)', 'rgba(5,12,28,0.88)']}
               style={StyleSheet.absoluteFill}
             />
+            {/* One minimal touch, not a full treatment — per the owner's
+                "don't make it over heavy" direction for the remaining screens. */}
+            {season === 'halloween' && (
+              <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.heroCobweb} tintColor="#FFFFFF" />
+            )}
             <Text style={styles.heroTitle}>Thrill Mill Turf and Pickleball</Text>
             <View style={styles.heroBadgeRow}>
               <View style={styles.heroDot} />
@@ -654,6 +662,7 @@ const styles = themedStyles(() => ({
     padding: spacing.lg,
     justifyContent: 'flex-end',
   },
+  heroCobweb: { position: 'absolute', top: 0, right: 0, width: 38, height: 38, opacity: 0.4 },
   heroTitle: { fontSize: 21, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
   heroBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   heroDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#5EE0A0' },

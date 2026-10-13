@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { showAlert } from '@/components/AppDialog';
 import { Avatar } from '@/components/Avatar';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTeamDetails } from '@/features/team/useTeams';
@@ -33,6 +36,7 @@ const MAX_MESSAGE_LENGTH = 1000;
 // preset-only design — see 20260919120000_*.sql.)
 export function ChatScreen() {
   const router = useRouter();
+  const { season } = useSeason();
   const { id: teamId } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
   const { data: teamDetails } = useTeamDetails(teamId);
@@ -198,6 +202,18 @@ export function ChatScreen() {
       </View>
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        {/* Faint wallpaper, not a full treatment — one low-opacity touch per
+            the owner's "don't make it over heavy" direction. */}
+        {season === 'halloween' && (
+          <View pointerEvents="none" style={styles.wallpaper}>
+            <Image source={HALLOWEEN_DECOR.doodlePumpkin} style={[styles.wallpaperIcon, styles.wallpaperIcon1]} tintColor={colors.textFaint} />
+            <Image source={HALLOWEEN_DECOR.doodleGhost} style={[styles.wallpaperIcon, styles.wallpaperIcon2]} tintColor={colors.textFaint} />
+            <Image source={HALLOWEEN_DECOR.doodleBat} style={[styles.wallpaperIcon, styles.wallpaperIcon3]} tintColor={colors.textFaint} />
+            <Image source={HALLOWEEN_DECOR.doodleCauldron} style={[styles.wallpaperIcon, styles.wallpaperIcon4]} tintColor={colors.textFaint} />
+            <Image source={HALLOWEEN_DECOR.doodleWitchHat} style={[styles.wallpaperIcon, styles.wallpaperIcon5]} tintColor={colors.textFaint} />
+            <Image source={HALLOWEEN_DECOR.doodleCobweb} style={[styles.wallpaperIcon, styles.wallpaperIcon6]} tintColor={colors.textFaint} />
+          </View>
+        )}
         {messagesPending ? (
           <ActivityIndicator style={{ marginTop: spacing.xl }} color={colors.primary} />
         ) : (
@@ -327,6 +343,14 @@ export function ChatScreen() {
 
 const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background },
+  wallpaper: StyleSheet.absoluteFill,
+  wallpaperIcon: { position: 'absolute', width: 22, height: 22, opacity: 0.06 },
+  wallpaperIcon1: { top: '4%', left: '12%' },
+  wallpaperIcon2: { top: '12%', right: '15%' },
+  wallpaperIcon3: { top: '28%', left: '10%' },
+  wallpaperIcon4: { top: '48%', right: '8%' },
+  wallpaperIcon5: { top: '65%', left: '18%' },
+  wallpaperIcon6: { top: '82%', right: '20%' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
