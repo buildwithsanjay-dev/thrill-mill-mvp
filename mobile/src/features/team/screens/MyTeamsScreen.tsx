@@ -76,6 +76,7 @@ export function MyTeamsScreen() {
         {!teams || teams.length === 0 ? (
           <EmptyState
             icon="people-outline"
+            mascot="welcome-open-arms"
             title="No Teams yet"
             message="Create a Team to start booking Turfs with your squad."
           />

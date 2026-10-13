@@ -2,9 +2,12 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/EmptyState';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { screenColors, radii, spacing, themedStyles, colors } from '@/constants/theme';
 import { useTeamDetails } from '@/features/team/useTeams';
 import { useTeamWallet, useWalletLedger } from '../useWallet';
@@ -32,6 +35,7 @@ const ENTRY_TITLE: Record<WalletLedgerEntry['entry_type'], string> = {
 export function WalletActivityScreen() {
   const { teamId } = useLocalSearchParams<{ teamId: string }>();
   const router = useRouter();
+  const { season } = useSeason();
   const { data: team } = useTeamDetails(teamId);
   const { data: wallet, isPending: walletPending } = useTeamWallet(teamId);
   const { data: ledger, isPending: ledgerPending } = useWalletLedger(teamId);
@@ -59,6 +63,9 @@ export function WalletActivityScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.balanceCard}>
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.pumpkinCluster} style={styles.balanceCardPumpkins} contentFit="contain" />
+          )}
           <View style={styles.balanceLabelRow}>
             <Ionicons name="card" size={14} color={screenColors.primaryLight} />
             <Text style={styles.balanceLabel}>CURRENT TEAM BALANCE</Text>
@@ -97,7 +104,12 @@ export function WalletActivityScreen() {
         {ledgerPending ? (
           <ActivityIndicator color={screenColors.primaryLight} style={{ marginTop: spacing.lg }} />
         ) : filtered.length === 0 ? (
-          <EmptyState icon="receipt-outline" title="No activity yet" message="Credit changes will show up here." />
+          <EmptyState
+            icon="receipt-outline"
+            mascot="napping"
+            title="No activity yet"
+            message="Credit changes will show up here."
+          />
         ) : (
           <View style={styles.timeline}>
             {filtered.map((entry, index) => {
@@ -151,12 +163,15 @@ const styles = themedStyles(() => ({
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
   balanceCard: {
+    position: 'relative',
     backgroundColor: screenColors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
     borderWidth: 1,
     borderColor: screenColors.border,
+    overflow: 'hidden',
   },
+  balanceCardPumpkins: { position: 'absolute', bottom: -4, right: spacing.sm, width: 48, height: 34, opacity: 0.9 },
   balanceLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   balanceLabel: { fontSize: 11, fontWeight: '700', color: screenColors.primaryLight, letterSpacing: 0.4 },
   balanceValue: { fontSize: 28, fontWeight: '800', color: screenColors.text, marginTop: spacing.sm },
