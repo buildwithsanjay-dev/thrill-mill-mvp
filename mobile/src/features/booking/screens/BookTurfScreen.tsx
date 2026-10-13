@@ -458,7 +458,12 @@ export function BookTurfScreen() {
           </View>
         )}
 
-        <Text style={styles.sectionLabel}>Select Date</Text>
+        <View style={styles.sectionLabelRow}>
+          <Text style={styles.sectionLabelInRow}>Select Date</Text>
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.propSpider} style={styles.sectionLabelIcon} contentFit="contain" />
+          )}
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateRow}>
           {dateOptions.map((iso) => {
             const { weekday, day } = formatDayLabel(iso);
@@ -476,7 +481,12 @@ export function BookTurfScreen() {
           })}
         </ScrollView>
 
-        <Text style={styles.sectionLabel}>Available Slots</Text>
+        <View style={styles.sectionLabelRow}>
+          <Text style={styles.sectionLabelInRow}>Available Slots</Text>
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.sectionLabelIcon} tintColor={colors.accent} />
+          )}
+        </View>
         {selectedSport === 'PICKLEBALL' && !turf ? (
           <Text style={styles.hintText}>Select a court above to see availability.</Text>
         ) : slotsPending ? (
@@ -662,13 +672,19 @@ const styles = themedStyles(() => ({
     padding: spacing.lg,
     justifyContent: 'flex-end',
   },
-  heroCobweb: { position: 'absolute', top: 0, right: 0, width: 38, height: 38, opacity: 0.4 },
+  // shape-cobweb.webp is drawn for a top-LEFT corner specifically (its web
+  // radiates from there) — using `right:0` mirrored it into the wrong
+  // orientation, which is what read as "misaligned".
+  heroCobweb: { position: 'absolute', top: 0, left: 0, width: 38, height: 38, opacity: 0.4 },
   heroTitle: { fontSize: 21, fontWeight: '800', color: '#FFFFFF', letterSpacing: 0.2 },
   heroBadgeRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   heroDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#5EE0A0' },
   heroBadgeText: { fontSize: 12, color: '#FFFFFF', fontWeight: '600' },
 
+  sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: spacing.xl, marginBottom: spacing.sm },
   sectionLabel: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: spacing.xl, marginBottom: spacing.sm },
+  sectionLabelInRow: { fontSize: 14, fontWeight: '700', color: colors.text },
+  sectionLabelIcon: { width: 16, height: 16 },
   hintText: { fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
   sportRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   sportChip: {

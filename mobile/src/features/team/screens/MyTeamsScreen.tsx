@@ -7,6 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { formatBookingDate, formatSlotTime } from '@/utils/datetime';
 import type { MyTeamSummary } from '../api';
@@ -35,6 +37,7 @@ function heroColorFor(_id: string): string {
 
 export function MyTeamsScreen() {
   const router = useRouter();
+  const { season } = useSeason();
   const { data: teams, isPending } = useMyTeams();
   const setActiveTeamId = useActiveTeamStore((s) => s.setActiveTeamId);
 
@@ -61,6 +64,9 @@ export function MyTeamsScreen() {
 
         {teams && teams.length > 0 && (
           <View style={styles.statsBar}>
+            {season === 'halloween' && (
+              <Image source={HALLOWEEN_DECOR.propWitchHat} style={styles.statsBarWitchHat} contentFit="contain" />
+            )}
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{teams.length}</Text>
               <Text style={styles.statLabel}>TEAM{teams.length === 1 ? '' : 'S'}</Text>
@@ -106,6 +112,7 @@ export function MyTeamsScreen() {
 }
 
 function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () => void }) {
+  const { season } = useSeason();
   const { team, myRole, wallet, memberCount, upcomingBooking, membershipStatus } = summary;
   const isMembershipActive = membershipStatus === 'ACTIVE';
 
@@ -122,6 +129,9 @@ function TeamCard({ summary, onPress }: { summary: MyTeamSummary; onPress: () =>
           </>
         ) : (
           <Ionicons name="football" size={64} color="rgba(255,255,255,0.15)" style={styles.cardHeroIcon} />
+        )}
+        {season === 'halloween' && (
+          <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.cardHeroCobweb} tintColor="#FFFFFF" />
         )}
         <Text style={styles.cardHeroTitle}>{team.name}</Text>
         <View style={styles.cardHeroBadge}>
@@ -180,6 +190,7 @@ const styles = themedStyles(() => ({
   subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
 
   statsBar: {
+    position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.surface,
@@ -190,6 +201,7 @@ const styles = themedStyles(() => ({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  statsBarWitchHat: { position: 'absolute', top: -10, right: spacing.lg, width: 22, height: 22, transform: [{ rotate: '-12deg' }] },
   statItem: { flex: 1, alignItems: 'center' },
   statDivider: { width: 1, height: 28, backgroundColor: colors.border },
   statValue: { fontSize: 20, fontWeight: '800', color: colors.text },
@@ -205,6 +217,7 @@ const styles = themedStyles(() => ({
   },
   cardHero: { height: 120, justifyContent: 'flex-end', padding: spacing.md, overflow: 'hidden' },
   cardHeroIcon: { position: 'absolute', right: -8, bottom: -12 },
+  cardHeroCobweb: { position: 'absolute', top: 0, left: 0, width: 30, height: 30, opacity: 0.4 },
   cardHeroScrim: {
     position: 'absolute',
     top: 0,

@@ -393,7 +393,11 @@ const styles = themedStyles(() => ({
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
-  heroCobweb: { position: 'absolute', top: 0, right: 0, width: 34, height: 34, opacity: 0.4 },
+  // shape-cobweb.webp is drawn for a top-LEFT corner specifically (its web
+  // radiates from there) — `right:0` mirrored it into the wrong
+  // orientation, which is what read as "misaligned". left:0 also keeps it
+  // clear of heroBadge, which sits top-right.
+  heroCobweb: { position: 'absolute', top: 0, left: 0, width: 34, height: 34, opacity: 0.4 },
   heroCard: {
     height: 130,
     borderRadius: radii.lg,

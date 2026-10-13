@@ -316,6 +316,12 @@ export function TeamDetailsScreen() {
         </View>
 
         <Pressable style={styles.walletCard} onPress={() => router.push(`/(app)/wallet/${team.id}`)}>
+          {season === 'halloween' && (
+            <>
+              <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.walletSparkle} tintColor={colors.heroAccent} />
+              <Image source={HALLOWEEN_DECOR.pumpkinCluster} style={styles.walletPumpkins} contentFit="contain" />
+            </>
+          )}
           <Text style={styles.walletLabel}>Team Credits</Text>
           <Text style={styles.walletValue}>{Math.round(wallet?.available_credits ?? 0).toLocaleString()}</Text>
           <Text style={styles.walletCaption}>Credits</Text>
@@ -514,11 +520,14 @@ const styles = themedStyles(() => ({
   planText: { fontSize: 13, fontWeight: '600', color: colors.text },
 
   walletCard: {
+    position: 'relative',
     backgroundColor: colors.hero,
     borderRadius: radii.lg,
     padding: spacing.lg,
     marginTop: spacing.md,
   },
+  walletSparkle: { position: 'absolute', top: spacing.sm, right: spacing.xl, width: 14, height: 14, opacity: 0.8 },
+  walletPumpkins: { position: 'absolute', bottom: -6, right: spacing.sm, width: 50, height: 36 },
   walletLabel: { fontSize: 12, color: colors.heroAccent, fontWeight: '700' },
   walletValue: { fontSize: 30, fontWeight: '800', color: '#FFFFFF', marginTop: 4 },
   walletCaption: { fontSize: 12, color: colors.heroMuted },
