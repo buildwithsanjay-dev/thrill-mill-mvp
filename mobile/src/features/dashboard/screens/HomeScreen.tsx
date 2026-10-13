@@ -368,6 +368,7 @@ const UPCOMING_CARD_STRIDE = 168 + spacing.sm;
 
 function OtherTeamsUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
   const router = useRouter();
+  const { season } = useSeason();
   const { data: allBookings, isPending } = useUpcomingBookingsAcrossTeams();
   const bookings = useMemo(
     () => (allBookings ?? []).filter((b) => b.team_id !== excludeTeamId),
@@ -397,6 +398,15 @@ function OtherTeamsUpcoming({ excludeTeamId }: { excludeTeamId: string }) {
         <ActivityIndicator color={colors.primary} style={{ marginVertical: spacing.md }} />
       ) : !bookings || bookings.length === 0 ? (
         <View style={styles.noBookingCard}>
+          {season === 'halloween' && (
+            <>
+              <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.noBookingCobweb} tintColor={colors.border} />
+              <Image source={HALLOWEEN_DECOR.propSpider} style={styles.noBookingSpider} contentFit="contain" />
+              <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.noBookingSparkle1} tintColor={colors.accentBorder} />
+              <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.noBookingSparkle2} tintColor={colors.accentBorder} />
+              <Image source={HALLOWEEN_DECOR.shapeGraveyard} style={styles.noBookingGraveyard} tintColor={colors.border} />
+            </>
+          )}
           <EmptyState
             icon="calendar-outline"
             mascot="napping"
@@ -545,6 +555,8 @@ const styles = themedStyles(() => ({
   bookingMeta: { fontSize: 13, color: colors.heroMuted, marginTop: 4 },
 
   noBookingCard: {
+    position: 'relative',
+    overflow: 'hidden',
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
     padding: spacing.lg,
@@ -552,6 +564,11 @@ const styles = themedStyles(() => ({
     borderColor: colors.border,
     borderStyle: 'dashed',
   },
+  noBookingCobweb: { position: 'absolute', top: -2, left: -2, width: 44, height: 44, opacity: 0.5 },
+  noBookingSpider: { position: 'absolute', top: 0, left: 22, width: 16, height: 30, opacity: 0.8 },
+  noBookingSparkle1: { position: 'absolute', top: spacing.lg, right: spacing.xl, width: 12, height: 12, opacity: 0.7 },
+  noBookingSparkle2: { position: 'absolute', bottom: spacing.xl, left: spacing.lg, width: 10, height: 10, opacity: 0.6 },
+  noBookingGraveyard: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 22, opacity: 0.3 },
   noBookingText: { fontSize: 13, color: colors.textMuted, textAlign: 'center' },
 
   quickGrid: {

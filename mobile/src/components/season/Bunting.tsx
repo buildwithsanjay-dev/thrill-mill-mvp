@@ -4,19 +4,14 @@ import { Image } from 'expo-image';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '../SeasonProvider';
 
-const FLAGS = [
-  HALLOWEEN_DECOR.buntingOrange,
-  HALLOWEEN_DECOR.buntingPurple,
-  HALLOWEEN_DECOR.buntingBat,
-  HALLOWEEN_DECOR.buntingOrange,
-  HALLOWEEN_DECOR.buntingPurple,
-];
+const FLAG_PATTERN = [HALLOWEEN_DECOR.buntingOrange, HALLOWEEN_DECOR.buntingPurple, HALLOWEEN_DECOR.buntingBat];
+// Repeated enough times to fill the row edge-to-edge with closely-packed
+// flags — spread thin across the whole screen width (the original 5) read
+// as disconnected dots next to one long straight thread line. Densely
+// packed, small flags plus a thread sized to match their actual span reads
+// as one continuous garland instead.
+const FLAGS = [...FLAG_PATTERN, ...FLAG_PATTERN, ...FLAG_PATTERN, ...FLAG_PATTERN];
 
-// A continuous string (the individual flag sprites don't include one — each
-// is drawn as an isolated cut-out, see halloween-asset-prompts.md's SP10)
-// sits behind the row so the flags read as strung together instead of
-// floating separately. `elevation`/`shadowOpacity` keep it crisply above
-// whatever scrolls past underneath it.
 export function Bunting() {
   const { season } = useSeason();
   if (season !== 'halloween') return null;
@@ -35,7 +30,7 @@ export function Bunting() {
 
 const styles = StyleSheet.create({
   wrap: {
-    height: 26,
+    height: 24,
     justifyContent: 'flex-end',
     elevation: 6,
     shadowColor: '#000',
@@ -43,14 +38,24 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
+  // Spans exactly the same horizontal extent as `row` (both sit inside the
+  // same `wrap`, `row`'s own paddingHorizontal keeps the first/last flag off
+  // the screen edges) so the thread starts and ends right at the flags,
+  // never extending past them as a bare line.
   thread: {
     position: 'absolute',
-    top: 2,
-    left: 12,
-    right: 12,
+    top: 3,
+    left: 16,
+    right: 16,
     height: 1,
-    backgroundColor: 'rgba(26,26,46,0.55)',
+    backgroundColor: 'rgba(26,26,46,0.5)',
   },
-  row: { flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'flex-start', paddingTop: 1 },
-  flag: { width: 18, height: 18 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingHorizontal: 16,
+    paddingTop: 2,
+  },
+  flag: { width: 13, height: 13 },
 });

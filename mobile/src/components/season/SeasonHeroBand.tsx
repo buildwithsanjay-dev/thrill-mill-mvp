@@ -35,7 +35,14 @@ export function SeasonHeroBand({ children }: PropsWithChildren) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginHorizontal: -spacing.lg, paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+  // Cancels the parent ScrollView's own `padding: spacing.lg` on ALL sides
+  // it previously only cancelled horizontally, which left the scroll's own
+  // top padding plus this band's own paddingTop plus the title's own
+  // marginTop all stacking into one large empty gap before any Halloween
+  // content appeared. No paddingTop here at all now — the screen's own
+  // title (ScreenIntro's marginTop, or titleRow's) is the only top spacing,
+  // counted from the image's true top edge (flush under the header).
+  wrap: { marginHorizontal: -spacing.lg, marginTop: -spacing.lg, paddingHorizontal: spacing.lg },
   scene: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   content: { paddingBottom: spacing.sm },
 });

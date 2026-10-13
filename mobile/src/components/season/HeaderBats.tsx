@@ -25,9 +25,20 @@ export function HeaderBats() {
 
   if (season !== 'halloween') return null;
 
-  return <Image source={FRAMES[frameIndex]} style={styles.bat} contentFit="contain" />;
+  // Two bats, offset in both position and animation phase (the second is
+  // always one frame ahead) so they don't flap in unison — reads as a small
+  // flock rather than one lone bat.
+  const secondFrame = FRAMES[(frameIndex + 1) % FRAMES.length];
+
+  return (
+    <>
+      <Image source={FRAMES[frameIndex]} style={styles.bat1} contentFit="contain" />
+      <Image source={secondFrame} style={styles.bat2} contentFit="contain" />
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
-  bat: { position: 'absolute', top: 2, right: 56, width: 22, height: 22 },
+  bat1: { position: 'absolute', top: 2, right: 56, width: 20, height: 20 },
+  bat2: { position: 'absolute', top: 18, right: 90, width: 14, height: 14, opacity: 0.85 },
 });
