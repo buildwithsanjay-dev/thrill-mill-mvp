@@ -1,11 +1,9 @@
-import { View } from 'react-native';
 import { Redirect, Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '@/constants/theme';
 import { useProfile } from '@/features/profile/useProfile';
 import { useMyTeams } from '@/features/team/useTeams';
-import { Bunting } from '@/components/season/Bunting';
 
 export default function TabsLayout() {
   const { data: profile } = useProfile();
@@ -24,58 +22,53 @@ export default function TabsLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <Tabs
-        backBehavior="history"
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-          sceneStyle: { backgroundColor: colors.background },
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textMuted,
-          tabBarBadgeStyle: { backgroundColor: colors.danger },
+    <Tabs
+      backBehavior="history"
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        sceneStyle: { backgroundColor: colors.background },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarBadgeStyle: { backgroundColor: colors.danger },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="book"
-          options={{
-            title: 'Book',
-            tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="team"
-          options={{
-            title: 'Team',
-            tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
-            tabBarBadge: pendingActionCount > 0 ? pendingActionCount : undefined,
-          }}
-        />
-        <Tabs.Screen
-          name="leaderboard"
-          options={{
-            title: 'Leaderboard',
-            tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="profile"
-          options={{
-            title: 'Profile',
-            tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
-          }}
-        />
-      </Tabs>
-      <View pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, bottom: 78 }}>
-        <Bunting />
-      </View>
-    </View>
+      />
+      <Tabs.Screen
+        name="book"
+        options={{
+          title: 'Book',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="team"
+        options={{
+          title: 'Team',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          tabBarBadge: pendingActionCount > 0 ? pendingActionCount : undefined,
+        }}
+      />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: 'Leaderboard',
+          tabBarIcon: ({ color, size }) => <Ionicons name="stats-chart" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+        }}
+      />
+    </Tabs>
   );
 }

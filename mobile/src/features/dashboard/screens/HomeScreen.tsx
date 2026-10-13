@@ -12,6 +12,7 @@ import { Button } from '@/components/Button';
 import { ScrollBox } from '@/components/ScrollBox';
 import { EmptyState } from '@/components/EmptyState';
 import { Mascot } from '@/components/Mascot';
+import { Bunting } from '@/components/season/Bunting';
 import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '@/components/SeasonProvider';
@@ -227,6 +228,12 @@ function DashboardContent({
             <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.creditsCardCobweb} tintColor={colors.heroAccent} />
             <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.creditsCardSparkle} tintColor={colors.heroAccent} />
             <Image source={HALLOWEEN_DECOR.pumpkinCluster} style={styles.creditsCardPumpkins} contentFit="contain" />
+            {/* Hangs off the card's own bottom edge and scrolls with it —
+                previously a separate strip pinned above the tab bar on every
+                screen, which read as floating, disconnected from anything. */}
+            <View style={styles.creditsCardBunting} pointerEvents="none">
+              <Bunting />
+            </View>
           </>
         )}
         <View style={styles.creditsCardTop}>
@@ -532,6 +539,7 @@ const styles = themedStyles(() => ({
   creditsCardCobweb: { position: 'absolute', top: 0, left: 0, width: 36, height: 36, opacity: 0.5 },
   creditsCardSparkle: { position: 'absolute', top: spacing.sm, right: spacing.xl, width: 14, height: 14, opacity: 0.8 },
   creditsCardPumpkins: { position: 'absolute', bottom: -6, right: spacing.sm, width: 56, height: 40 },
+  creditsCardBunting: { position: 'absolute', left: 0, right: 0, bottom: -16, overflow: 'hidden' },
   creditsCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   creditsLabel: { fontSize: 11, fontWeight: '700', color: colors.heroAccent, letterSpacing: 0.5 },
   creditsValue: { fontSize: 34, fontWeight: '800', color: '#FFFFFF', marginTop: spacing.xs },

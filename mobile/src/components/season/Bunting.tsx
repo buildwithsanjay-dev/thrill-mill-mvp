@@ -9,40 +9,31 @@ import { useSeason } from '../SeasonProvider';
 const GARLAND_RATIO = 761 / 187;
 const TILE_HEIGHT = 26;
 const TILE_WIDTH = TILE_HEIGHT * GARLAND_RATIO;
-// Enough tiles to cover any phone width edge-to-edge; `wrap`'s own
-// overflow:hidden clips whatever doesn't fit rather than wrapping to a
-// second row.
+// Enough tiles to cover the full screen width (and so the credits card,
+// which spans the same content width) edge-to-edge; the parent's own
+// overflow:hidden (see HomeScreen's creditsCardBunting) clips any excess
+// rather than wrapping to a second row.
 const TILE_COUNT = 6;
 
 // A single owner-supplied image (string + flags + bats already drawn
-// together) repeated edge-to-edge, replacing the earlier version that
-// composed separate flag cut-outs over a code-drawn line — that read as
-// disconnected dots floating above an unrelated straight line.
+// together), tiled edge-to-edge. Scrolls as part of whatever it's placed
+// in — this used to be its own fixed strip pinned above the tab bar on
+// every screen, which read as floating disconnected from anything; now the
+// caller attaches it to a specific element (the Home credits card) instead.
 export function Bunting() {
   const { season } = useSeason();
   if (season !== 'halloween') return null;
 
   return (
-    <View style={styles.wrap} pointerEvents="none">
-      <View style={styles.row}>
-        {Array.from({ length: TILE_COUNT }).map((_, i) => (
-          <Image key={i} source={HALLOWEEN_DECOR.buntingGarland} style={styles.tile} contentFit="contain" />
-        ))}
-      </View>
+    <View style={styles.row}>
+      {Array.from({ length: TILE_COUNT }).map((_, i) => (
+        <Image key={i} source={HALLOWEEN_DECOR.buntingGarland} style={styles.tile} contentFit="contain" />
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    height: TILE_HEIGHT,
-    overflow: 'hidden',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-  },
   row: { flexDirection: 'row' },
   tile: { width: TILE_WIDTH, height: TILE_HEIGHT },
 });
