@@ -67,7 +67,7 @@ export function HomeScreen() {
               {profile?.full_name?.split(' ')[0] ?? 'there'} {season === 'halloween' ? '🎃' : '👋'}
             </Text>
           </ScreenIntro>
-          {season === 'halloween' && <Mascot pose="wave-hello" size={72} style={styles.heroMascotPeek} />}
+          {season === 'halloween' && <Mascot pose="wave-hello" size={116} style={styles.heroMascotPeek} />}
         </SeasonHeroBand>
 
         <PendingInvites />
@@ -464,7 +464,7 @@ const styles = themedStyles(() => ({
   brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
   greetingLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.8 },
   greetingName: { fontSize: 28, fontWeight: '800', color: colors.text, marginTop: 2 },
-  heroMascotPeek: { position: 'absolute', right: spacing.md, bottom: -8 },
+  heroMascotPeek: { position: 'absolute', right: spacing.sm, bottom: -22 },
 
   newMemberWrap: { marginTop: spacing.sm },
   newMemberIntro: { fontSize: 15, color: colors.textMuted, marginBottom: spacing.lg },
