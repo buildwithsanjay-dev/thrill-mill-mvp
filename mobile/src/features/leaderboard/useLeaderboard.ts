@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 
 import { getLiveLeaderboard, getMyCreditUsageLog, type LeaderboardPeriod } from './api';
 
-export function useLeaderboard(scope: 'TEAM' | 'MEMBER', period: LeaderboardPeriod) {
+export function useLeaderboard(scope: 'TEAM' | 'MEMBER', period: LeaderboardPeriod, offset = 0) {
   return useQuery({
-    queryKey: ['leaderboard', scope, period],
-    queryFn: () => getLiveLeaderboard(scope, period),
+    queryKey: ['leaderboard', scope, period, offset],
+    queryFn: () => getLiveLeaderboard(scope, period, offset),
   });
 }
 

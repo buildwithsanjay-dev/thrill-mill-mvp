@@ -25,14 +25,27 @@ const PODIUM_COLORS = ['#F59E0B', '#D1D5DB', '#B45309'];
 export function LeaderboardScreen() {
   const [scope, setScope] = useState<Scope>('TEAM');
   const [period, setPeriod] = useState<LeaderboardPeriod>('WEEK');
+  // How many periods back from the current (possibly partial) one — 0 =
+  // this week/month, 1 = last, 2 = the one before that, etc. Reset whenever
+  // the Week/Month tab changes so a stale "3 months ago" doesn't silently
+  // carry over into the Week view.
+  const [offset, setOffset] = useState(0);
   const { season } = useSeason();
-  const { data: rows, isPending } = useLeaderboard(scope, period);
+  const { data: rows, isPending } = useLeaderboard(scope, period, offset);
 
   const top3 = (rows ?? []).slice(0, 3);
   const rest = (rows ?? []).slice(3);
   const periodLabel = rows?.[0]
     ? `${formatShort(rows[0].period_start)} - ${formatShort(rows[0].period_end)}`
     : '';
+  const unit = period === 'WEEK' ? 'WEEK' : 'MONTH';
+  const periodChipLabel =
+    offset === 0 ? `THIS ${unit}` : offset === 1 ? `LAST ${unit}` : `${offset} ${unit}S AGO`;
+
+  const changePeriod = (next: LeaderboardPeriod) => {
+    setPeriod(next);
+    setOffset(0);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -51,16 +64,31 @@ export function LeaderboardScreen() {
         </SeasonHeroBand>
 
         <View style={styles.periodTabs}>
-          <PeriodTab label="THIS WEEK" active={period === 'WEEK'} onPress={() => setPeriod('WEEK')} />
-          <PeriodTab label="THIS MONTH" active={period === 'MONTH'} onPress={() => setPeriod('MONTH')} />
+          <PeriodTab label="WEEK" active={period === 'WEEK'} onPress={() => changePeriod('WEEK')} />
+          <PeriodTab label="MONTH" active={period === 'MONTH'} onPress={() => changePeriod('MONTH')} />
         </View>
 
-        {!!periodLabel && (
+        <View style={styles.periodNav}>
+          <Pressable
+            onPress={() => setOffset((o) => o + 1)}
+            hitSlop={10}
+            style={styles.periodNavArrow}
+          >
+            <Ionicons name="chevron-back" size={16} color={colors.primary} />
+          </Pressable>
           <View style={styles.weekChip}>
-            <Text style={styles.weekChipText}>{period === 'WEEK' ? 'THIS WEEK' : 'THIS MONTH'}</Text>
-            <Text style={styles.weekChipDate}>· {periodLabel}</Text>
+            <Text style={styles.weekChipText}>{periodChipLabel}</Text>
+            {!!periodLabel && <Text style={styles.weekChipDate}>· {periodLabel}</Text>}
           </View>
-        )}
+          <Pressable
+            onPress={() => setOffset((o) => Math.max(0, o - 1))}
+            hitSlop={10}
+            disabled={offset === 0}
+            style={[styles.periodNavArrow, offset === 0 && styles.periodNavArrowDisabled]}
+          >
+            <Ionicons name="chevron-forward" size={16} color={offset === 0 ? colors.textFaint : colors.primary} />
+          </Pressable>
+        </View>
 
         <View style={styles.scopeTabs}>
           <ScopeTab label="TEAMS" active={scope === 'TEAM'} onPress={() => setScope('TEAM')} />
@@ -72,11 +100,12 @@ export function LeaderboardScreen() {
         ) : !rows || rows.length === 0 ? (
           <EmptyState
             icon="trophy-outline"
-            title="No games played yet"
+            mascot="napping"
+            title="No games played"
             message={
-              period === 'WEEK'
-                ? 'Rankings appear as soon as a game is played this week.'
-                : 'Rankings appear as soon as a game is played this month.'
+              offset === 0
+                ? `Rankings appear as soon as a game is played this ${period === 'WEEK' ? 'week' : 'month'}.`
+                : `No completed games in that ${period === 'WEEK' ? 'week' : 'month'}.`
             }
           />
         ) : (
@@ -200,15 +229,29 @@ const styles = themedStyles(() => ({
   periodTabLabel: { fontSize: 11, fontWeight: '700', color: colors.textMuted },
   periodTabLabelActive: { color: '#FFFFFF' },
 
+  periodNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  periodNavArrow: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  periodNavArrowDisabled: { backgroundColor: colors.surfaceAlt },
   weekChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     backgroundColor: colors.primarySoft,
     borderRadius: radii.pill,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    marginTop: spacing.md,
   },
   weekChipText: { fontSize: 11, fontWeight: '800', color: colors.primary },
   weekChipDate: { fontSize: 11, color: colors.textMuted, marginLeft: 4 },
