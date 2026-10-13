@@ -36,10 +36,8 @@ export function WelcomeScreen() {
         style={styles.bottomScrim}
       />
 
-      {/* hero-standing — the one screen this pose was actually made for
-          (mascot.md: "Welcome / onboarding → HERO") — plus two minimal
-          seasonal touches crossing the photo, not a full treatment. */}
-      <Mascot pose="hero-standing" size={150} style={styles.welcomeMascot} />
+      {/* Two minimal seasonal touches crossing the photo, not a full
+          treatment. */}
       {season === 'halloween' && (
         <>
           <Image source={HALLOWEEN_DECOR.batWingsLevel} style={styles.welcomeBat1} contentFit="contain" />
@@ -61,6 +59,13 @@ export function WelcomeScreen() {
             <Text style={styles.subtitle}>
               Your sports club, community and games{'\n'}— all in one place.
             </Text>
+
+            {/* hero-standing — the one screen this pose was actually made
+                for (mascot.md: "Welcome / onboarding → HERO"). Placed
+                in-flow directly above the CTA, not absolute-positioned over
+                the photo, so it always sits exactly above the button no
+                matter how the title/subtitle wrap on a given device. */}
+            <Mascot pose="hero-standing" size={90} style={styles.ctaMascot} />
 
             <View style={styles.ctaRow}>
               <GradientButton
@@ -118,7 +123,7 @@ const styles = themedStyles(() => ({
     marginTop: -46,
     marginBottom: spacing.sm,
   },
-  welcomeMascot: { position: 'absolute', bottom: '40%', left: spacing.lg },
+  ctaMascot: { marginTop: spacing.sm },
   welcomeBat1: { position: 'absolute', top: 70, right: 50, width: 26, height: 26 },
   welcomeBat2: { position: 'absolute', top: 110, right: 90, width: 18, height: 18, opacity: 0.85 },
   welcomeWitchHat: { position: 'absolute', top: -14, right: 6, width: 26, height: 26, transform: [{ rotate: '18deg' }] },

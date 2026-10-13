@@ -82,7 +82,9 @@ export function AdminBookingsScreen() {
             try {
               await adminReviewBooking(booking.id, true);
               invalidateForBooking(booking);
-              showAlert('Booking approved', 'The Team has been notified their booking is confirmed.');
+              showAlert('Booking approved', 'The Team has been notified their booking is confirmed.', undefined, {
+                variant: 'success',
+              });
             } catch (error) {
               showAlert('Could not approve', friendlyError(error));
             } finally {
@@ -90,7 +92,8 @@ export function AdminBookingsScreen() {
             }
           },
         },
-      ]
+      ],
+      { variant: 'info' }
     );
   };
 
@@ -105,7 +108,9 @@ export function AdminBookingsScreen() {
       invalidateForBooking(booking);
       setDecliningId(null);
       setDeclineReason('');
-      showAlert('Booking declined', 'Full credits were refunded to the Team wallet and the slot reopened.');
+      showAlert('Booking declined', 'Full credits were refunded to the Team wallet and the slot reopened.', undefined, {
+        variant: 'warning',
+      });
     } catch (error) {
       showAlert('Could not decline', friendlyError(error));
     } finally {

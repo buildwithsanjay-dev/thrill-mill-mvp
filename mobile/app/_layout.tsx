@@ -9,6 +9,7 @@ import { DialogHost } from '../src/components/AppDialog';
 import { AppThemeProvider, ThemedTree, useAppearance } from '../src/components/ThemeProvider';
 import { SeasonProvider } from '../src/components/SeasonProvider';
 import { ExitOnDoubleBack } from '../src/components/ExitOnDoubleBack';
+import { WeeklyResultPopup } from '../src/components/WeeklyResultPopup';
 import { queryClient, registerQueryClientFocusManager } from '../src/lib/queryClient';
 import { AuthProvider } from '../src/features/auth/AuthProvider';
 import { handlePushTap, type NotificationData } from '../src/features/notifications/api';
@@ -92,6 +93,7 @@ export default function RootLayout() {
                 <ExitOnDoubleBack />
                 <ThemedStack />
                 <DialogHost />
+                <WeeklyResultPopup />
               </ThemedTree>
             </QueryClientProvider>
           </AuthProvider>

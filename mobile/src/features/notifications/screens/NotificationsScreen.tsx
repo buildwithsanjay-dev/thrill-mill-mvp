@@ -35,6 +35,10 @@ const TYPE_META: Record<string, { icon: keyof typeof Ionicons.glyphMap; kind: Ki
   JOIN_REQUEST_REJECTED: { icon: 'close-circle', kind: 'danger', face: 'face-sad' },
   TEAM_INVITE: { icon: 'mail', kind: 'brand', face: 'face-wink' },
   TEAM_POLL: { icon: 'bar-chart', kind: 'brand', face: 'face-thinking' },
+  WEEKLY_LEADERBOARD_RANK1: { icon: 'trophy', kind: 'success', face: 'face-laughing' },
+  WEEKLY_LEADERBOARD_RANK2: { icon: 'medal', kind: 'success', face: 'face-wink' },
+  WEEKLY_LEADERBOARD_RANK3: { icon: 'medal', kind: 'success', face: 'face-smile' },
+  WEEKLY_TEAM_LEAD: { icon: 'trophy', kind: 'success', face: 'face-laughing' },
 };
 
 // One consistent set of tints for the whole list (built per render so it
