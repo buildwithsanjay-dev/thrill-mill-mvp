@@ -90,22 +90,23 @@ function getSnapshot() {
   return queue;
 }
 
-// Calm, brand-consistent tints (no neon): success is a muted green, info uses
-// the brand teal. Built per render so it follows light/dark. `pending` reuses
-// the same warning tint/soft as the existing PENDING APPROVAL Badge tone
-// (see Badge.tsx) for visual consistency across the app.
-function variantStyle(variant: DialogVariant): { pose: MascotPose; tint: string; soft: string } {
+// `tint` only drives the brief pulsing ring behind the mascot now — the
+// solid tinted circle that used to sit behind it was removed so the mascot
+// itself is what's visible, not a coloured disc. `pending` reuses the same
+// warning tint as the existing PENDING APPROVAL Badge tone (see Badge.tsx)
+// for visual consistency across the app.
+function variantStyle(variant: DialogVariant): { pose: MascotPose; tint: string } {
   switch (variant) {
     case 'success':
-      return { pose: 'celebrate-jump', tint: colors.success, soft: colors.successSoft };
+      return { pose: 'celebrate-jump', tint: colors.success };
     case 'error':
-      return { pose: 'oops-sorry', tint: colors.danger, soft: colors.dangerSoft };
+      return { pose: 'oops-sorry', tint: colors.danger };
     case 'warning':
-      return { pose: 'hold-on', tint: colors.warning, soft: colors.warningSoft };
+      return { pose: 'hold-on', tint: colors.warning };
     case 'pending':
-      return { pose: 'waiting-watch', tint: colors.warning, soft: colors.warningSoft };
+      return { pose: 'waiting-watch', tint: colors.warning };
     default:
-      return { pose: 'face-thinking', tint: colors.primary, soft: colors.primarySoft };
+      return { pose: 'face-thinking', tint: colors.primary };
   }
 }
 
@@ -190,13 +191,10 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
               ]}
             />
             <Animated.View
-              style={[
-                styles.iconCircle,
-                { backgroundColor: style.soft, transform: [{ scale: iconScale }, { rotate: iconRotate }] },
-              ]}
+              style={[styles.iconCircle, { transform: [{ scale: iconScale }, { rotate: iconRotate }] }]}
             >
               <View style={styles.iconInner}>
-                <Mascot pose={dialog.mascotOverride ?? style.pose} size={54} />
+                <Mascot pose={dialog.mascotOverride ?? style.pose} size={88} />
               </View>
             </Animated.View>
           </View>
@@ -256,10 +254,13 @@ const styles = themedStyles(() => ({
     shadowOffset: { width: 0, height: 10 },
     elevation: 12,
   },
-  iconStage: { width: 84, height: 84, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
-  ring: { position: 'absolute', width: 64, height: 64, borderRadius: 32 },
-  iconCircle: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center' },
-  iconInner: { width: 54, height: 54, alignItems: 'center', justifyContent: 'center' },
+  // No solid background circle behind the mascot any more — it read as a
+  // flat coloured disc hiding the character rather than framing it. The
+  // pulsing `ring` stays (it's a brief animated accent, not a static panel).
+  iconStage: { width: 110, height: 110, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
+  ring: { position: 'absolute', width: 78, height: 78, borderRadius: 39 },
+  iconCircle: { width: 100, height: 100, alignItems: 'center', justifyContent: 'center' },
+  iconInner: { width: 88, height: 88, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'center' },
   message: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, lineHeight: 20 },
   buttons: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg, width: '100%' },

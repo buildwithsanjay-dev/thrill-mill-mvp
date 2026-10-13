@@ -273,7 +273,7 @@ const styles = themedStyles(() => ({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   periodNavArrow: {
     width: 28,
@@ -295,7 +295,7 @@ const styles = themedStyles(() => ({
   weekChipText: { fontSize: 11, fontWeight: '800', color: colors.primary },
   weekChipDate: { fontSize: 11, color: colors.textMuted, marginLeft: 4 },
 
-  scopeTabs: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.pill, padding: 4, marginTop: spacing.md },
+  scopeTabs: { flexDirection: 'row', backgroundColor: colors.surfaceAlt, borderRadius: radii.pill, padding: 4, marginTop: spacing.sm },
   scopeTab: { flex: 1, alignItems: 'center', paddingVertical: spacing.sm, borderRadius: radii.pill },
   scopeTabActive: { backgroundColor: colors.primary },
   scopeTabLabel: { fontSize: 12, fontWeight: '700', color: colors.textMuted },

@@ -160,7 +160,7 @@ export function SignInScreen() {
             {/* Fills what was otherwise empty space between the sign-in
                 options and the footer — also doubles as the "Sign in" slot
                 from the mascot coverage map (docs/seasonal-theming/mascot.md). */}
-            <Mascot pose="wave-hello" size={150} style={styles.signInMascot} />
+            <Mascot pose="wave-hello" size={300} style={styles.signInMascot} />
           </View>
 
           <View style={styles.footer}>

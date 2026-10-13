@@ -10,6 +10,10 @@ export const HALLOWEEN_DECOR = {
   buntingOrange: require('../../assets/seasons/halloween/bunting-orange.webp'),
   buntingPurple: require('../../assets/seasons/halloween/bunting-purple.webp'),
   buntingBat: require('../../assets/seasons/halloween/bunting-bat.webp'),
+  // Owner-supplied reference image, background removed — a single strip with
+  // its own string/knots already drawn in, used instead of composing
+  // separate flag cut-outs + a code-drawn line (see Bunting.tsx).
+  buntingGarland: require('../../assets/seasons/halloween/bunting-garland.webp'),
   pumpkinCluster: require('../../assets/seasons/halloween/pumpkin-cluster.webp'),
   shapeCobweb: require('../../assets/seasons/halloween/shape-cobweb.webp'),
   shapeSparkle: require('../../assets/seasons/halloween/shape-sparkle.webp'),

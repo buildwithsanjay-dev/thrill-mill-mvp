@@ -4,24 +4,29 @@ import { Image } from 'expo-image';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '../SeasonProvider';
 
-const FLAG_PATTERN = [HALLOWEEN_DECOR.buntingOrange, HALLOWEEN_DECOR.buntingPurple, HALLOWEEN_DECOR.buntingBat];
-// Repeated enough times to fill the row edge-to-edge with closely-packed
-// flags — spread thin across the whole screen width (the original 5) read
-// as disconnected dots next to one long straight thread line. Densely
-// packed, small flags plus a thread sized to match their actual span reads
-// as one continuous garland instead.
-const FLAGS = [...FLAG_PATTERN, ...FLAG_PATTERN, ...FLAG_PATTERN, ...FLAG_PATTERN];
+// The garland's own natural aspect ratio (761x187 — see
+// scripts/_cutout_bunting.py) — used to size each tile from a fixed height.
+const GARLAND_RATIO = 761 / 187;
+const TILE_HEIGHT = 26;
+const TILE_WIDTH = TILE_HEIGHT * GARLAND_RATIO;
+// Enough tiles to cover any phone width edge-to-edge; `wrap`'s own
+// overflow:hidden clips whatever doesn't fit rather than wrapping to a
+// second row.
+const TILE_COUNT = 6;
 
+// A single owner-supplied image (string + flags + bats already drawn
+// together) repeated edge-to-edge, replacing the earlier version that
+// composed separate flag cut-outs over a code-drawn line — that read as
+// disconnected dots floating above an unrelated straight line.
 export function Bunting() {
   const { season } = useSeason();
   if (season !== 'halloween') return null;
 
   return (
     <View style={styles.wrap} pointerEvents="none">
-      <View style={styles.thread} />
       <View style={styles.row}>
-        {FLAGS.map((source, i) => (
-          <Image key={i} source={source} style={styles.flag} contentFit="contain" />
+        {Array.from({ length: TILE_COUNT }).map((_, i) => (
+          <Image key={i} source={HALLOWEEN_DECOR.buntingGarland} style={styles.tile} contentFit="contain" />
         ))}
       </View>
     </View>
@@ -30,32 +35,14 @@ export function Bunting() {
 
 const styles = StyleSheet.create({
   wrap: {
-    height: 24,
-    justifyContent: 'flex-end',
+    height: TILE_HEIGHT,
+    overflow: 'hidden',
     elevation: 6,
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  // Spans exactly the same horizontal extent as `row` (both sit inside the
-  // same `wrap`, `row`'s own paddingHorizontal keeps the first/last flag off
-  // the screen edges) so the thread starts and ends right at the flags,
-  // never extending past them as a bare line.
-  thread: {
-    position: 'absolute',
-    top: 3,
-    left: 16,
-    right: 16,
-    height: 1,
-    backgroundColor: 'rgba(26,26,46,0.5)',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: 2,
-  },
-  flag: { width: 13, height: 13 },
+  row: { flexDirection: 'row' },
+  tile: { width: TILE_WIDTH, height: TILE_HEIGHT },
 });

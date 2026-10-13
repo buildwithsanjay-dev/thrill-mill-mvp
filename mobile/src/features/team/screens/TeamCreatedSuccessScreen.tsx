@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { BackHandler, Share, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedSuccess } from '@/components/AnimatedSuccess';
+import { Mascot } from '@/components/Mascot';
 import { Button } from '@/components/Button';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useCreateTeamWizard } from '@/stores/createTeamWizard';
 import { buildInviteMessage } from '../invite';
@@ -16,6 +19,7 @@ import { buildInviteMessage } from '../invite';
 // dismissAll(), so no stale Create Team / Add Members screen is left beneath.
 export function TeamCreatedSuccessScreen() {
   const router = useRouter();
+  const { season } = useSeason();
   const { teamId, teamName, teamJoinCode, selectedMembers, reset } = useCreateTeamWizard();
 
   const leaveWizard = (target: 'home' | 'team') => {
@@ -55,7 +59,17 @@ export function TeamCreatedSuccessScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.center}>
-        <AnimatedSuccess />
+        <View style={styles.celebrateWrap}>
+          {season === 'halloween' && (
+            <>
+              <Image source={HALLOWEEN_DECOR.confettiPumpkin} style={styles.confettiTopLeft} contentFit="contain" />
+              <Image source={HALLOWEEN_DECOR.confettiStarOrange} style={styles.confettiTopRight} contentFit="contain" />
+              <Image source={HALLOWEEN_DECOR.confettiBat} style={styles.confettiBottomLeft} contentFit="contain" />
+              <Image source={HALLOWEEN_DECOR.confettiCandyCorn} style={styles.confettiBottomRight} contentFit="contain" />
+            </>
+          )}
+          <Mascot pose="celebrate-jump" size={140} />
+        </View>
         <Text style={styles.title}>Team created!</Text>
         <Text style={styles.subtitle}>
           {teamName} is set up with {memberCount} {memberCount === 1 ? 'member' : 'members'}. Your membership request is now
@@ -84,6 +98,11 @@ export function TeamCreatedSuccessScreen() {
 const styles = themedStyles(() => ({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing.lg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  celebrateWrap: { width: 170, height: 170, alignItems: 'center', justifyContent: 'center' },
+  confettiTopLeft: { position: 'absolute', top: 4, left: 8, width: 22, height: 22 },
+  confettiTopRight: { position: 'absolute', top: 10, right: 4, width: 16, height: 16 },
+  confettiBottomLeft: { position: 'absolute', bottom: 14, left: 0, width: 18, height: 18 },
+  confettiBottomRight: { position: 'absolute', bottom: 6, right: 10, width: 20, height: 20 },
   title: { fontSize: 26, fontWeight: '800', color: colors.text, marginTop: spacing.md },
   subtitle: {
     fontSize: 14,

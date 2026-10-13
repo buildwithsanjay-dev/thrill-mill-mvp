@@ -39,6 +39,9 @@ export function HeaderBats() {
 }
 
 const styles = StyleSheet.create({
-  bat1: { position: 'absolute', top: 2, right: 56, width: 20, height: 20 },
-  bat2: { position: 'absolute', top: 18, right: 90, width: 14, height: 14, opacity: 0.85 },
+  // Both sit well clear of the bell/avatar icon cluster (which occupies
+  // roughly the rightmost 100px of the header) — they previously overlapped
+  // the notification bell.
+  bat1: { position: 'absolute', top: 0, right: 128, width: 18, height: 18 },
+  bat2: { position: 'absolute', top: 20, right: 158, width: 13, height: 13, opacity: 0.85 },
 });
