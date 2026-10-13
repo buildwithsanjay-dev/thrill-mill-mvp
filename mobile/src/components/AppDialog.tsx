@@ -123,7 +123,6 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
   const [card] = useState(() => new Animated.Value(0));
   const [iconPop] = useState(() => new Animated.Value(0));
   const [wiggle] = useState(() => new Animated.Value(0));
-  const [ring] = useState(() => new Animated.Value(0));
 
   const style = variantStyle(dialog.variant);
 
@@ -143,13 +142,6 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
           Animated.timing(wiggle, { toValue: 1, duration: 110, easing: Easing.linear, useNativeDriver: true }),
           Animated.timing(wiggle, { toValue: 0, duration: 70, easing: Easing.linear, useNativeDriver: true }),
         ]).start();
-      } else {
-        Animated.loop(
-          Animated.sequence([
-            Animated.timing(ring, { toValue: 1, duration: 1100, easing: Easing.out(Easing.quad), useNativeDriver: true }),
-            Animated.timing(ring, { toValue: 0, duration: 0, useNativeDriver: true }),
-          ])
-        ).start();
       }
     });
     // Animation values are stable refs; run once per dialog instance.
@@ -175,29 +167,15 @@ function DialogCard({ dialog }: { dialog: DialogState }) {
   const cardScale = card.interpolate({ inputRange: [0, 1], outputRange: [0.86, 1] });
   const iconScale = iconPop.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
   const iconRotate = wiggle.interpolate({ inputRange: [-1, 0, 1], outputRange: ['-9deg', '0deg', '9deg'] });
-  const ringScale = ring.interpolate({ inputRange: [0, 1], outputRange: [1, 1.7] });
-  const ringOpacity = ring.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0] });
 
   return (
     <Modal transparent visible animationType="none" statusBarTranslucent onRequestClose={() => close(cancelButton)}>
       <Animated.View style={[styles.backdrop, { opacity: backdrop }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={() => (cancelButton ? close(cancelButton) : undefined)} />
         <Animated.View style={[styles.card, { opacity: card, transform: [{ scale: cardScale }] }]}>
-          <View style={styles.iconStage}>
-            <Animated.View
-              style={[
-                styles.ring,
-                { backgroundColor: style.tint, opacity: ringOpacity, transform: [{ scale: ringScale }] },
-              ]}
-            />
-            <Animated.View
-              style={[styles.iconCircle, { transform: [{ scale: iconScale }, { rotate: iconRotate }] }]}
-            >
-              <View style={styles.iconInner}>
-                <Mascot pose={dialog.mascotOverride ?? style.pose} size={88} />
-              </View>
-            </Animated.View>
-          </View>
+          <Animated.View style={[styles.iconStage, { transform: [{ scale: iconScale }, { rotate: iconRotate }] }]}>
+            <Mascot pose={dialog.mascotOverride ?? style.pose} size={132} />
+          </Animated.View>
 
           <Text style={styles.title}>{dialog.title}</Text>
           {!!dialog.message && <Text style={styles.message}>{dialog.message}</Text>}
@@ -254,13 +232,11 @@ const styles = themedStyles(() => ({
     shadowOffset: { width: 0, height: 10 },
     elevation: 12,
   },
-  // No solid background circle behind the mascot any more — it read as a
-  // flat coloured disc hiding the character rather than framing it. The
-  // pulsing `ring` stays (it's a brief animated accent, not a static panel).
-  iconStage: { width: 110, height: 110, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
-  ring: { position: 'absolute', width: 78, height: 78, borderRadius: 39 },
-  iconCircle: { width: 100, height: 100, alignItems: 'center', justifyContent: 'center' },
-  iconInner: { width: 88, height: 88, alignItems: 'center', justifyContent: 'center' },
+  // No circle of any kind behind the mascot — neither the old solid tinted
+  // disc nor the pulsing ring that replaced it. Just the character itself,
+  // sized to actually read its expression rather than sitting small inside
+  // a frame.
+  iconStage: { width: 132, height: 132, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
   title: { fontSize: 18, fontWeight: '800', color: colors.text, textAlign: 'center' },
   message: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: spacing.sm, lineHeight: 20 },
   buttons: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg, width: '100%' },
