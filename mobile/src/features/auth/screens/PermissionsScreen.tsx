@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
+import { Mascot } from '@/components/Mascot';
 import { PaginationDots } from '@/components/PaginationDots';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { registerForPushNotificationsAsync } from '@/features/notifications/pushToken';
@@ -103,6 +104,7 @@ export function PermissionsScreen() {
               icon="notifications-outline"
               title="Notifications"
               reason="Know the moment your booking is confirmed or your Team's membership is approved."
+              showMascot
             />
             <PermissionCard
               icon="image-outline"
@@ -133,10 +135,12 @@ function PermissionCard({
   icon,
   title,
   reason,
+  showMascot = false,
 }: {
   icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string;
   reason: string;
+  showMascot?: boolean;
 }) {
   return (
     <View style={styles.card}>
@@ -146,6 +150,7 @@ function PermissionCard({
       <View style={styles.cardTextWrap}>
         <View style={styles.cardTitleRow}>
           <Text style={styles.cardTitle}>{title}</Text>
+          {showMascot && <Mascot pose="face-surprised" size={28} />}
         </View>
         <Text style={styles.cardReason}>{reason}</Text>
       </View>

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { requestJoinTeam } from '../api';
 import { useInvalidateTeamQueries } from '../useTeams';
@@ -13,6 +16,7 @@ import { showAlert } from '@/components/AppDialog';
 
 export function JoinTeamScreen() {
   const router = useRouter();
+  const { season } = useSeason();
   const invalidate = useInvalidateTeamQueries();
   const [code, setCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +59,9 @@ export function JoinTeamScreen() {
       <View style={styles.content}>
         <View style={styles.iconWrap}>
           <Ionicons name="git-network" size={28} color={colors.primary} />
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.shapeSparkle} style={styles.iconSparkle} tintColor={colors.accent} />
+          )}
         </View>
         <Text style={styles.title}>Join a Team</Text>
         <Text style={styles.subtitle}>
@@ -94,6 +101,7 @@ const styles = themedStyles(() => ({
     justifyContent: 'center',
     marginBottom: spacing.lg,
   },
+  iconSparkle: { position: 'absolute', top: -4, right: -4, width: 16, height: 16 },
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
   subtitle: {
     fontSize: 13,
