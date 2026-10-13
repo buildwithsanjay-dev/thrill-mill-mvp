@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '@/components/SeasonProvider';
+import { useAppearance } from '@/components/ThemeProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { LeaderboardPeriod } from '../api';
 import { useLeaderboard } from '../useLeaderboard';
@@ -19,8 +20,11 @@ type Scope = 'TEAM' | 'MEMBER';
 
 // Index 0 = 1st place, 1 = 2nd, 2 = 3rd — gold/silver/bronze in that order.
 // Was ['#D1D5DB', '#F59E0B', ...] (silver, gold, ...), which put silver on
-// 1st place and gold on 2nd.
-const PODIUM_COLORS = ['#F59E0B', '#D1D5DB', '#B45309'];
+// 1st place and gold on 2nd. Dark mode gets its own, slightly brighter/more
+// saturated set — the light-mode colours (especially bronze) read as a flat,
+// muddy brown against the dark navy background.
+const PODIUM_COLORS_LIGHT = ['#F59E0B', '#D1D5DB', '#B45309'];
+const PODIUM_COLORS_DARK = ['#F5B93F', '#9FB3CC', '#D97A3D'];
 
 export function LeaderboardScreen() {
   const [scope, setScope] = useState<Scope>('TEAM');
@@ -146,9 +150,12 @@ export function LeaderboardScreen() {
                     <Ionicons name="shield" size={16} color={colors.textMuted} />
                   </View>
                 )}
-                <Text style={styles.listName} numberOfLines={1}>
-                  {row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member')}
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.listName} numberOfLines={1}>
+                    {row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member')}
+                  </Text>
+                  <RankMovement row={row} />
+                </View>
                 <Text style={styles.listValue}>{Math.round(row.metric_value)}</Text>
               </View>
             ))}
@@ -177,6 +184,8 @@ function PeriodTab({ label, active, onPress }: { label: string; active: boolean;
 
 function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: number; scope: Scope }) {
   const { season } = useSeason();
+  const { scheme } = useAppearance();
+  const podiumColors = scheme === 'dark' ? PODIUM_COLORS_DARK : PODIUM_COLORS_LIGHT;
   const height = rank === 1 ? 88 : rank === 2 ? 64 : 52;
   const name = row.display_name ?? (scope === 'TEAM' ? 'Team' : 'Member');
 
@@ -197,9 +206,39 @@ function PodiumSlot({ row, rank, scope }: { row: LiveLeaderboardRow; rank: numbe
         {name}
       </Text>
       <Text style={styles.podiumMeta}>{Math.round(row.metric_value)}</Text>
-      <View style={[styles.podiumBlock, { height, backgroundColor: PODIUM_COLORS[rank - 1] }]}>
+      <RankMovement row={row} />
+      <View style={[styles.podiumBlock, { height, backgroundColor: podiumColors[rank - 1] }]}>
         <Text style={styles.podiumRank}>{rank}</Text>
       </View>
+    </View>
+  );
+}
+
+// "Stock-ticker" style rank movement: a green ▲ + places gained, a red ▼ +
+// places lost, a neutral dash for no change, or a NEW badge for a subject
+// with no completed activity in the comparison period at all (not the same
+// as "no movement" — there is nothing to compare against).
+function RankMovement({ row }: { row: LiveLeaderboardRow }) {
+  if (row.previous_rank_no == null) {
+    return (
+      <View style={[styles.movementBadge, styles.movementNew]}>
+        <Text style={styles.movementNewText}>NEW</Text>
+      </View>
+    );
+  }
+  const delta = row.previous_rank_no - row.rank_no; // positive = moved up (lower rank number is better)
+  if (delta === 0) {
+    return (
+      <View style={styles.movementBadge}>
+        <Ionicons name="remove" size={11} color={colors.textMuted} />
+      </View>
+    );
+  }
+  const up = delta > 0;
+  return (
+    <View style={styles.movementBadge}>
+      <Ionicons name={up ? 'caret-up' : 'caret-down'} size={11} color={up ? colors.success : colors.danger} />
+      <Text style={[styles.movementText, { color: up ? colors.success : colors.danger }]}>{Math.abs(delta)}</Text>
     </View>
   );
 }
@@ -286,6 +325,17 @@ const styles = themedStyles(() => ({
   },
   listRank: { width: 28, fontSize: 13, fontWeight: '800', color: colors.textMuted },
   listIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
-  listName: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.text },
+  listName: { fontSize: 14, fontWeight: '700', color: colors.text },
   listValue: { fontSize: 14, fontWeight: '800', color: colors.primary },
+
+  movementBadge: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 2 },
+  movementText: { fontSize: 11, fontWeight: '800' },
+  movementNew: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.primarySoft,
+    borderRadius: radii.sm,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  movementNewText: { fontSize: 9.5, fontWeight: '800', color: colors.primary, letterSpacing: 0.4 },
 }));

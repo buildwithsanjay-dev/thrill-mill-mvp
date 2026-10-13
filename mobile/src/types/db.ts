@@ -176,6 +176,10 @@ export type LiveLeaderboardRow = {
   metric_value: number;
   period_start: string;
   period_end: string;
+  // Rank the same subject held in the immediately preceding equivalent
+  // period — null means no completed activity at all in that period (a new
+  // entrant to the board), not "no movement".
+  previous_rank_no: number | null;
 };
 
 // Row shape returned by fn_my_credit_usage_log(period) for the Profile
