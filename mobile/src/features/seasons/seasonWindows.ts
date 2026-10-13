@@ -22,7 +22,15 @@ function toMonthDayNumber(monthDay: string): number {
   return month * 100 + day;
 }
 
+// TEMPORARY — testing override (2026-10-13): forces Halloween on regardless
+// of date so the owner can review the new theming before Oct 15 without
+// changing their phone's clock. Remove this early return (restoring the
+// real SEASON_WINDOWS check below) once the review is confirmed good.
+const FORCE_SEASON_FOR_TESTING: SeasonId | null = 'halloween';
+
 export function getCalendarSeason(date: Date = new Date()): SeasonId {
+  if (FORCE_SEASON_FOR_TESTING) return FORCE_SEASON_FOR_TESTING;
+
   const todayNumber = (date.getMonth() + 1) * 100 + date.getDate();
   const active = SEASON_WINDOWS.find((w) => {
     const start = toMonthDayNumber(w.startMonthDay);
