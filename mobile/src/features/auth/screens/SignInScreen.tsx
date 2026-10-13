@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
-import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,17 +10,11 @@ import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
 import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { Mascot } from '@/components/Mascot';
-import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { signInWithGoogle, signInWithUsername } from '../api';
 import { showAlert } from '@/components/AppDialog';
 import { friendlyError } from '@/lib/errors';
-
-// Owner-supplied animated GIF, Halloween costume only (no base-costume
-// animated version exists yet) — expo-image autoplays/loops animated
-// sources by default, no custom frame-cycling needed.
-const WAVE_HELLO_HALLOWEEN_GIF = require('../../../../assets/mascot/halloween/wave-hello.gif');
 
 // Note: the Figma design (assets/ui/Sign In.png) also shows a "Continue with
 // Apple" option. Omitted here on purpose — CLAUDE.md scopes this MVP to
@@ -30,7 +23,6 @@ const WAVE_HELLO_HALLOWEEN_GIF = require('../../../../assets/mascot/halloween/wa
 // dead UI. Add it back when iOS is actually in scope.
 export function SignInScreen() {
   const router = useRouter();
-  const { season } = useSeason();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [username, setUsername] = useState('');
@@ -168,18 +160,7 @@ export function SignInScreen() {
             {/* Fills what was otherwise empty space between the sign-in
                 options and the footer — also doubles as the "Sign in" slot
                 from the mascot coverage map (docs/seasonal-theming/mascot.md). */}
-            {season === 'halloween' ? (
-              // Native 144x256 (9:16) — sized by height to match the static
-              // mascot's previous visual scale, width follows its own aspect
-              // ratio rather than being forced square.
-              <Image
-                source={WAVE_HELLO_HALLOWEEN_GIF}
-                style={[styles.signInMascot, { width: 169, height: 300 }]}
-                contentFit="contain"
-              />
-            ) : (
-              <Mascot pose="wave-hello" size={300} style={styles.signInMascot} />
-            )}
+            <Mascot pose="wave-hello" size={300} style={styles.signInMascot} />
           </View>
 
           <View style={styles.footer}>
