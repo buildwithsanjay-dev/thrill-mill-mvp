@@ -9,7 +9,7 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { PaginationDots } from '@/components/PaginationDots';
 import { FadeSlideIn } from '@/components/FadeSlideIn';
-import { AnimatedWaveMascot } from '@/components/AnimatedWaveMascot';
+import { Mascot } from '@/components/Mascot';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { signInWithGoogle, signInWithUsername } from '../api';
@@ -160,7 +160,7 @@ export function SignInScreen() {
             {/* Fills what was otherwise empty space between the sign-in
                 options and the footer — also doubles as the "Sign in" slot
                 from the mascot coverage map (docs/seasonal-theming/mascot.md). */}
-            <AnimatedWaveMascot size={300} style={styles.signInMascot} />
+            <Mascot pose="wave-hello" size={300} style={styles.signInMascot} />
           </View>
 
           <View style={styles.footer}>
