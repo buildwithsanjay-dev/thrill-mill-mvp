@@ -16,14 +16,23 @@ import { useSeason } from '../SeasonProvider';
 // `overflow` is intentionally NOT hidden here: a mascot peek passed in as a
 // child is allowed to break past the band's bottom edge, matching the
 // reference's mascot-bleeding-past-the-frame look.
+// Exported so screens can match their own text colour to whichever scene is
+// actually showing — the night scene can appear while the app is still in
+// LIGHT theme (it's simply evening), and the light theme's normal dark-navy
+// text is unreadable against it. True whenever the dark/night art is what's
+// behind the content, regardless of why (evening hour, or dark theme).
+export function useIsHeroNight(): boolean {
+  const { scheme } = useAppearance();
+  const hour = new Date().getHours();
+  return scheme === 'dark' || hour < 5 || hour >= 17;
+}
+
 export function SeasonHeroBand({ children }: PropsWithChildren) {
   const { season } = useSeason();
-  const { scheme } = useAppearance();
+  const isNight = useIsHeroNight();
 
   if (season !== 'halloween') return <>{children}</>;
 
-  const hour = new Date().getHours();
-  const isNight = scheme === 'dark' || hour < 5 || hour >= 17;
   const source = isNight ? HALLOWEEN_DECOR.heroNight : HALLOWEEN_DECOR.heroDay;
 
   return (

@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppHeader } from '@/components/AppHeader';
 import { Avatar } from '@/components/Avatar';
 import { EmptyState } from '@/components/EmptyState';
-import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
+import { SeasonHeroBand, useIsHeroNight } from '@/components/season/SeasonHeroBand';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '@/components/SeasonProvider';
 import { useAppearance } from '@/components/ThemeProvider';
@@ -35,6 +35,13 @@ export function LeaderboardScreen() {
   // carry over into the Week view.
   const [offset, setOffset] = useState(0);
   const { season } = useSeason();
+  // Same fix as Home: the night hero scene can show in LIGHT theme (it's
+  // just evening), and light theme's dark-navy title text is unreadable
+  // against it. Hook called unconditionally first — `season === 'halloween'
+  // && useIsHeroNight()` would make the call conditional and break the
+  // Rules of Hooks.
+  const isHeroNight = useIsHeroNight();
+  const onDarkScene = season === 'halloween' && isHeroNight;
   const { data: rows, isPending } = useLeaderboard(scope, period, offset);
 
   const top3 = (rows ?? []).slice(0, 3);
@@ -57,14 +64,14 @@ export function LeaderboardScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <SeasonHeroBand>
           <View style={styles.titleRow}>
-            <Text style={styles.subtitle}>Leaderboard</Text>
+            <Text style={[styles.subtitle, onDarkScene && styles.subtitleOnDark]}>Leaderboard</Text>
             {season === 'halloween' ? (
               <Image source={HALLOWEEN_DECOR.propPumpkinTrophy} style={{ width: 20, height: 20 }} contentFit="contain" />
             ) : (
               <Ionicons name="trophy" size={18} color={colors.warning} />
             )}
           </View>
-          <Text style={styles.tagline}>Compete. Play. Climb.</Text>
+          <Text style={[styles.tagline, onDarkScene && styles.taglineOnDark]}>Compete. Play. Climb.</Text>
         </SeasonHeroBand>
 
         <View style={styles.periodTabs}>
@@ -254,7 +261,9 @@ const styles = themedStyles(() => ({
   title: { fontSize: 22, fontWeight: '800', color: colors.text },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.lg },
   subtitle: { fontSize: 22, fontWeight: '800', color: colors.text },
+  subtitleOnDark: { color: '#FFFFFF' },
   tagline: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  taglineOnDark: { color: 'rgba(255,255,255,0.75)' },
 
   periodTabs: {
     flexDirection: 'row',

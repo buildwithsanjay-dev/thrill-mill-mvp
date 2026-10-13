@@ -13,7 +13,7 @@ import { ScrollBox } from '@/components/ScrollBox';
 import { EmptyState } from '@/components/EmptyState';
 import { Mascot } from '@/components/Mascot';
 import { Bunting } from '@/components/season/Bunting';
-import { SeasonHeroBand } from '@/components/season/SeasonHeroBand';
+import { SeasonHeroBand, useIsHeroNight } from '@/components/season/SeasonHeroBand';
 import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
 import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
@@ -33,6 +33,12 @@ import { formatSlotTime, formatBookingDate } from '@/utils/datetime';
 export function HomeScreen() {
   const greeting = useGreeting();
   const { season } = useSeason();
+  // The night hero scene can show while the app is still in LIGHT theme
+  // (it's simply evening) — the light theme's normal dark-navy greeting text
+  // then reads as invisible against it, so this forces light text whenever
+  // the dark scene is actually behind it.
+  const isHeroNight = useIsHeroNight();
+  const onDarkScene = season === 'halloween' && isHeroNight;
   const { data: profile } = useProfile();
   const { data: teams, isPending } = useMyTeams();
   const { activeTeamId, setActiveTeamId } = useActiveTeamStore();
@@ -63,8 +69,10 @@ export function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         <SeasonHeroBand>
           <ScreenIntro>
-            <Text style={styles.greetingLabel}>{greeting.toUpperCase()},</Text>
-            <Text style={styles.greetingName}>
+            <Text style={[styles.greetingLabel, onDarkScene && styles.greetingLabelOnDark]}>
+              {greeting.toUpperCase()},
+            </Text>
+            <Text style={[styles.greetingName, onDarkScene && styles.greetingNameOnDark]}>
               {profile?.full_name?.split(' ')[0] ?? 'there'} {season === 'halloween' ? '🎃' : '👋'}
             </Text>
           </ScreenIntro>
@@ -480,7 +488,9 @@ const styles = themedStyles(() => ({
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md },
   brandText: { fontSize: 16, fontWeight: '800', color: colors.primary, letterSpacing: 0.2 },
   greetingLabel: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.8 },
+  greetingLabelOnDark: { color: 'rgba(255,255,255,0.75)' },
   greetingName: { fontSize: 28, fontWeight: '800', color: colors.text, marginTop: 2 },
+  greetingNameOnDark: { color: '#FFFFFF' },
   heroMascotPeek: { position: 'absolute', right: spacing.sm, bottom: -22 },
 
   newMemberWrap: { marginTop: spacing.sm },
