@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FadeSlideIn } from '@/components/FadeSlideIn';
 import { PaginationDots } from '@/components/PaginationDots';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { LogoBadge } from '../components/LogoBadge';
 import { GradientButton } from '../components/GradientButton';
@@ -14,6 +16,7 @@ const HERO_IMAGE = require('../../../../assets/welcome-hero.webp');
 
 export function WelcomeScreen() {
   const router = useRouter();
+  const { season } = useSeason();
 
   return (
     <View style={styles.container}>
@@ -32,10 +35,22 @@ export function WelcomeScreen() {
         style={styles.bottomScrim}
       />
 
+      {/* Two minimal touches, not a full treatment — crossing the hero photo
+          rather than decorating the whole screen. */}
+      {season === 'halloween' && (
+        <>
+          <Image source={HALLOWEEN_DECOR.batWingsLevel} style={styles.welcomeBat1} contentFit="contain" />
+          <Image source={HALLOWEEN_DECOR.batWingsUp} style={styles.welcomeBat2} contentFit="contain" />
+        </>
+      )}
+
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.sheet}>
           <View style={styles.badgeWrap}>
             <LogoBadge size={92} ring />
+            {season === 'halloween' && (
+              <Image source={HALLOWEEN_DECOR.propWitchHat} style={styles.welcomeWitchHat} contentFit="contain" />
+            )}
           </View>
 
           <FadeSlideIn delay={80} style={{ width: '100%', alignItems: 'center' }}>
@@ -100,6 +115,9 @@ const styles = themedStyles(() => ({
     marginTop: -46,
     marginBottom: spacing.sm,
   },
+  welcomeBat1: { position: 'absolute', top: 70, right: 50, width: 26, height: 26 },
+  welcomeBat2: { position: 'absolute', top: 110, right: 90, width: 18, height: 18, opacity: 0.85 },
+  welcomeWitchHat: { position: 'absolute', top: -14, right: 6, width: 26, height: 26, transform: [{ rotate: '18deg' }] },
   title: {
     fontSize: 28,
     fontWeight: '800',

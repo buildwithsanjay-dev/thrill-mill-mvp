@@ -9,6 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/Avatar';
 import { Badge } from '@/components/Badge';
 import { Button } from '@/components/Button';
+import { HALLOWEEN_DECOR } from '@/constants/seasonDecorAssets';
+import { useSeason } from '@/components/SeasonProvider';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useProfile } from '@/features/profile/useProfile';
@@ -47,6 +49,7 @@ const STATUS_LABEL: Partial<Record<string, string>> = {
 export function ManageBookingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { season } = useSeason();
   const { session } = useAuth();
   const { data: profile } = useProfile();
   const { data: booking, isPending } = useBooking(id);
@@ -211,6 +214,9 @@ export function ManageBookingScreen() {
           <Image source={TURF_HERO} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition="center" />
           {/* Dark fade under the text so it reads on the photo in light AND dark mode. */}
           <LinearGradient colors={['rgba(5,12,28,0.05)', 'rgba(5,12,28,0.88)']} style={StyleSheet.absoluteFill} />
+          {season === 'halloween' && (
+            <Image source={HALLOWEEN_DECOR.shapeCobweb} style={styles.heroCobweb} tintColor="#FFFFFF" />
+          )}
           <View style={styles.heroBadge}>
             <Badge label={STATUS_LABEL[booking.status] ?? booking.status} tone={STATUS_TONE[booking.status] ?? 'neutral'} />
           </View>
@@ -387,6 +393,7 @@ const styles = themedStyles(() => ({
   headerTitle: { fontSize: 16, fontWeight: '800', color: colors.text },
   scroll: { padding: spacing.lg, paddingBottom: spacing.xl },
 
+  heroCobweb: { position: 'absolute', top: 0, right: 0, width: 34, height: 34, opacity: 0.4 },
   heroCard: {
     height: 130,
     borderRadius: radii.lg,
