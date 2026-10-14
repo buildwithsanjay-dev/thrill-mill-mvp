@@ -12,7 +12,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { readFileSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
-import { dirname, join, resolve, isAbsolute } from 'node:path';
+import { dirname, join, resolve, isAbsolute, extname } from 'node:path';
 
 const planPath = resolve(process.argv[2] ?? '');
 if (!existsSync(planPath)) {
@@ -34,7 +34,10 @@ const TONEMAP = {
 };
 
 function ff(args, label) {
-  const r = spawnSync('ffmpeg', ['-y', '-v', 'error', ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+  // -nostdin + a hard timeout: a corrupt input can make ffmpeg retry forever (seen with a
+  // half-written still), and a stuck stage must fail loudly instead of hanging the job.
+  const r = spawnSync('ffmpeg', ['-y', '-nostdin', '-v', 'error', ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, timeout: 10 * 60 * 1000 });
+  if (r.error?.code === 'ETIMEDOUT') { console.error(`ffmpeg timed out (${label})`); process.exit(1); }
   if (r.status !== 0) {
     console.error(`ffmpeg failed (${label}):\n${r.stderr}`);
     process.exit(1);
@@ -48,7 +51,9 @@ function transferOf(file) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=color_transfer', '-of', 'csv=p=0', file], { encoding: 'utf8' });
   return r.stdout.trim();
 }
-const srcPath = (s) => join(rel(plan.sourceDir ?? '.'), s);
+// resolve() so a shot may also point at an absolute path (e.g. a still converted into work/).
+const srcPath = (s) => resolve(rel(plan.sourceDir ?? '.'), s);
+const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png']);
 // FFmpeg copies the SOURCE colour tags (iPhone: bt2020 / HLG) onto the output even after
 // tone-mapping the pixels to SDR. Mis-tagged files display wrong everywhere and push
 // HyperFrames onto its slow HDR path. Always stamp outputs as Rec.709 SDR explicitly.
@@ -64,10 +69,15 @@ if (!onlyAudio) {
     const file = srcPath(s.src);
     const speed = s.speed ?? 1;
     const span = s.dur * speed; // source seconds consumed
-    const tm = TONEMAP[transferOf(file)];
+    const isImage = IMAGE_EXT.has(extname(file).toLowerCase());
+    const tm = isImage ? null : TONEMAP[transferOf(file)];
     // Exact frame counts keep every later cut on the beat grid.
     const frames = Math.round(s.dur * fps);
-    const avail = durationOf(file) - s.in;
+    if (isImage) {
+      const pr = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=width', '-of', 'csv=p=0', file], { encoding: 'utf8', timeout: 30000 });
+      if (pr.status !== 0 || !Number(pr.stdout.trim())) { console.error(`[${id}] still image is unreadable or corrupt: ${file}`); process.exit(1); }
+    }
+    const avail = isImage ? Infinity : durationOf(file) - s.in;
     if (span > avail - 1 / fps) {
       console.error(`[${id}] needs ${span.toFixed(3)}s of source from ${s.in}s but only ${avail.toFixed(3)}s exist — move "in" earlier or lower "speed"`);
       process.exit(1);
@@ -79,7 +89,7 @@ if (!onlyAudio) {
     const vf = [
       tm,
       reframe,
-      `setpts=(PTS-STARTPTS)/${speed}`,
+      isImage ? null : `setpts=(PTS-STARTPTS)/${speed}`,
       `fps=${fps}`,
       s.grade ?? plan.grade,
       // frame-level colour props win over output flags — stamp SDR here too
@@ -88,7 +98,8 @@ if (!onlyAudio) {
     ].filter(Boolean).join(',');
     const out = join(shotsDir, `${id}.mp4`);
     process.stderr.write(`[${id}] ${s.src} @${s.in}s ×${speed} → ${s.dur}s\n`);
-    ff(['-ss', String(s.in), '-t', String(span + 0.2), '-i', file, '-vf', vf, '-frames:v', String(frames), '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-r', String(fps), ...SDR_TAGS, out], id);
+    const input = isImage ? ['-loop', '1', '-framerate', String(fps), '-i', file] : ['-ss', String(s.in), '-t', String(span + 0.2), '-i', file];
+    ff([...input, '-vf', vf, '-frames:v', String(frames), '-an', '-c:v', 'libx264', '-preset', 'medium', '-crf', '14', '-r', String(fps), ...SDR_TAGS, out], id);
     list.push(`file '${out.replace(/\\/g, '/')}'`);
     timeline.push({ id, start: Number(t.toFixed(3)), dur: frames / fps, frames, src: s.src, in: s.in, speed, why: s.why });
     t += frames / fps;
@@ -127,7 +138,32 @@ const mixLabels = ['[mus]'];
   chains.push(`[${i + 1}:a]aresample=48000,aformat=channel_layouts=stereo,volume=${r.gainDb ?? -6}dB,afade=t=in:d=0.12,afade=t=out:st=${(r.dur - 0.3).toFixed(2)}:d=0.3,adelay=${ms}|${ms}[r${i}]`);
   mixLabels.push(`[r${i}]`);
 });
+const SFX = {
+  whoosh: { d: 0.45, src: "anoisesrc=d=0.45:c=pink:a=0.8,bandpass=f=1500:width_type=o:w=1.5,afade=t=in:st=0:d=0.22:curve=exp,afade=t=out:st=0.22:d=0.23:curve=exp" },
+  riser: { d: 1.2, src: "aevalsrc='0.35*sin(2*PI*(220*t+260*t*t))+0.25*(random(0)*2-1)*t/1.2':d=1.2:s=48000,highpass=f=300,afade=t=in:d=0.9,afade=t=out:st=1.1:d=0.1" },
+  impact: { d: 0.6, src: "aevalsrc='0.9*sin(2*PI*55*t)*exp(-7*t)+0.4*(random(0)*2-1)*exp(-30*t)':d=0.6:s=48000,lowpass=f=2500" },
+};
+const sfxChains = [];
+(plan.sfx ?? []).forEach((x, i) => {
+  const def = SFX[x.type];
+  if (!def) { console.error(`unknown sfx type ${x.type}`); process.exit(1); }
+  const idx = inputs.filter((a) => a === '-i').length;
+  inputs.push('-f', 'lavfi', '-i', def.src);
+  const ms = Math.round(x.at * 1000);
+  chains.push(`[${idx}:a]aformat=channel_layouts=stereo,aresample=48000,volume=${x.gainDb ?? -8}dB,adelay=${ms}|${ms}[x${i}]`);
+  mixLabels.push(`[x${i}]`);
+  sfxChains.push({ src: def.src, ms, gain: x.gainDb ?? -8 });
+});
 chains.push(`${mixLabels.join('')}amix=inputs=${mixLabels.length}:normalize=0:duration=first,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,apad[out]`);
 ff([...inputs, '-filter_complex', chains.join(';'), '-map', '[out]', '-t', String(total), '-c:a', 'pcm_s16le', join(work, 'mix.wav')], 'mix');
+
+// Effects-only track for the Instagram copy (the song gets added inside Instagram).
+if (sfxChains.length) {
+  const ins = ['-f', 'lavfi', '-t', String(total), '-i', 'anullsrc=r=48000:cl=stereo'];
+  const ch = [];
+  sfxChains.forEach((x, i) => { ins.push('-f', 'lavfi', '-i', x.src); ch.push(`[${i + 1}:a]aformat=channel_layouts=stereo,aresample=48000,volume=${x.gain}dB,adelay=${x.ms}|${x.ms}[y${i}]`); });
+  ch.push(`[0:a]${sfxChains.map((_, i) => `[y${i}]`).join('')}amix=inputs=${sfxChains.length + 1}:normalize=0:duration=first[out]`);
+  ff([...ins, '-filter_complex', ch.join(';'), '-map', '[out]', '-t', String(total), '-c:a', 'pcm_s16le', join(work, 'sfx.wav')], 'sfx');
+}
 
 console.log(`base.mp4 + mix.wav ready — ${total.toFixed(3)}s`);
