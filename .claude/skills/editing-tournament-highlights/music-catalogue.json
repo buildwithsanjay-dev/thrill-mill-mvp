@@ -1,6 +1,6 @@
 {
   "$comment": "MEMORY, not the menu: every edit runs fresh web research first (references/music-selection.md Step 0) and writes new verified songs back here with source URLs. Facts only: bpm/hook_start stay null until measured or checked on Instagram; lyric_safe is 'yes' only when the song's theme is well established, otherwise 'check'. status: trending | evergreen | fading. Update 'verified' and 'feedback' after every trial.",
-  "updated": "2026-10-11",
+  "updated": "2026-10-14",
   "songs": [
     {
       "title": "One Name",
@@ -12,12 +12,16 @@
         "mass"
       ],
       "status": "trending",
-      "verified": "2026-10-11",
+      "verified": "2026-10-14",
       "lyric_safe": "check",
       "bpm": null,
       "hook_start": null,
-      "notes": "Promo single. Film releases 2026-10-15 → expect reel peak through Oct–Nov.",
-      "feedback": null
+      "notes": "Promo single. Film releases 2026-10-15 → expect reel peak through Oct–Nov. #1 on Tamil chart week ending 2026-10-02.",
+      "feedback": null,
+      "source": [
+        "https://www.4to40.com/indian-music/top-20-tamil-songs/",
+        "https://soundcharts.com/en/song/1fe9b7ca-86fb-4f4a-97b3-0aeeaa3b4463"
+      ]
     },
     {
       "title": "One Sun, One Moon",
@@ -330,6 +334,157 @@
       "hook_start": null,
       "notes": "Pan-South reel phenomenon; swagger energy for team intros.",
       "feedback": null
+    },
+    {
+      "title": "Veramaari",
+      "film": "Jailer 2",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass",
+        "celebration"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Released 2026-09-30, lyrics Thamizh Aadhavan. On 2026 trending-reels playlists. Film releases 2026-10-15.",
+      "source": [
+        "https://lyricsraag.com/?p=336698",
+        "https://open.spotify.com/playlist/4COLjwHwDJa7K198gsl4M1"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Vibe Venuma",
+      "film": "Meesaya Murukku 2",
+      "composer": "Hiphop Tamizha",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass",
+        "stadium"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "yes",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Released 2026-09-23 (film 2026-09-25). #2 on Tamil chart week ending 2026-10-02. Theme: confidence, keep chasing dreams after failure → strong for tournaments/youth. Also spelt 'Vibeu Venuma'.",
+      "source": [
+        "https://www.4to40.com/indian-music/top-20-tamil-songs/",
+        "https://lyricsraag.com/?p=331521"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Aura 10/10",
+      "film": "Meesaya Murukku 2",
+      "composer": "Hiphop Tamizha",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass",
+        "celebration"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Released 2026-03-04; swagger track, on 2026 trending-reels playlists.",
+      "source": [
+        "https://lyricsraag.com/aura-10-10-meesaya-murukku-2-translation/",
+        "https://open.spotify.com/playlist/4COLjwHwDJa7K198gsl4M1"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Pavazha Malli",
+      "film": "Independent",
+      "composer": "Sai Abhyankkar (with Shruti Haasan)",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "feel-good",
+        "celebration"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "2026 indie single; on 2026 trending-reels playlists.",
+      "source": [
+        "https://newstodaynet.com/2026/08/25/sai-abhyankkar-unveils-new-single-radhimaa/",
+        "https://open.spotify.com/playlist/4COLjwHwDJa7K198gsl4M1"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Radhimaa",
+      "film": "Independent",
+      "composer": "Sai Abhyankkar",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "feel-good"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Indie single released late Aug 2026 (video with Bhagyashri Borse, lyrics Vivek). Quirky/light; check lyric theme.",
+      "source": [
+        "https://newstodaynet.com/2026/08/25/sai-abhyankkar-unveils-new-single-radhimaa/",
+        "https://www.jewellerydesignshub.com/2026/08/sai-abhyankkar-and-bhagyashri-borse.html"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Pattampoochi",
+      "film": "Vishwanath and Sons",
+      "composer": "G. V. Prakash Kumar",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "feel-good"
+      ],
+      "status": "trending",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Breezy melody, first single 2026-06-19 (Suriya film). Not the 1975/2022 songs of the same name.",
+      "source": [
+        "https://www.newkerala.com/news/a/suriya-starrer-vishwanath-sons-first-single-pattampoochi-breezy-melody-218.htm",
+        "https://lyricsraag.com/pattampoochi-vishwanath-and-sons-translation/"
+      ],
+      "feedback": null
+    },
+    {
+      "title": "Thalapathy Kacheri",
+      "film": "Jana Nayagan",
+      "composer": "Anirudh Ravichander",
+      "lang": "ta",
+      "year": 2026,
+      "lanes": [
+        "mass",
+        "celebration"
+      ],
+      "status": "evergreen",
+      "verified": "2026-10-14",
+      "lyric_safe": "check",
+      "bpm": null,
+      "hook_start": null,
+      "notes": "Vijay's 2026 film; widely known celebration number.",
+      "source": [
+        "https://en.wikipedia.org/wiki/Thalapathy_Kacheri"
+      ],
+      "feedback": null
     }
   ],
   "rejected": [
@@ -337,6 +492,11 @@
       "title": "Magical Moment (Mixkit stock)",
       "reason": "Trial 01: 'not good at all, the vibe is very bad'. Anonymous Western stock music doesn't land with a Tamil audience.",
       "date": "2026-10-11"
+    },
+    {
+      "title": "Magale / Mozhiye (Baththa)",
+      "reason": "Research 2026-10-14: emotional song about regret towards a daughter; wrong mood for joyful/sports reels.",
+      "date": "2026-10-14"
     }
   ]
 }

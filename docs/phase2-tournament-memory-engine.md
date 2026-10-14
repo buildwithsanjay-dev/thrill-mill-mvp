@@ -2,6 +2,11 @@
 
 **Status:** Planning / research only. Nothing built yet. Not part of the current MVP.
 
+> **Update 2026-10-14:** a local prototype now exists and several assumptions below changed
+> (video-clip input, Instagram-reel-style output, Google Cloud Run + Gemini instead of Cloudflare).
+> Read `docs/phase2-reel-engine-build-notes.md` first. It records the working pipeline, measured
+> numbers, gotchas and the pending decisions.
+
 **Why this file exists:** this work is being moved to its own conversation so it
 doesn't mix with the main app's coding/development context. Paste this whole
 file into that new conversation to continue from here.
