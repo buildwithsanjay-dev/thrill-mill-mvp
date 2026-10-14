@@ -1,17 +1,17 @@
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Badge } from '@/components/Badge';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import type { Tournament, TournamentStatus } from '../types';
 
-const STATUS_LABEL: Record<TournamentStatus, string> = {
+export const STATUS_LABEL: Record<TournamentStatus, string> = {
   ONGOING: 'ONGOING',
   UPCOMING: 'UPCOMING',
   COMPLETED: 'COMPLETED',
 };
 
-const STATUS_TONE: Record<TournamentStatus, 'active' | 'pending' | 'neutral'> = {
+export const STATUS_TONE: Record<TournamentStatus, 'active' | 'pending' | 'neutral'> = {
   ONGOING: 'active',
   UPCOMING: 'pending',
   COMPLETED: 'neutral',
@@ -23,7 +23,7 @@ const SPORT_ICON: Record<Tournament['sport'], keyof typeof Ionicons.glyphMap> = 
   Cricket: 'baseball-outline',
 };
 
-function formatRange(start: string, end: string): string {
+export function formatRange(start: string, end: string): string {
   const fmt = (iso: string) =>
     new Date(`${iso}T00:00:00`).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
   return start === end ? fmt(start) : `${fmt(start)} - ${fmt(end)}`;
@@ -31,11 +31,14 @@ function formatRange(start: string, end: string): string {
 
 // Card layout follows the pattern seen on tournament.rizzfitt.com's own
 // listing (organizer, host/venue, date range, status, sport+type) — see
-// docs/phase2-tournament-memory-engine.md §6. Read-only shell: tapping it
-// does nothing yet, there's no detail page until RizzFit's API exists.
-export function TournamentCard({ tournament }: { tournament: Tournament }) {
+// docs/phase2-tournament-memory-engine.md §6. `onPress` is only passed for
+// COMPLETED tournaments right now (see TournamentsScreen) — Upcoming/Ongoing
+// detail (registration-style: pamphlet, guidelines, WhatsApp link,
+// categories+fees) is a later pass, so those cards stay flat/non-interactive
+// rather than open a half-built screen.
+export function TournamentCard({ tournament, onPress }: { tournament: Tournament; onPress?: () => void }) {
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress} disabled={!onPress}>
       <View style={styles.topRow}>
         <View style={styles.organizerRow}>
           <Ionicons name="shield-checkmark-outline" size={14} color={colors.primary} />
@@ -66,7 +69,7 @@ export function TournamentCard({ tournament }: { tournament: Tournament }) {
           </Text>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

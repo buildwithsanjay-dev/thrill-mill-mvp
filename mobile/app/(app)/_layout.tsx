@@ -25,6 +25,7 @@ export default function AppLayout() {
       <Stack.Screen name="team/join" />
       <Stack.Screen name="team/[id]" />
       <Stack.Screen name="booking/[id]" />
+      <Stack.Screen name="tournament/[id]" />
       <Stack.Screen name="wallet/[teamId]" />
     </Stack>
   );

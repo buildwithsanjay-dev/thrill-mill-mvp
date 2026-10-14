@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppHeader, ScreenIntro } from '@/components/AppHeader';
@@ -25,6 +26,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 // then it always shows the explanatory empty state below, honestly, rather
 // than pretending to work.
 export function TournamentsScreen() {
+  const router = useRouter();
   const [tab, setTab] = useState<FilterTab>('UPCOMING');
 
   const rows = useMemo(() => {
@@ -65,7 +67,13 @@ export function TournamentsScreen() {
             }
           />
         ) : (
-          rows.map((t) => <TournamentCard key={t.id} tournament={t} />)
+          rows.map((t) => (
+            <TournamentCard
+              key={t.id}
+              tournament={t}
+              onPress={t.status === 'COMPLETED' ? () => router.push(`/tournament/${t.id}`) : undefined}
+            />
+          ))
         )}
       </ScrollView>
     </SafeAreaView>
