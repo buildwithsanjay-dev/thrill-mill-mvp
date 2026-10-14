@@ -164,6 +164,27 @@ files.forEach((f, i) => {
 
 writeFileSync(join(outDir, 'footage-report.json'), JSON.stringify(report, null, 2));
 
+// One combined overview image (one row per clip, ≤17 tiles of 200px, HDR tone-mapped,
+// filename + time stamped). Reviewing this single image is far cheaper than one sheet per clip.
+const TONEMAP =
+  'zscale=tin=arib-std-b67:pin=bt2020:min=bt2020nc:t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p';
+const rows = [];
+for (const c of report.clips) {
+  if (c.error) continue;
+  const rowFps = Math.min(2.5, 17 / Math.max(c.duration, 0.5));
+  const label = `drawtext=font='Arial':text='${c.id} %{pts\\:hms}':x=4:y=4:fontsize=13:fontcolor=white:box=1:boxcolor=black@0.6`;
+  const vf = [`fps=${rowFps.toFixed(3)}`, 'scale=200:-2', c.hdr ? TONEMAP : null, label, 'tile=17x1:padding=2'].filter(Boolean).join(',');
+  const rowPath = join(sheetsDir, `_row-${c.id}.png`);
+  let r = run('ffmpeg', ['-y', '-v', 'error', '-i', join(inputDir, c.file), '-vf', vf, '-frames:v', '1', rowPath]);
+  if (r.code !== 0) r = run('ffmpeg', ['-y', '-v', 'error', '-i', join(inputDir, c.file), '-vf', vf.replace(`${label},`, ''), '-frames:v', '1', rowPath]);
+  if (r.code === 0) rows.push(rowPath);
+}
+if (rows.length) {
+  const ins = rows.flatMap((p) => ['-i', p]);
+  const fc = rows.length > 1 ? `${rows.map((_, i) => `[${i}]`).join('')}vstack=inputs=${rows.length}` : 'null';
+  run('ffmpeg', ['-y', '-v', 'error', ...ins, '-filter_complex', fc, '-q:v', '3', join(outDir, 'overview.jpg')]);
+}
+
 const md = [];
 md.push(`# Footage report`, ``, `Source: \`${inputDir}\`  `, `Generated: ${report.generatedAt}`, ``);
 const total = report.clips.reduce((s, c) => s + (c.duration ?? 0), 0);
