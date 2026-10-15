@@ -109,7 +109,21 @@ function analyze(x) {
   }
   // Snap lifts to the nearest beat so they're usable as cut points.
   const snap = (t) => beats.reduce((a, b) => (Math.abs(b - t) < Math.abs(a - t) ? b : a), beats[0] ?? t);
+  // Songs downloaded from YouTube often carry a label/ad tag before the real song
+  // (e.g. a Saregama Carvaan voice-over), followed by a short gap. contentStart = end of the
+  // last near-silent gap in the first 12 s; the edit's music offset must never be earlier.
+  let contentStart = 0;
+  const head = curve.filter((p) => p.t <= 12);
+  for (let i = 0; i < head.length; i++) {
+    if (head[i].db < -33 && head[i].t > 0.4) {
+      let j = i;
+      while (j < head.length && head[j].db < -33) j++;
+      if (j < head.length) contentStart = head[j].t;
+      i = j;
+    }
+  }
   return {
+    contentStart,
     duration: Number((x.length / SR).toFixed(2)),
     bpm: best.bpm,
     barSec: Number(((60 / best.bpm) * 4).toFixed(3)),
@@ -139,9 +153,9 @@ for (const f of files) {
   report.push({ file: basename(f), ...analyze(decode(f)) });
 }
 writeFileSync(join(out, 'music-report.json'), JSON.stringify(report, null, 2));
-const md = ['# Music report', '', '| Track | Len | BPM | Bar (s) | First beat | Lifts (s, snapped to beat) | Energy (1 char = 2 s) |', '|---|---|---|---|---|---|---|'];
+const md = ['# Music report', '', '| Track | Starts at | Len | BPM | Bar (s) | First beat | Lifts (s, snapped to beat) | Energy (1 char = 2 s) |', '|---|---|---|---|---|---|---|---|'];
 for (const r of report) {
-  md.push(`| ${r.file} | ${r.duration.toFixed(0)}s | ${r.bpm} | ${r.barSec} | ${r.firstBeat.toFixed(2)} | ${r.lifts.map((l) => `${l.beat.toFixed(1)} (+${l.gainDb}dB)`).join(', ') || '—'} | \`${spark(r.curve)}\` |`);
+  md.push(`| ${r.file} | ${r.contentStart ? r.contentStart + 's ⚠ intro tag?' : '0'} | ${r.duration.toFixed(0)}s | ${r.bpm} | ${r.barSec} | ${r.firstBeat.toFixed(2)} | ${r.lifts.map((l) => `${l.beat.toFixed(1)} (+${l.gainDb}dB)`).join(', ') || '—'} | \`${spark(r.curve)}\` |`);
 }
 writeFileSync(join(out, 'music-report.md'), md.join('\n'));
 console.log(md.join('\n'));
