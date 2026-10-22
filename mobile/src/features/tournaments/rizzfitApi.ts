@@ -19,13 +19,14 @@ export class RizzfitNotConfiguredError extends Error {
   }
 }
 
+// RizzFit's own DTO also carries the organizer's contact `email` and
+// `mobileNumber` — the `rizzfit` Edge Function strips both before this ever
+// reaches the client, so they're deliberately not in this type.
 export interface RizzfitTournamentListItem {
   id: number;
   name: string;
   slug: string;
   location: string;
-  email: string;
-  mobileNumber: string;
   startDate: string;
   endDate: string;
   statusName: string;
@@ -183,7 +184,10 @@ async function callRizzfit<T>(action: string, params: ApiParams = {}): Promise<T
 export function fetchRizzfitTournaments(params?: {
   limit?: number;
   page?: number;
-  sortField?: 'name' | 'mobileNumber' | 'email' | 'updatedOn' | 'statusName' | 'tournamentType';
+  // RizzFit also allows sorting by 'mobileNumber'/'email', but since those
+  // fields are stripped from the response (see RizzfitTournamentListItem),
+  // the app has no reason to ever request sorting by them.
+  sortField?: 'name' | 'updatedOn' | 'statusName' | 'tournamentType';
   sortOrder?: 'ASC' | 'DESC';
 }) {
   return callRizzfit<{
