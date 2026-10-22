@@ -90,7 +90,11 @@ export function TournamentsScreen() {
             <TournamentCard
               key={t.id}
               tournament={t}
-              onPress={t.status === 'COMPLETED' ? () => router.push(`/tournament/${t.id}`) : undefined}
+              // Upcoming stays non-interactive — its detail is a different,
+              // still-deferred registration-style page (pamphlet,
+              // guidelines, categories+fees), not this Fixtures/Bracket/
+              // Leaderboard shell.
+              onPress={t.status !== 'UPCOMING' ? () => router.push(`/tournament/${t.id}`) : undefined}
             />
           ))
         )}

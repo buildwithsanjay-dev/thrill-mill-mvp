@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,8 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
-import { MOCK_TOURNAMENTS } from '../mockData';
 import { MOCK_TOURNAMENT_DETAILS } from '../mockDetailData';
+import { useTournamentsFeed } from '../useRizzfit';
+import { adaptRizzfitMatch, useRizzfitLeaderboard, useRizzfitMatches } from '../useRizzfitDetail';
 import { formatRange, STATUS_LABEL, STATUS_TONE } from '../components/TournamentCard';
 import { MatchList } from '../components/MatchList';
 import { StandingsTable } from '../components/StandingsTable';
@@ -16,6 +17,7 @@ import { BracketView } from '../components/BracketView';
 import { TournamentLeaderboardTable } from '../components/TournamentLeaderboardTable';
 
 type DetailTab = 'FIXTURES' | 'BRACKET' | 'LEADERBOARD';
+type MatchFilter = 'all' | 'live' | 'upcoming' | 'past';
 
 const TABS: { key: DetailTab; label: string }[] = [
   { key: 'FIXTURES', label: 'Fixtures' },
@@ -23,22 +25,53 @@ const TABS: { key: DetailTab; label: string }[] = [
   { key: 'LEADERBOARD', label: 'Leaderboard' },
 ];
 
-// Mirrors RizzFit's own completed-tournament page: a header card, then
-// Fixtures (group tabs + match list + standings) / Bracket (knockout
-// visual) / Leaderboard — see
+const MATCH_FILTERS: { key: MatchFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'live', label: 'Live' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'past', label: 'Past' },
+];
+
+const RIZZFIT_PREFIX = 'rizzfit-';
+
+// Mirrors RizzFit's own tournament page: a header card, then
+// Fixtures / Bracket (knockout visual) / Leaderboard — see
 // tournament.rizzfitt.com/Logesh/dpl/dplpickleball/pickleball/matches.
-// Mock data only; a real RizzFit-backed version replaces MOCK_TOURNAMENT_
-// DETAILS once their API/Swagger spec is available (CLAUDE.md Phase 2 note).
+//
+// A `rizzfit-<id>` tournament (from the live feed, see useRizzfit.ts) wires
+// Fixtures + Leaderboard to RizzFit's real match/leaderboard endpoints.
+// Bracket stays unwired for real tournaments — RizzFit's knockout endpoint
+// requires a category+subCategory pair, and there's no documented endpoint
+// to discover those ahead of time (see the chat thread, not guessed here).
+// A `mock-<id>` tournament (the pre-integration placeholder data, now only
+// reachable as a fallback when RizzFit isn't configured) keeps using the
+// original mock detail with groups/standings/bracket.
 export function TournamentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [tab, setTab] = useState<DetailTab>('FIXTURES');
   const [groupIndex, setGroupIndex] = useState(0);
+  const [matchFilter, setMatchFilter] = useState<MatchFilter>('all');
 
-  const tournament = useMemo(() => MOCK_TOURNAMENTS.find((t) => t.id === id), [id]);
-  const detail = id ? MOCK_TOURNAMENT_DETAILS[id] : undefined;
+  const { data: feed } = useTournamentsFeed();
+  const tournament = useMemo(() => feed?.tournaments.find((t) => t.id === id), [feed, id]);
+  const isLive = !!id?.startsWith(RIZZFIT_PREFIX);
+  const rizzfitId = isLive ? Number(id.slice(RIZZFIT_PREFIX.length)) : undefined;
 
-  if (!tournament || !detail) {
+  const mockDetail = !isLive && id ? MOCK_TOURNAMENT_DETAILS[id] : undefined;
+  const matchesQuery = useRizzfitMatches(rizzfitId);
+  const leaderboardQuery = useRizzfitLeaderboard(rizzfitId);
+
+  const filteredMatches = useMemo(() => {
+    const raw = matchesQuery.data ?? [];
+    if (matchFilter === 'all') return raw;
+    if (matchFilter === 'live') return raw.filter((m) => m.hasStarted && !m.hasEnded);
+    if (matchFilter === 'upcoming') return raw.filter((m) => !m.hasStarted);
+    return raw.filter((m) => m.hasEnded || m.isCompleted);
+  }, [matchesQuery.data, matchFilter]);
+  const displayMatches = useMemo(() => filteredMatches.map(adaptRizzfitMatch), [filteredMatches]);
+
+  if (!tournament || (!isLive && !mockDetail)) {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.header}>
@@ -53,7 +86,7 @@ export function TournamentDetailScreen() {
     );
   }
 
-  const group = detail.groups[groupIndex];
+  const group = mockDetail?.groups[groupIndex];
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -94,11 +127,39 @@ export function TournamentDetailScreen() {
           ))}
         </View>
 
-        {tab === 'FIXTURES' && (
+        {tab === 'FIXTURES' && isLive && (
           <>
-            {detail.groups.length > 1 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.groupRow}>
+              {MATCH_FILTERS.map((f) => (
+                <Pressable
+                  key={f.key}
+                  style={[styles.groupChip, matchFilter === f.key && styles.groupChipActive]}
+                  onPress={() => setMatchFilter(f.key)}
+                >
+                  <Text style={[styles.groupChipLabel, matchFilter === f.key && styles.groupChipLabelActive]}>{f.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            {matchesQuery.isLoading ? (
+              <ActivityIndicator style={styles.loading} color={colors.primary} />
+            ) : displayMatches.length === 0 ? (
+              <EmptyState
+                icon="tennisball-outline"
+                mascot="napping"
+                title="No matches here"
+                message="Nothing in this filter right now — try a different one."
+              />
+            ) : (
+              <MatchList matches={displayMatches} />
+            )}
+          </>
+        )}
+
+        {tab === 'FIXTURES' && !isLive && mockDetail && group && (
+          <>
+            {mockDetail.groups.length > 1 && (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.groupRow}>
-                {detail.groups.map((g, i) => (
+                {mockDetail.groups.map((g, i) => (
                   <Pressable
                     key={g.name}
                     style={[styles.groupChip, groupIndex === i && styles.groupChipActive]}
@@ -115,9 +176,35 @@ export function TournamentDetailScreen() {
           </>
         )}
 
-        {tab === 'BRACKET' && <BracketView rounds={detail.bracket} />}
+        {tab === 'BRACKET' && isLive && (
+          <EmptyState
+            icon="trophy-outline"
+            mascot="napping"
+            title="Bracket not wired up yet"
+            message="RizzFit's knockout endpoint needs a category selected first — this will be wired up once that's confirmed."
+          />
+        )}
 
-        {tab === 'LEADERBOARD' && <TournamentLeaderboardTable rows={detail.leaderboard} />}
+        {tab === 'BRACKET' && !isLive && mockDetail && <BracketView rounds={mockDetail.bracket} />}
+
+        {tab === 'LEADERBOARD' && isLive && (
+          <>
+            {leaderboardQuery.isLoading ? (
+              <ActivityIndicator style={styles.loading} color={colors.primary} />
+            ) : (leaderboardQuery.data ?? []).length === 0 ? (
+              <EmptyState
+                icon="list-outline"
+                mascot="napping"
+                title="No leaderboard yet"
+                message="Standings will appear here once matches are completed."
+              />
+            ) : (
+              <TournamentLeaderboardTable rows={leaderboardQuery.data ?? []} />
+            )}
+          </>
+        )}
+
+        {tab === 'LEADERBOARD' && !isLive && mockDetail && <TournamentLeaderboardTable rows={mockDetail.leaderboard} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -167,4 +254,5 @@ const styles = themedStyles(() => ({
   groupChipLabelActive: { color: '#FFFFFF' },
 
   sectionLabel: { fontSize: 12, fontWeight: '800', color: colors.textMuted, marginTop: spacing.xs },
+  loading: { marginTop: spacing.xl },
 }));
