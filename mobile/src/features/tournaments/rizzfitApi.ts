@@ -251,7 +251,10 @@ export function fetchRizzfitKnockoutBracket(
   return callRizzfit<RizzfitKnockoutBracketItem[]>('match-knockout', { tournamentId, ...params });
 }
 
-export function fetchRizzfitLeaderboard(tournamentId: number, params?: { category?: number; subCategory?: number }) {
+export function fetchRizzfitLeaderboard(
+  tournamentId: number,
+  params?: { category?: number; subCategory?: number; page?: number; limit?: number }
+) {
   return callRizzfit<{
     message: string;
     data: { total: number; page: number; limit: number; offset: number; data: RizzfitLeaderboardItem[] };

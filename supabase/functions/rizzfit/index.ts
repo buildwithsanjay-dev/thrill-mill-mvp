@@ -100,7 +100,7 @@ const ACTIONS: Record<string, ActionDef> = {
   leaderboard: {
     path: (p) => `/external/v1/leaderboard/pickleball/fetchall/${encodeURIComponent(p.tournamentId)}`,
     pathParams: { tournamentId: 'id' },
-    queryParams: ['category', 'subCategory'],
+    queryParams: ['category', 'subCategory', 'page', 'limit'],
   },
 };
 
@@ -189,6 +189,8 @@ Deno.serve(async (req: Request) => {
     if (!isEmpty(params[key])) url.searchParams.set(key, String(params[key]));
   }
 
+  console.log(`[rizzfit] action=${action} path=${url.pathname}${url.search}`);
+
   let upstream: Response;
   try {
     upstream = await fetch(url.toString(), {
@@ -205,6 +207,26 @@ Deno.serve(async (req: Request) => {
     data = JSON.parse(text);
   } catch {
     data = { raw: text };
+  }
+
+  // TEMP diagnostic (2026-10-23): the owner reported a live match visible on
+  // RizzFit's own organizer dashboard not showing up in the app's Fixtures
+  // tab. No PII here (just ids/flags), only to confirm whether RizzFit's
+  // matches/fetchall actually includes an in-progress match. Remove once
+  // that's confirmed either way.
+  if (action === 'matches') {
+    try {
+      const list = (data as { data?: { data?: { id: number; hasStarted: boolean; hasEnded: boolean; courtName?: string }[] } })
+        ?.data?.data ?? [];
+      const live = list.filter((m) => m.hasStarted && !m.hasEnded);
+      console.log(
+        `[rizzfit] matches status=${upstream.status} total=${list.length} liveCount=${live.length} liveIds=${live
+          .map((m) => `${m.id}@${m.courtName ?? '?'}`)
+          .join(',')}`
+      );
+    } catch (e) {
+      console.log(`[rizzfit] matches diagnostic parse failed: ${e}`);
+    }
   }
 
   return json(stripPii(action, data), upstream.status);

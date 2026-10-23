@@ -3,6 +3,27 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchRizzfitLeaderboard, fetchRizzfitMatches, type RizzfitMatch } from './rizzfitApi';
 import type { LeaderboardRow, TournamentMatch } from './types';
 
+// Both RizzFit's matches and leaderboard endpoints are paginated
+// (total/page/limit/offset in the response) — a single capped-limit call
+// silently truncates once a tournament has more matches/teams than that
+// cap (seen directly against the real dashboard: 237 matches, only the
+// first 100 were ever fetched). Page through until every row is in.
+const PAGE_SIZE = 100;
+
+async function fetchAllPages<T>(
+  fetchPage: (page: number) => Promise<{ data: { total: number; data: T[] } }>
+): Promise<T[]> {
+  let page = 1;
+  let all: T[] = [];
+  while (true) {
+    const res = await fetchPage(page);
+    all = all.concat(res.data.data);
+    if (res.data.data.length === 0 || all.length >= res.data.total) break;
+    page += 1;
+  }
+  return all;
+}
+
 // RizzFit's match detail has no "round"/group label at all (groups only
 // exist via match-groups, whose fixtures/teams fields are untyped in their
 // own spec — not safe to map until a live tournament lets us smoke-test the
@@ -37,10 +58,8 @@ export function adaptRizzfitMatch(m: RizzfitMatch): TournamentMatch {
 export function useRizzfitMatches(tournamentId: number | undefined) {
   return useQuery({
     queryKey: ['rizzfit-matches', tournamentId],
-    queryFn: async () => {
-      const res = await fetchRizzfitMatches(tournamentId as number, { limit: 100 });
-      return res.data.data;
-    },
+    queryFn: () =>
+      fetchAllPages((page) => fetchRizzfitMatches(tournamentId as number, { limit: PAGE_SIZE, page })),
     enabled: tournamentId !== undefined,
     // Tournament is actively in progress while this screen is open —
     // scores move. 30s is a reasonable whole-list refresh; a true per-match
@@ -55,8 +74,10 @@ export function useRizzfitLeaderboard(tournamentId: number | undefined) {
   return useQuery({
     queryKey: ['rizzfit-leaderboard', tournamentId],
     queryFn: async () => {
-      const res = await fetchRizzfitLeaderboard(tournamentId as number);
-      const rows: LeaderboardRow[] = res.data.data
+      const items = await fetchAllPages((page) =>
+        fetchRizzfitLeaderboard(tournamentId as number, { limit: PAGE_SIZE, page })
+      );
+      const rows: LeaderboardRow[] = items
         .slice()
         .sort((a, b) => b.winPercentage - a.winPercentage || b.wins - a.wins)
         .map((item, i) => ({
