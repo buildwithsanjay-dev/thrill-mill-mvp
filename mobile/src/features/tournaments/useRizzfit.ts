@@ -12,7 +12,15 @@ import type { Tournament } from './types';
 function deriveStatus(startIso: string, endIso: string): Tournament['status'] {
   const now = Date.now();
   const start = new Date(startIso).getTime();
-  const end = new Date(endIso).getTime();
+  // RizzFit's endDate is a bare midnight timestamp with no time-of-day of
+  // its own — treating it as an exact cutoff made a same-day tournament
+  // look "completed" within minutes of the day starting (any time after
+  // 00:00 UTC on that date already counted as "past"). Extend it to the
+  // end of that calendar day instead, so a tournament stays Ongoing for
+  // its whole last day.
+  const endOfDay = new Date(endIso);
+  endOfDay.setUTCHours(23, 59, 59, 999);
+  const end = endOfDay.getTime();
   if (now < start) return 'UPCOMING';
   if (now > end) return 'COMPLETED';
   return 'ONGOING';
@@ -69,6 +77,11 @@ export function useTournamentsFeed() {
   return useQuery({
     queryKey: ['rizzfit-tournaments'],
     queryFn: loadTournamentsFeed,
-    staleTime: 5 * 60 * 1000,
+    // A 5-minute staleTime meant a newly-created or newly-changed
+    // tournament on RizzFit's side could take up to 5 minutes to show up
+    // here even after reopening the screen (staleTime gates whether
+    // focus-triggered refetching happens at all). A minute is fresh
+    // enough without re-fetching on every single screen visit.
+    staleTime: 60_000,
   });
 }
