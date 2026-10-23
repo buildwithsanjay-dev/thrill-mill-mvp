@@ -246,5 +246,26 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+  // TEMP diagnostic (2026-10-23): RizzFit's own spec leaves match-groups'
+  // `teams`/`fixtures` fields as untyped raw object[] — logging only the
+  // object KEYS (never values, so no player names/PII) of the first team
+  // and first fixture in each group is enough to finally learn the real
+  // field names without guessing. Remove once the client is typed for real.
+  if (action === 'match-groups') {
+    try {
+      const groups = (data as { id: number; name: string; teams?: unknown[]; fixtures?: unknown[] }[]) ?? [];
+      console.log(`[rizzfit] match-groups status=${upstream.status} groupCount=${Array.isArray(groups) ? groups.length : 'n/a'}`);
+      for (const g of Array.isArray(groups) ? groups : []) {
+        const teamKeys = g.teams?.[0] && typeof g.teams[0] === 'object' ? Object.keys(g.teams[0] as object) : [];
+        const fixtureKeys = g.fixtures?.[0] && typeof g.fixtures[0] === 'object' ? Object.keys(g.fixtures[0] as object) : [];
+        console.log(
+          `[rizzfit] group id=${g.id} name=${g.name} teamCount=${g.teams?.length ?? 0} teamKeys=${teamKeys.join(',')} fixtureCount=${g.fixtures?.length ?? 0} fixtureKeys=${fixtureKeys.join(',')}`
+        );
+      }
+    } catch (e) {
+      console.log(`[rizzfit] match-groups diagnostic parse failed: ${e}`);
+    }
+  }
+
   return json(stripPii(action, data), upstream.status);
 });

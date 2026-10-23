@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchRizzfitCategories, fetchRizzfitLeaderboard, fetchRizzfitMatches, type RizzfitMatch } from './rizzfitApi';
+import {
+  fetchRizzfitCategories,
+  fetchRizzfitLeaderboard,
+  fetchRizzfitMatchGroups,
+  fetchRizzfitMatches,
+  type RizzfitMatch,
+  type RizzfitMatchGroup,
+} from './rizzfitApi';
 import type { LeaderboardRow, TournamentMatch } from './types';
 
 export type CategoryLeaderboard = { category: string; rows: LeaderboardRow[] };
@@ -123,5 +130,48 @@ export function useRizzfitLeaderboard(tournamentId: number | undefined, enabled 
     },
     enabled: tournamentId !== undefined && enabled,
     staleTime: 60_000,
+  });
+}
+
+// RizzFit's own Swagger spec leaves `teams`/`fixtures` as untyped raw
+// `object[]` on ExternalMatchGroupItemDto — no field names given at all.
+// Rather than guess one shape and silently show nothing for a different
+// one, try every plausible field name RizzFit's other DTOs use elsewhere
+// (name/teamName for teams; teamA/teamB-style pairs for fixtures) and fall
+// back to a raw count so the screen is at least honest about what it found.
+function pickString(obj: unknown, keys: string[]): string | undefined {
+  if (!obj || typeof obj !== 'object') return undefined;
+  const rec = obj as Record<string, unknown>;
+  for (const key of keys) {
+    const value = rec[key];
+    if (typeof value === 'string' && value.trim()) return value;
+    if (typeof value === 'number') return String(value);
+  }
+  return undefined;
+}
+
+export function groupTeamNames(group: RizzfitMatchGroup): string[] {
+  return (group.teams ?? [])
+    .map((t) => pickString(t, ['name', 'teamName', 'playerName', 'player1', 'teamName1']))
+    .filter((n): n is string => !!n);
+}
+
+export type GroupFixtureSummary = { label: string; raw: unknown };
+
+export function groupFixtureSummaries(group: RizzfitMatchGroup): GroupFixtureSummary[] {
+  return (group.fixtures ?? []).map((f) => {
+    const teamA = pickString(f, ['teamA', 'team1', 'teamAName', 'player1']);
+    const teamB = pickString(f, ['teamB', 'team2', 'teamBName', 'player2']);
+    const label = teamA && teamB ? `${teamA} vs ${teamB}` : 'Fixture (shape not confirmed yet)';
+    return { label, raw: f };
+  });
+}
+
+export function useRizzfitMatchGroups(tournamentId: number | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['rizzfit-match-groups', tournamentId],
+    queryFn: () => fetchRizzfitMatchGroups(tournamentId as number),
+    enabled: tournamentId !== undefined && enabled,
+    staleTime: 5 * 60_000,
   });
 }

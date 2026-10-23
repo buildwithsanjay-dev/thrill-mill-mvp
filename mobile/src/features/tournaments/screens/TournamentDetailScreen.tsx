@@ -10,7 +10,15 @@ import { TextField } from '@/components/TextField';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { MOCK_TOURNAMENT_DETAILS } from '../mockDetailData';
 import { useTournamentsFeed } from '../useRizzfit';
-import { adaptRizzfitMatch, courtLabel, useRizzfitLeaderboard, useRizzfitMatches } from '../useRizzfitDetail';
+import {
+  adaptRizzfitMatch,
+  courtLabel,
+  groupFixtureSummaries,
+  groupTeamNames,
+  useRizzfitLeaderboard,
+  useRizzfitMatches,
+  useRizzfitMatchGroups,
+} from '../useRizzfitDetail';
 import { formatRange, STATUS_LABEL, STATUS_TONE } from '../components/TournamentCard';
 import { MatchList } from '../components/MatchList';
 import { StandingsTable } from '../components/StandingsTable';
@@ -69,6 +77,11 @@ export function TournamentDetailScreen() {
   // tournament feel laggy.
   const matchesQuery = useRizzfitMatches(rizzfitId, tab === 'FIXTURES');
   const leaderboardQuery = useRizzfitLeaderboard(rizzfitId, tab === 'LEADERBOARD');
+  // match-groups has no required params (unlike knockout, which needs a
+  // subCategory id we have no way to discover) — fetching it unscoped
+  // returns every group across every category, which is exactly the real
+  // data needed to finally confirm the undocumented teams/fixtures shape.
+  const groupsQuery = useRizzfitMatchGroups(rizzfitId, tab === 'FIXTURES');
 
   const filteredMatches = useMemo(() => {
     const raw = matchesQuery.data ?? [];
@@ -205,6 +218,31 @@ export function TournamentDetailScreen() {
             ) : (
               <MatchList matches={displayMatches} />
             )}
+
+            {(groupsQuery.data ?? []).length > 0 && (
+              <View style={{ gap: spacing.md, marginTop: spacing.md }}>
+                <Text style={styles.sectionLabel}>Groups</Text>
+                {(groupsQuery.data ?? []).map((g) => {
+                  const teamNames = groupTeamNames(g);
+                  const fixtures = groupFixtureSummaries(g);
+                  return (
+                    <View key={g.id} style={styles.groupCard}>
+                      <Text style={styles.groupCardTitle}>{g.name}</Text>
+                      {teamNames.length > 0 ? (
+                        <Text style={styles.groupCardMeta}>{teamNames.join(' • ')}</Text>
+                      ) : (
+                        <Text style={styles.groupCardMeta}>{(g.teams ?? []).length} teams (names not confirmed yet)</Text>
+                      )}
+                      {fixtures.length > 0 && (
+                        <Text style={styles.groupCardMeta}>
+                          {fixtures.length} fixture{fixtures.length === 1 ? '' : 's'}: {fixtures.map((f) => f.label).join(', ')}
+                        </Text>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </>
         )}
 
@@ -318,4 +356,15 @@ const styles = themedStyles(() => ({
   sectionLabel: { fontSize: 12, fontWeight: '800', color: colors.textMuted, marginTop: spacing.xs },
   loading: { marginTop: spacing.xl },
   searchInput: { height: 40, fontSize: 13 },
+
+  groupCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.sm,
+    gap: 2,
+  },
+  groupCardTitle: { fontSize: 13, fontWeight: '800', color: colors.text },
+  groupCardMeta: { fontSize: 11, color: colors.textMuted },
 }));
