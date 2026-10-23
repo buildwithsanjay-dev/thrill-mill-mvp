@@ -1,7 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchRizzfitLeaderboard, fetchRizzfitMatches, type RizzfitMatch } from './rizzfitApi';
+import { fetchRizzfitCategories, fetchRizzfitLeaderboard, fetchRizzfitMatches, type RizzfitMatch } from './rizzfitApi';
 import type { LeaderboardRow, TournamentMatch } from './types';
+
+export type CategoryLeaderboard = { category: string; rows: LeaderboardRow[] };
 
 // Both RizzFit's matches and leaderboard endpoints are paginated
 // (total/page/limit/offset in the response) — a single capped-limit call
@@ -10,18 +12,20 @@ import type { LeaderboardRow, TournamentMatch } from './types';
 // first 100 were ever fetched). Page through until every row is in.
 const PAGE_SIZE = 100;
 
+// Fetches page 1 to learn the real page size + total, then fires every
+// remaining page in parallel instead of one-at-a-time — sequential paging
+// was adding a full extra RizzFit round-trip per page (visibly laggy
+// opening a tournament with 200+ matches across 3 pages).
 async function fetchAllPages<T>(
   fetchPage: (page: number) => Promise<{ data: { total: number; data: T[] } }>
 ): Promise<T[]> {
-  let page = 1;
-  let all: T[] = [];
-  while (true) {
-    const res = await fetchPage(page);
-    all = all.concat(res.data.data);
-    if (res.data.data.length === 0 || all.length >= res.data.total) break;
-    page += 1;
-  }
-  return all;
+  const first = await fetchPage(1);
+  const pageLen = first.data.data.length;
+  if (pageLen === 0 || pageLen >= first.data.total) return first.data.data;
+
+  const pageCount = Math.ceil(first.data.total / pageLen);
+  const rest = await Promise.all(Array.from({ length: pageCount - 1 }, (_, i) => fetchPage(i + 2)));
+  return first.data.data.concat(...rest.map((r) => r.data.data));
 }
 
 // Normalizes RizzFit's raw courtName (unknown exact format — could be "3"
@@ -68,12 +72,12 @@ export function adaptRizzfitMatch(m: RizzfitMatch): TournamentMatch {
 
 // Raw matches (not yet adapted) so the screen can filter by live status
 // before mapping to display shape.
-export function useRizzfitMatches(tournamentId: number | undefined) {
+export function useRizzfitMatches(tournamentId: number | undefined, enabled = true) {
   return useQuery({
     queryKey: ['rizzfit-matches', tournamentId],
     queryFn: () =>
       fetchAllPages((page) => fetchRizzfitMatches(tournamentId as number, { limit: PAGE_SIZE, page })),
-    enabled: tournamentId !== undefined,
+    enabled: tournamentId !== undefined && enabled,
     // Tournament is actively in progress while this screen is open —
     // scores move. 30s is a reasonable whole-list refresh; a true per-match
     // "LIVE" ticker would need its own faster poll scoped to one match,
@@ -83,26 +87,41 @@ export function useRizzfitMatches(tournamentId: number | undefined) {
   });
 }
 
-export function useRizzfitLeaderboard(tournamentId: number | undefined) {
+// RizzFit's leaderboard endpoint is scoped to one category per call — an
+// unscoped call doesn't return everyone combined, it silently returns only
+// whichever category RizzFit treats as the default (confirmed directly:
+// the owner's "only 20 of 40" report was the Men roster, Women never
+// included at all). So fetch the real category list first, then one
+// leaderboard per category, kept as separate labeled groups — ranking
+// Men against Women in one combined table wouldn't mean anything anyway,
+// they never play each other.
+export function useRizzfitLeaderboard(tournamentId: number | undefined, enabled = true) {
   return useQuery({
     queryKey: ['rizzfit-leaderboard', tournamentId],
-    queryFn: async () => {
-      const items = await fetchAllPages((page) =>
-        fetchRizzfitLeaderboard(tournamentId as number, { limit: PAGE_SIZE, page })
+    queryFn: async (): Promise<CategoryLeaderboard[]> => {
+      const categories = await fetchRizzfitCategories(tournamentId as number);
+      const scopes: { id?: number; name: string }[] = categories.length > 0 ? categories : [{ name: 'Overall' }];
+
+      return Promise.all(
+        scopes.map(async (cat) => {
+          const items = await fetchAllPages((page) =>
+            fetchRizzfitLeaderboard(tournamentId as number, { category: cat.id, limit: PAGE_SIZE, page })
+          );
+          const rows: LeaderboardRow[] = items
+            .slice()
+            .sort((a, b) => b.winPercentage - a.winPercentage || b.wins - a.wins)
+            .map((item, i) => ({
+              rank: i + 1,
+              team: item.teamName,
+              games: item.totalMatches,
+              wins: item.wins,
+              losses: item.losses,
+            }));
+          return { category: cat.name, rows };
+        })
       );
-      const rows: LeaderboardRow[] = items
-        .slice()
-        .sort((a, b) => b.winPercentage - a.winPercentage || b.wins - a.wins)
-        .map((item, i) => ({
-          rank: i + 1,
-          team: item.teamName,
-          games: item.totalMatches,
-          wins: item.wins,
-          losses: item.losses,
-        }));
-      return rows;
     },
-    enabled: tournamentId !== undefined,
+    enabled: tournamentId !== undefined && enabled,
     staleTime: 60_000,
   });
 }

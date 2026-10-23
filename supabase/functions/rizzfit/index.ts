@@ -216,14 +216,29 @@ Deno.serve(async (req: Request) => {
   // that's confirmed either way.
   if (action === 'matches') {
     try {
-      const list = (data as { data?: { data?: { id: number; hasStarted: boolean; hasEnded: boolean; courtName?: string }[] } })
-        ?.data?.data ?? [];
+      type DiagMatch = {
+        id: number;
+        matchNo?: string;
+        hasStarted: boolean;
+        hasEnded: boolean;
+        isCompleted: boolean;
+        isScheduled: boolean;
+        courtId?: number;
+        courtName?: string;
+        teamA?: { name?: string };
+        teamB?: { name?: string };
+      };
+      const list = (data as { data?: { data?: DiagMatch[] } })?.data?.data ?? [];
       const live = list.filter((m) => m.hasStarted && !m.hasEnded);
+      const onCourt = list.filter((m) => !isEmpty(m.courtName) || !isEmpty(m.courtId));
       console.log(
-        `[rizzfit] matches status=${upstream.status} total=${list.length} liveCount=${live.length} liveIds=${live
-          .map((m) => `${m.id}@${m.courtName ?? '?'}`)
-          .join(',')}`
+        `[rizzfit] matches status=${upstream.status} page_count=${list.length} liveCount=${live.length} onCourtCount=${onCourt.length}`
       );
+      for (const m of onCourt) {
+        console.log(
+          `[rizzfit] onCourt id=${m.id} matchNo=${m.matchNo} court=${m.courtName ?? m.courtId} started=${m.hasStarted} ended=${m.hasEnded} completed=${m.isCompleted} scheduled=${m.isScheduled} ${m.teamA?.name ?? '?'} vs ${m.teamB?.name ?? '?'}`
+        );
+      }
     } catch (e) {
       console.log(`[rizzfit] matches diagnostic parse failed: ${e}`);
     }

@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/Badge';
 import { EmptyState } from '@/components/EmptyState';
+import { TextField } from '@/components/TextField';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { MOCK_TOURNAMENT_DETAILS } from '../mockDetailData';
 import { useTournamentsFeed } from '../useRizzfit';
@@ -53,6 +54,7 @@ export function TournamentDetailScreen() {
   const [tab, setTab] = useState<DetailTab>('FIXTURES');
   const [groupIndex, setGroupIndex] = useState(0);
   const [matchFilter, setMatchFilter] = useState<MatchFilter>('all');
+  const [playerSearch, setPlayerSearch] = useState('');
 
   const { data: feed } = useTournamentsFeed();
   const tournament = useMemo(() => feed?.tournaments.find((t) => t.id === id), [feed, id]);
@@ -60,8 +62,13 @@ export function TournamentDetailScreen() {
   const rizzfitId = isLive ? Number(id.slice(RIZZFIT_PREFIX.length)) : undefined;
 
   const mockDetail = !isLive && id ? MOCK_TOURNAMENT_DETAILS[id] : undefined;
-  const matchesQuery = useRizzfitMatches(rizzfitId);
-  const leaderboardQuery = useRizzfitLeaderboard(rizzfitId);
+  // Only fetch each tab's data while that tab is actually open — matches
+  // and leaderboard were both firing (matches: up to 3 parallel RizzFit
+  // calls, leaderboard: one call per category) on every mount regardless
+  // of which tab was selected, which is exactly what made opening a
+  // tournament feel laggy.
+  const matchesQuery = useRizzfitMatches(rizzfitId, tab === 'FIXTURES');
+  const leaderboardQuery = useRizzfitLeaderboard(rizzfitId, tab === 'LEADERBOARD');
 
   const filteredMatches = useMemo(() => {
     const raw = matchesQuery.data ?? [];
@@ -70,7 +77,18 @@ export function TournamentDetailScreen() {
     if (matchFilter === 'upcoming') return raw.filter((m) => !m.hasStarted);
     return raw.filter((m) => m.hasEnded || m.isCompleted);
   }, [matchesQuery.data, matchFilter]);
-  const displayMatches = useMemo(() => filteredMatches.map(adaptRizzfitMatch), [filteredMatches]);
+
+  // Lets a member find their own upcoming matches without scrolling
+  // through the whole list — matches by either player's name (a "team"
+  // here is one singles player).
+  const searchedMatches = useMemo(() => {
+    const q = playerSearch.trim().toLowerCase();
+    if (!q) return filteredMatches;
+    return filteredMatches.filter(
+      (m) => (m.teamA?.name ?? '').toLowerCase().includes(q) || (m.teamB?.name ?? '').toLowerCase().includes(q)
+    );
+  }, [filteredMatches, playerSearch]);
+  const displayMatches = useMemo(() => searchedMatches.map(adaptRizzfitMatch), [searchedMatches]);
 
   // Up to one match per court can be live at once (the club has 4 courts)
   // — showing them as a flat list buried which court each one is on, which
@@ -79,14 +97,14 @@ export function TournamentDetailScreen() {
   // matters less for upcoming/past matches.
   const liveByCourt = useMemo(() => {
     if (matchFilter !== 'live') return null;
-    const groups = new Map<string, typeof filteredMatches>();
-    for (const m of filteredMatches) {
+    const groups = new Map<string, typeof searchedMatches>();
+    for (const m of searchedMatches) {
       const key = m.courtName?.trim() || UNASSIGNED_COURT;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(m);
     }
     return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
-  }, [filteredMatches, matchFilter]);
+  }, [searchedMatches, matchFilter]);
 
   if (!tournament || (!isLive && !mockDetail)) {
     return (
@@ -157,6 +175,13 @@ export function TournamentDetailScreen() {
                 </Pressable>
               ))}
             </ScrollView>
+            <TextField
+              placeholder="Search by player name"
+              value={playerSearch}
+              onChangeText={setPlayerSearch}
+              autoCapitalize="none"
+              style={styles.searchInput}
+            />
             {matchesQuery.isLoading ? (
               <ActivityIndicator style={styles.loading} color={colors.primary} />
             ) : displayMatches.length === 0 ? (
@@ -219,7 +244,7 @@ export function TournamentDetailScreen() {
           <>
             {leaderboardQuery.isLoading ? (
               <ActivityIndicator style={styles.loading} color={colors.primary} />
-            ) : (leaderboardQuery.data ?? []).length === 0 ? (
+            ) : (leaderboardQuery.data ?? []).every((g) => g.rows.length === 0) ? (
               <EmptyState
                 icon="list-outline"
                 mascot="napping"
@@ -227,7 +252,16 @@ export function TournamentDetailScreen() {
                 message="Standings will appear here once matches are completed."
               />
             ) : (
-              <TournamentLeaderboardTable rows={leaderboardQuery.data ?? []} />
+              <View style={{ gap: spacing.md }}>
+                {(leaderboardQuery.data ?? [])
+                  .filter((g) => g.rows.length > 0)
+                  .map((g) => (
+                    <View key={g.category}>
+                      <Text style={styles.sectionLabel}>{g.category}</Text>
+                      <TournamentLeaderboardTable rows={g.rows} />
+                    </View>
+                  ))}
+              </View>
             )}
           </>
         )}
@@ -283,4 +317,5 @@ const styles = themedStyles(() => ({
 
   sectionLabel: { fontSize: 12, fontWeight: '800', color: colors.textMuted, marginTop: spacing.xs },
   loading: { marginTop: spacing.xl },
+  searchInput: { height: 40, fontSize: 13 },
 }));
