@@ -216,6 +216,10 @@ Deno.serve(async (req: Request) => {
   // that's confirmed either way.
   if (action === 'matches') {
     try {
+      // No team/player names here deliberately (flagged by security review
+      // as unnecessary PII-in-logs) — ids/flags/court are enough to
+      // diagnose whether RizzFit's own hasStarted/hasEnded match the live
+      // state its dashboard shows.
       type DiagMatch = {
         id: number;
         matchNo?: string;
@@ -225,8 +229,6 @@ Deno.serve(async (req: Request) => {
         isScheduled: boolean;
         courtId?: number;
         courtName?: string;
-        teamA?: { name?: string };
-        teamB?: { name?: string };
       };
       const list = (data as { data?: { data?: DiagMatch[] } })?.data?.data ?? [];
       const live = list.filter((m) => m.hasStarted && !m.hasEnded);
@@ -236,7 +238,7 @@ Deno.serve(async (req: Request) => {
       );
       for (const m of onCourt) {
         console.log(
-          `[rizzfit] onCourt id=${m.id} matchNo=${m.matchNo} court=${m.courtName ?? m.courtId} started=${m.hasStarted} ended=${m.hasEnded} completed=${m.isCompleted} scheduled=${m.isScheduled} ${m.teamA?.name ?? '?'} vs ${m.teamB?.name ?? '?'}`
+          `[rizzfit] onCourt id=${m.id} matchNo=${m.matchNo} court=${m.courtName ?? m.courtId} started=${m.hasStarted} ended=${m.hasEnded} completed=${m.isCompleted} scheduled=${m.isScheduled}`
         );
       }
     } catch (e) {
