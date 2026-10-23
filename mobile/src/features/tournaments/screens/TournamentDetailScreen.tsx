@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { colors, radii, spacing, themedStyles } from '@/constants/theme';
 import { MOCK_TOURNAMENT_DETAILS } from '../mockDetailData';
 import { useTournamentsFeed } from '../useRizzfit';
-import { adaptRizzfitMatch, useRizzfitLeaderboard, useRizzfitMatches } from '../useRizzfitDetail';
+import { adaptRizzfitMatch, courtLabel, useRizzfitLeaderboard, useRizzfitMatches } from '../useRizzfitDetail';
 import { formatRange, STATUS_LABEL, STATUS_TONE } from '../components/TournamentCard';
 import { MatchList } from '../components/MatchList';
 import { StandingsTable } from '../components/StandingsTable';
@@ -33,6 +33,7 @@ const MATCH_FILTERS: { key: MatchFilter; label: string }[] = [
 ];
 
 const RIZZFIT_PREFIX = 'rizzfit-';
+const UNASSIGNED_COURT = '__unassigned__';
 
 // Mirrors RizzFit's own tournament page: a header card, then
 // Fixtures / Bracket (knockout visual) / Leaderboard — see
@@ -70,6 +71,22 @@ export function TournamentDetailScreen() {
     return raw.filter((m) => m.hasEnded || m.isCompleted);
   }, [matchesQuery.data, matchFilter]);
   const displayMatches = useMemo(() => filteredMatches.map(adaptRizzfitMatch), [filteredMatches]);
+
+  // Up to one match per court can be live at once (the club has 4 courts)
+  // — showing them as a flat list buried which court each one is on, which
+  // is the main thing someone watches a live match for. Grouped by court
+  // only for the Live filter; other filters stay a flat list since court
+  // matters less for upcoming/past matches.
+  const liveByCourt = useMemo(() => {
+    if (matchFilter !== 'live') return null;
+    const groups = new Map<string, typeof filteredMatches>();
+    for (const m of filteredMatches) {
+      const key = m.courtName?.trim() || UNASSIGNED_COURT;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(m);
+    }
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }));
+  }, [filteredMatches, matchFilter]);
 
   if (!tournament || (!isLive && !mockDetail)) {
     return (
@@ -149,6 +166,17 @@ export function TournamentDetailScreen() {
                 title="No matches here"
                 message="Nothing in this filter right now — try a different one."
               />
+            ) : liveByCourt ? (
+              <View style={{ gap: spacing.md }}>
+                {liveByCourt.map(([court, matches]) => (
+                  <View key={court}>
+                    <Text style={styles.sectionLabel}>
+                      {court === UNASSIGNED_COURT ? 'Court not assigned' : courtLabel(court)}
+                    </Text>
+                    <MatchList matches={matches.map(adaptRizzfitMatch)} />
+                  </View>
+                ))}
+              </View>
             ) : (
               <MatchList matches={displayMatches} />
             )}

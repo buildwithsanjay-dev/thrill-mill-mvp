@@ -24,15 +24,28 @@ async function fetchAllPages<T>(
   return all;
 }
 
+// Normalizes RizzFit's raw courtName (unknown exact format — could be "3"
+// or "Court 3") into a consistent "Court 3" label without double-prefixing.
+export function courtLabel(courtName?: string): string | undefined {
+  const trimmed = courtName?.trim();
+  if (!trimmed) return undefined;
+  return /^court\b/i.test(trimmed) ? trimmed : `Court ${trimmed}`;
+}
+
 // RizzFit's match detail has no "round"/group label at all (groups only
 // exist via match-groups, whose fixtures/teams fields are untyped in their
 // own spec — not safe to map until a live tournament lets us smoke-test the
-// real shape). Repurposing MatchList's round/footer slot to show live
-// status instead is honest about what we actually know per match.
+// real shape). Repurposing MatchList's round/footer slot to show court +
+// live status instead is honest about what we actually know per match —
+// and court number matters most exactly while a match is live (the owner's
+// own report: a live match on court 3 was showing just "LIVE" with no court
+// at all, since this used to return 'LIVE'/'Completed' before ever
+// checking courtName).
 function matchStatusLabel(m: RizzfitMatch): string {
-  if (m.hasStarted && !m.hasEnded) return 'LIVE';
-  if (m.isCompleted || m.hasEnded) return 'Completed';
-  if (m.courtName) return m.courtName;
+  const court = courtLabel(m.courtName);
+  if (m.hasStarted && !m.hasEnded) return court ? `${court} • Live` : 'Live';
+  if (m.isCompleted || m.hasEnded) return court ? `${court} • Completed` : 'Completed';
+  if (court) return court;
   if (m.scheduledTime) {
     const d = new Date(m.scheduledTime);
     if (!Number.isNaN(d.getTime())) {
