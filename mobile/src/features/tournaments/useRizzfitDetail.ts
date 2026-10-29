@@ -107,12 +107,11 @@ export function useRizzfitMatches(tournamentId: number | undefined, enabled = tr
       return merged;
     },
     enabled: tournamentId !== undefined && enabled,
-    // Tournament is actively in progress while this screen is open —
-    // scores move. 30s is a reasonable whole-list refresh; a true per-match
-    // "LIVE" ticker would need its own faster poll scoped to one match,
-    // not this list view (see useRizzfit.ts / CLAUDE.md Phase 2 note on
-    // polling cadence).
-    refetchInterval: 30_000,
+    // Tournament is actively in progress while this screen is open — scores
+    // move. 30s felt laggy watching a live match (2026-10-29 owner
+    // feedback); 10s is a reasonable floor before this becomes its own
+    // per-match ticker scoped to one match instead of the whole list.
+    refetchInterval: 10_000,
   });
 }
 
