@@ -12,6 +12,7 @@ import { MOCK_TOURNAMENT_DETAILS } from '../mockDetailData';
 import { useTournamentsFeed } from '../useRizzfit';
 import {
   adaptRizzfitMatch,
+  bracketRoundsFromKnockout,
   courtLabel,
   groupFixtureMatches,
   groupTeamNames,
@@ -76,7 +77,9 @@ export function TournamentDetailScreen() {
   // calls, leaderboard: one call per category) on every mount regardless
   // of which tab was selected, which is exactly what made opening a
   // tournament feel laggy.
-  const matchesQuery = useRizzfitMatches(rizzfitId, tab === 'FIXTURES');
+  // Also fetched for the Bracket tab — bracket slots only carry a match id,
+  // so the real team names come from this list (see matchesById below).
+  const matchesQuery = useRizzfitMatches(rizzfitId, tab === 'FIXTURES' || tab === 'BRACKET');
   const leaderboardQuery = useRizzfitLeaderboard(rizzfitId, tab === 'LEADERBOARD');
   // match-groups has no required params — fetching it unscoped returns
   // every group across every category.
@@ -283,15 +286,7 @@ export function TournamentDetailScreen() {
                       <Text style={styles.sectionLabel}>
                         {b.category} — {b.subCategory}
                       </Text>
-                      {b.items.map((item) => (
-                        <View key={item.id} style={styles.groupCard}>
-                          <Text style={styles.groupCardTitle}>{item.stage || 'Stage'}</Text>
-                          <Text style={styles.groupCardMeta}>
-                            {item.teamASource ?? 'TBD'} vs {item.teamBSource ?? 'TBD'}
-                            {item.winnerTeam ? ` — Winner: ${item.winnerTeam.name}` : ''}
-                          </Text>
-                        </View>
-                      ))}
+                      <BracketView rounds={bracketRoundsFromKnockout(b.items, matchesById)} />
                     </View>
                   ))}
               </View>

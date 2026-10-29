@@ -11,7 +11,7 @@ import {
   type RizzfitMatch,
   type RizzfitMatchGroup,
 } from './rizzfitApi';
-import type { LeaderboardRow, TournamentMatch } from './types';
+import type { BracketMatch, BracketRound, LeaderboardRow, TournamentMatch } from './types';
 
 export type CategoryLeaderboard = { category: string; rows: LeaderboardRow[] };
 
@@ -198,12 +198,13 @@ export type CategoryBracket = {
 
 // One knockout-bracket call per category+subCategory pair, same
 // fetch-all-categories-then-fan-out pattern as useRizzfitLeaderboard. Not
-// every category has reached the knockout stage yet (some are still in
-// group play) — RizzFit 404s/empties for those, which this treats as "no
-// bracket yet" rather than an error. Note: unlike matches/groups, this
-// endpoint's response fields (stage/teamASource/teamBSource/winnerTeam)
-// are from RizzFit's documented Swagger spec, not yet confirmed against a
-// live knockout-stage tournament — rendered defensively until that happens.
+// every category has a knockout bracket yet — RizzFit answers with a 200
+// body like `{ success: false, message: "Fixtures have not been published
+// yet." }` instead of the documented array (confirmed live against
+// tournament 201, 2026-10-29), so this is treated as "no bracket yet" and
+// not just non-2xx errors. The item fields themselves
+// (stage/teamASource/teamBSource/winnerTeam) are still from RizzFit's
+// Swagger spec only, not yet confirmed against a live published bracket.
 export function useRizzfitBrackets(tournamentId: number | undefined, enabled = true) {
   return useQuery({
     queryKey: ['rizzfit-brackets', tournamentId],
@@ -216,7 +217,7 @@ export function useRizzfitBrackets(tournamentId: number | undefined, enabled = t
               category: sc.categoryId,
               subCategory: sc.subCategoryId,
             });
-            return { category: sc.categoryName, subCategory: sc.subCategoryName, items };
+            return { category: sc.categoryName, subCategory: sc.subCategoryName, items: Array.isArray(items) ? items : [] };
           } catch {
             return { category: sc.categoryName, subCategory: sc.subCategoryName, items: [] };
           }
@@ -225,5 +226,60 @@ export function useRizzfitBrackets(tournamentId: number | undefined, enabled = t
     },
     enabled: tournamentId !== undefined && enabled,
     staleTime: 60_000,
+  });
+}
+
+// Later rounds first (Final last-but-one... no — earliest round first,
+// Final last), matching how BracketView expects rounds ordered for its
+// tree layout. Unknown/future stage names fall after every known one,
+// keeping their relative appearance order rather than being dropped.
+const KNOWN_STAGE_ORDER = ['Round of 32', 'Round of 16', 'Pre-Quarter Final', 'Quarter Final', 'Semi Final', 'Final'];
+
+// A bracket item's own teamASource/teamBSource are placeholder labels
+// (e.g. "#1 Group A") until a real match exists — once `match.id` is set,
+// the real team names/winner come from the already-fetched matches list
+// via that id, same resolve-by-id approach as groupFixtureMatches.
+function bracketSlotLabels(
+  item: RizzfitKnockoutBracketItem,
+  matchesById: Map<number, RizzfitMatch>
+): { top: string; bottom: string; winner?: 'top' | 'bottom' } {
+  const resolved = item.match ? matchesById.get(item.match.id) : undefined;
+  const top = resolved?.teamA?.name ?? item.teamASource ?? 'TBD';
+  const bottom = resolved?.teamB?.name ?? item.teamBSource ?? 'TBD';
+  let winner: 'top' | 'bottom' | undefined;
+  if (item.winnerTeam) {
+    if (resolved?.teamA?.id === item.winnerTeam.id) winner = 'top';
+    else if (resolved?.teamB?.id === item.winnerTeam.id) winner = 'bottom';
+  }
+  return { top, bottom, winner };
+}
+
+export function bracketRoundsFromKnockout(
+  items: RizzfitKnockoutBracketItem[],
+  matchesById: Map<number, RizzfitMatch>
+): BracketRound[] {
+  const byStage = new Map<string, RizzfitKnockoutBracketItem[]>();
+  for (const item of items) {
+    const stage = item.stage || 'Round';
+    if (!byStage.has(stage)) byStage.set(stage, []);
+    byStage.get(stage)!.push(item);
+  }
+
+  const stages = [...byStage.keys()].sort((a, b) => {
+    const ia = KNOWN_STAGE_ORDER.indexOf(a);
+    const ib = KNOWN_STAGE_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return 0;
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+
+  return stages.map((stage) => {
+    const stageItems = byStage.get(stage)!.slice().sort((a, b) => a.id - b.id);
+    const matches: BracketMatch[] = stageItems.map((item) => ({
+      id: String(item.id),
+      ...bracketSlotLabels(item, matchesById),
+    }));
+    return { name: stage, matches };
   });
 }
