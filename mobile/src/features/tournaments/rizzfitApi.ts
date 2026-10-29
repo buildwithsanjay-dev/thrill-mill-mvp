@@ -123,14 +123,36 @@ export interface RizzfitMatch {
 }
 
 // `fixtures`/`teams` are untyped in RizzFit's own spec (raw `object[]`) —
-// deliberately not narrowed further here until a live tournament lets us
-// smoke-test the real payload shape. Only `id`/`name` are documented.
+// these shapes come from a live smoke test against tournament 199
+// (2026-10-28, Swagger "Try it out", after RizzFit fixed teams/fixtures
+// previously always coming back empty).
+export interface RizzfitGroupTeamStanding {
+  id: number;
+  wins: number;
+  losses: number;
+  matchesPlayed: number;
+  points: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  netPoints: number;
+  team: { id: number; name: string };
+}
+
+// Only `id` is relied on by the client — it's a RizzfitMatch id, so the
+// real teamA/teamB names, score, and live state are read off the
+// already-fetched matches list rather than trusted from this object (whose
+// other fields weren't exhaustively confirmed in the live test).
+export interface RizzfitGroupFixture {
+  id: number;
+  matchStage?: string;
+}
+
 export interface RizzfitMatchGroup {
   id: number;
   name: string;
   mappingId?: number;
-  fixtures?: unknown[];
-  teams?: unknown[];
+  teams: RizzfitGroupTeamStanding[];
+  fixtures: RizzfitGroupFixture[];
 }
 
 export interface RizzfitKnockoutBracketItem {
@@ -207,6 +229,23 @@ export function fetchRizzfitTournamentConfig(tournamentId: number) {
 
 export function fetchRizzfitCategories(tournamentId: number) {
   return callRizzfit<RizzfitCategory[]>('tournament-categories', { tournamentId });
+}
+
+// The only documented way to discover a category's `subCategory` id — the
+// `match-knockout` endpoint requires one and there's no other listing for
+// it. Confirmed live against tournament 199 on 2026-10-28.
+export interface RizzfitSubCategoryStatus {
+  subCategoryId: number;
+  subCategoryName: string;
+  categoryId: number;
+  categoryName: string;
+  orgShow: boolean;
+}
+
+export function fetchRizzfitTournamentStatus(tournamentId: number) {
+  return callRizzfit<{ success: boolean; message: string; data: RizzfitSubCategoryStatus[] }>('tournament-status', {
+    tournamentId,
+  });
 }
 
 export function fetchRizzfitSponsors(tournamentId: number) {

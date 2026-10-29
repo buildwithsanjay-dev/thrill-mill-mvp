@@ -76,6 +76,11 @@ const ACTIONS: Record<string, ActionDef> = {
     pathParams: { tournamentId: 'id' },
     queryParams: [],
   },
+  'tournament-status': {
+    path: (p) => `/external/v1/tournament/status/${encodeURIComponent(p.tournamentId)}`,
+    pathParams: { tournamentId: 'id' },
+    queryParams: [],
+  },
   matches: {
     path: (p) => `/external/v1/pickleball/matches/fetchall/${encodeURIComponent(p.tournamentId)}`,
     pathParams: { tournamentId: 'id' },
@@ -207,64 +212,6 @@ Deno.serve(async (req: Request) => {
     data = JSON.parse(text);
   } catch {
     data = { raw: text };
-  }
-
-  // TEMP diagnostic (2026-10-23): the owner reported a live match visible on
-  // RizzFit's own organizer dashboard not showing up in the app's Fixtures
-  // tab. No PII here (just ids/flags), only to confirm whether RizzFit's
-  // matches/fetchall actually includes an in-progress match. Remove once
-  // that's confirmed either way.
-  if (action === 'matches') {
-    try {
-      // No team/player names here deliberately (flagged by security review
-      // as unnecessary PII-in-logs) — ids/flags/court are enough to
-      // diagnose whether RizzFit's own hasStarted/hasEnded match the live
-      // state its dashboard shows.
-      type DiagMatch = {
-        id: number;
-        matchNo?: string;
-        hasStarted: boolean;
-        hasEnded: boolean;
-        isCompleted: boolean;
-        isScheduled: boolean;
-        courtId?: number;
-        courtName?: string;
-      };
-      const list = (data as { data?: { data?: DiagMatch[] } })?.data?.data ?? [];
-      const live = list.filter((m) => m.hasStarted && !m.hasEnded);
-      const onCourt = list.filter((m) => !isEmpty(m.courtName) || !isEmpty(m.courtId));
-      console.log(
-        `[rizzfit] matches status=${upstream.status} page_count=${list.length} liveCount=${live.length} onCourtCount=${onCourt.length}`
-      );
-      for (const m of onCourt) {
-        console.log(
-          `[rizzfit] onCourt id=${m.id} matchNo=${m.matchNo} court=${m.courtName ?? m.courtId} started=${m.hasStarted} ended=${m.hasEnded} completed=${m.isCompleted} scheduled=${m.isScheduled}`
-        );
-      }
-    } catch (e) {
-      console.log(`[rizzfit] matches diagnostic parse failed: ${e}`);
-    }
-  }
-
-  // TEMP diagnostic (2026-10-23): RizzFit's own spec leaves match-groups'
-  // `teams`/`fixtures` fields as untyped raw object[] — logging only the
-  // object KEYS (never values, so no player names/PII) of the first team
-  // and first fixture in each group is enough to finally learn the real
-  // field names without guessing. Remove once the client is typed for real.
-  if (action === 'match-groups') {
-    try {
-      const groups = (data as { id: number; name: string; teams?: unknown[]; fixtures?: unknown[] }[]) ?? [];
-      console.log(`[rizzfit] match-groups status=${upstream.status} groupCount=${Array.isArray(groups) ? groups.length : 'n/a'}`);
-      for (const g of Array.isArray(groups) ? groups : []) {
-        const teamKeys = g.teams?.[0] && typeof g.teams[0] === 'object' ? Object.keys(g.teams[0] as object) : [];
-        const fixtureKeys = g.fixtures?.[0] && typeof g.fixtures[0] === 'object' ? Object.keys(g.fixtures[0] as object) : [];
-        console.log(
-          `[rizzfit] group id=${g.id} name=${g.name} teamCount=${g.teams?.length ?? 0} teamKeys=${teamKeys.join(',')} fixtureCount=${g.fixtures?.length ?? 0} fixtureKeys=${fixtureKeys.join(',')}`
-        );
-      }
-    } catch (e) {
-      console.log(`[rizzfit] match-groups diagnostic parse failed: ${e}`);
-    }
   }
 
   return json(stripPii(action, data), upstream.status);

@@ -13,8 +13,9 @@ import { useTournamentsFeed } from '../useRizzfit';
 import {
   adaptRizzfitMatch,
   courtLabel,
-  groupFixtureSummaries,
+  groupFixtureMatches,
   groupTeamNames,
+  useRizzfitBrackets,
   useRizzfitLeaderboard,
   useRizzfitMatches,
   useRizzfitMatchGroups,
@@ -49,10 +50,10 @@ const UNASSIGNED_COURT = '__unassigned__';
 // tournament.rizzfitt.com/Logesh/dpl/dplpickleball/pickleball/matches.
 //
 // A `rizzfit-<id>` tournament (from the live feed, see useRizzfit.ts) wires
-// Fixtures + Leaderboard to RizzFit's real match/leaderboard endpoints.
-// Bracket stays unwired for real tournaments — RizzFit's knockout endpoint
-// requires a category+subCategory pair, and there's no documented endpoint
-// to discover those ahead of time (see the chat thread, not guessed here).
+// Fixtures + Bracket + Leaderboard to RizzFit's real endpoints. Bracket
+// uses `tournament/status/{tournamentId}` to discover each category's
+// subCategory id (confirmed live 2026-10-28 — previously undiscoverable),
+// then one `match-knockout` call per category; see useRizzfitBrackets.
 // A `mock-<id>` tournament (the pre-integration placeholder data, now only
 // reachable as a fallback when RizzFit isn't configured) keeps using the
 // original mock detail with groups/standings/bracket.
@@ -77,11 +78,14 @@ export function TournamentDetailScreen() {
   // tournament feel laggy.
   const matchesQuery = useRizzfitMatches(rizzfitId, tab === 'FIXTURES');
   const leaderboardQuery = useRizzfitLeaderboard(rizzfitId, tab === 'LEADERBOARD');
-  // match-groups has no required params (unlike knockout, which needs a
-  // subCategory id we have no way to discover) — fetching it unscoped
-  // returns every group across every category, which is exactly the real
-  // data needed to finally confirm the undocumented teams/fixtures shape.
+  // match-groups has no required params — fetching it unscoped returns
+  // every group across every category.
   const groupsQuery = useRizzfitMatchGroups(rizzfitId, tab === 'FIXTURES');
+  const bracketsQuery = useRizzfitBrackets(rizzfitId, tab === 'BRACKET');
+
+  // Lets a group's fixtures (which only carry a match id) be shown as real
+  // MatchList rows — same team names/score/live state as the Fixtures list.
+  const matchesById = useMemo(() => new Map((matchesQuery.data ?? []).map((m) => [m.id, m])), [matchesQuery.data]);
 
   const filteredMatches = useMemo(() => {
     const raw = matchesQuery.data ?? [];
@@ -224,20 +228,12 @@ export function TournamentDetailScreen() {
                 <Text style={styles.sectionLabel}>Groups</Text>
                 {(groupsQuery.data ?? []).map((g) => {
                   const teamNames = groupTeamNames(g);
-                  const fixtures = groupFixtureSummaries(g);
+                  const fixtureMatches = groupFixtureMatches(g, matchesById);
                   return (
                     <View key={g.id} style={styles.groupCard}>
                       <Text style={styles.groupCardTitle}>{g.name}</Text>
-                      {teamNames.length > 0 ? (
-                        <Text style={styles.groupCardMeta}>{teamNames.join(' • ')}</Text>
-                      ) : (
-                        <Text style={styles.groupCardMeta}>{(g.teams ?? []).length} teams (names not confirmed yet)</Text>
-                      )}
-                      {fixtures.length > 0 && (
-                        <Text style={styles.groupCardMeta}>
-                          {fixtures.length} fixture{fixtures.length === 1 ? '' : 's'}: {fixtures.map((f) => f.label).join(', ')}
-                        </Text>
-                      )}
+                      <Text style={styles.groupCardMeta}>{teamNames.length > 0 ? teamNames.join(' • ') : 'No teams yet'}</Text>
+                      {fixtureMatches.length > 0 && <MatchList matches={fixtureMatches.map(adaptRizzfitMatch)} />}
                     </View>
                   );
                 })}
@@ -268,12 +264,39 @@ export function TournamentDetailScreen() {
         )}
 
         {tab === 'BRACKET' && isLive && (
-          <EmptyState
-            icon="trophy-outline"
-            mascot="napping"
-            title="Bracket not wired up yet"
-            message="RizzFit's knockout endpoint needs a category selected first — this will be wired up once that's confirmed."
-          />
+          <>
+            {bracketsQuery.isLoading ? (
+              <ActivityIndicator style={styles.loading} color={colors.primary} />
+            ) : (bracketsQuery.data ?? []).every((b) => b.items.length === 0) ? (
+              <EmptyState
+                icon="trophy-outline"
+                mascot="napping"
+                title="No bracket yet"
+                message="The knockout stage hasn't been generated for any category yet."
+              />
+            ) : (
+              <View style={{ gap: spacing.md }}>
+                {(bracketsQuery.data ?? [])
+                  .filter((b) => b.items.length > 0)
+                  .map((b) => (
+                    <View key={`${b.category}-${b.subCategory}`} style={{ gap: spacing.sm }}>
+                      <Text style={styles.sectionLabel}>
+                        {b.category} — {b.subCategory}
+                      </Text>
+                      {b.items.map((item) => (
+                        <View key={item.id} style={styles.groupCard}>
+                          <Text style={styles.groupCardTitle}>{item.stage || 'Stage'}</Text>
+                          <Text style={styles.groupCardMeta}>
+                            {item.teamASource ?? 'TBD'} vs {item.teamBSource ?? 'TBD'}
+                            {item.winnerTeam ? ` — Winner: ${item.winnerTeam.name}` : ''}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+              </View>
+            )}
+          </>
         )}
 
         {tab === 'BRACKET' && !isLive && mockDetail && <BracketView rounds={mockDetail.bracket} />}

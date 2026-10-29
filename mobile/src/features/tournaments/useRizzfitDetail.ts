@@ -2,9 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import {
   fetchRizzfitCategories,
+  fetchRizzfitKnockoutBracket,
   fetchRizzfitLeaderboard,
   fetchRizzfitMatchGroups,
   fetchRizzfitMatches,
+  fetchRizzfitTournamentStatus,
+  type RizzfitKnockoutBracketItem,
   type RizzfitMatch,
   type RizzfitMatchGroup,
 } from './rizzfitApi';
@@ -79,11 +82,30 @@ export function adaptRizzfitMatch(m: RizzfitMatch): TournamentMatch {
 
 // Raw matches (not yet adapted) so the screen can filter by live status
 // before mapping to display shape.
+//
+// Confirmed live against tournament 199 (2026-10-28, Swagger "Try it out")
+// that passing `matchType: 'live'` explicitly is what surfaces an
+// in-progress match with its real score/court — the unscoped/`all` call
+// previously missed it entirely (hasStarted stuck false, score stuck 0-0).
+// Fetching 'live' separately and merging it over the full list keeps that
+// guarantee even if RizzFit's `all` scope doesn't fully carry the fix.
 export function useRizzfitMatches(tournamentId: number | undefined, enabled = true) {
   return useQuery({
     queryKey: ['rizzfit-matches', tournamentId],
-    queryFn: () =>
-      fetchAllPages((page) => fetchRizzfitMatches(tournamentId as number, { limit: PAGE_SIZE, page })),
+    queryFn: async () => {
+      const [all, liveRes] = await Promise.all([
+        fetchAllPages((page) => fetchRizzfitMatches(tournamentId as number, { limit: PAGE_SIZE, page })),
+        fetchRizzfitMatches(tournamentId as number, { matchType: 'live', limit: PAGE_SIZE }),
+      ]);
+      const live = liveRes.data.data;
+      if (live.length === 0) return all;
+      const liveById = new Map(live.map((m) => [m.id, m]));
+      const merged = all.map((m) => liveById.get(m.id) ?? m);
+      for (const m of live) {
+        if (!merged.some((x) => x.id === m.id)) merged.push(m);
+      }
+      return merged;
+    },
     enabled: tournamentId !== undefined && enabled,
     // Tournament is actively in progress while this screen is open —
     // scores move. 30s is a reasonable whole-list refresh; a true per-match
@@ -133,38 +155,18 @@ export function useRizzfitLeaderboard(tournamentId: number | undefined, enabled 
   });
 }
 
-// RizzFit's own Swagger spec leaves `teams`/`fixtures` as untyped raw
-// `object[]` on ExternalMatchGroupItemDto — no field names given at all.
-// Rather than guess one shape and silently show nothing for a different
-// one, try every plausible field name RizzFit's other DTOs use elsewhere
-// (name/teamName for teams; teamA/teamB-style pairs for fixtures) and fall
-// back to a raw count so the screen is at least honest about what it found.
-function pickString(obj: unknown, keys: string[]): string | undefined {
-  if (!obj || typeof obj !== 'object') return undefined;
-  const rec = obj as Record<string, unknown>;
-  for (const key of keys) {
-    const value = rec[key];
-    if (typeof value === 'string' && value.trim()) return value;
-    if (typeof value === 'number') return String(value);
-  }
-  return undefined;
-}
-
 export function groupTeamNames(group: RizzfitMatchGroup): string[] {
-  return (group.teams ?? [])
-    .map((t) => pickString(t, ['name', 'teamName', 'playerName', 'player1', 'teamName1']))
-    .filter((n): n is string => !!n);
+  return (group.teams ?? []).map((t) => t.team.name);
 }
 
-export type GroupFixtureSummary = { label: string; raw: unknown };
-
-export function groupFixtureSummaries(group: RizzfitMatchGroup): GroupFixtureSummary[] {
-  return (group.fixtures ?? []).map((f) => {
-    const teamA = pickString(f, ['teamA', 'team1', 'teamAName', 'player1']);
-    const teamB = pickString(f, ['teamB', 'team2', 'teamBName', 'player2']);
-    const label = teamA && teamB ? `${teamA} vs ${teamB}` : 'Fixture (shape not confirmed yet)';
-    return { label, raw: f };
-  });
+// A group's own `fixtures` entries only reliably carry a match `id` (see
+// RizzfitGroupFixture) — the real teamA/teamB names, score, and live state
+// come from the already-fetched matches list via that id, rather than from
+// fields on the fixture object itself.
+export function groupFixtureMatches(group: RizzfitMatchGroup, matchesById: Map<number, RizzfitMatch>): RizzfitMatch[] {
+  return (group.fixtures ?? [])
+    .map((f) => matchesById.get(f.id))
+    .filter((m): m is RizzfitMatch => !!m);
 }
 
 export function useRizzfitMatchGroups(tournamentId: number | undefined, enabled = true) {
@@ -173,5 +175,55 @@ export function useRizzfitMatchGroups(tournamentId: number | undefined, enabled 
     queryFn: () => fetchRizzfitMatchGroups(tournamentId as number),
     enabled: tournamentId !== undefined && enabled,
     staleTime: 5 * 60_000,
+  });
+}
+
+// `match-knockout` requires a subCategory id with no listing endpoint of
+// its own — `tournament/status/{tournamentId}` is the only documented way
+// to discover one (confirmed live against tournament 199, 2026-10-28).
+export function useRizzfitSubCategories(tournamentId: number | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['rizzfit-subcategories', tournamentId],
+    queryFn: async () => (await fetchRizzfitTournamentStatus(tournamentId as number)).data,
+    enabled: tournamentId !== undefined && enabled,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export type CategoryBracket = {
+  category: string;
+  subCategory: string;
+  items: RizzfitKnockoutBracketItem[];
+};
+
+// One knockout-bracket call per category+subCategory pair, same
+// fetch-all-categories-then-fan-out pattern as useRizzfitLeaderboard. Not
+// every category has reached the knockout stage yet (some are still in
+// group play) — RizzFit 404s/empties for those, which this treats as "no
+// bracket yet" rather than an error. Note: unlike matches/groups, this
+// endpoint's response fields (stage/teamASource/teamBSource/winnerTeam)
+// are from RizzFit's documented Swagger spec, not yet confirmed against a
+// live knockout-stage tournament — rendered defensively until that happens.
+export function useRizzfitBrackets(tournamentId: number | undefined, enabled = true) {
+  return useQuery({
+    queryKey: ['rizzfit-brackets', tournamentId],
+    queryFn: async (): Promise<CategoryBracket[]> => {
+      const subCats = await fetchRizzfitTournamentStatus(tournamentId as number).then((r) => r.data);
+      return Promise.all(
+        subCats.map(async (sc) => {
+          try {
+            const items = await fetchRizzfitKnockoutBracket(tournamentId as number, {
+              category: sc.categoryId,
+              subCategory: sc.subCategoryId,
+            });
+            return { category: sc.categoryName, subCategory: sc.subCategoryName, items };
+          } catch {
+            return { category: sc.categoryName, subCategory: sc.subCategoryName, items: [] };
+          }
+        })
+      );
+    },
+    enabled: tournamentId !== undefined && enabled,
+    staleTime: 60_000,
   });
 }
